@@ -2,8 +2,10 @@
 
 namespace Sierra::vk {
     class Instance;
+    class Device;
 
-    typedef struct Context {
+    struct Context {
         Instance* instance;
+        Device* device;
     };
 }

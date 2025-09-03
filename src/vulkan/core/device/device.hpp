@@ -14,6 +14,8 @@ namespace Sierra::vk {
             Device(Device&) = delete;
             Device(Device&&) = delete;
 
+            VkQueue getQueue(VkQueueFlags queueType);
+
             ~Device();
         private:
 
@@ -25,6 +27,10 @@ namespace Sierra::vk {
             std::vector<VkQueue> computeQueues;
             std::vector<VkQueue> graphicsQueues;
             std::vector<VkQueue> transferQueues;
+
+            uint32_t computeQueueIndex;
+            uint32_t graphicsQueueIndex;
+            uint32_t transferQueueIndex;
 
             VkPhysicalDevice physicalDevice;
             VkDevice vkDevice;

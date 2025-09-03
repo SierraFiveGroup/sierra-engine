@@ -3,6 +3,7 @@
 #include "vulkan/vulkan.h"
 
 #include "core/instance/instance.hpp"
+#include "core/device/device.hpp"
 #include "core/context.hpp"
 
 namespace Sierra::vk {
@@ -17,6 +18,7 @@ namespace Sierra::vk {
             Context ctx;
 
             Instance instance;
+            Device device;
     };
 }
 

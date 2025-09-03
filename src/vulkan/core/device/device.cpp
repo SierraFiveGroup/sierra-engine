@@ -5,6 +5,7 @@ namespace Sierra::vk {
     Device::Device(Instance* instance) {
         pickPhysicalDevice(instance);
         createLogicalDevice();
+        retrieveQueues();
     }
 
     void Device::pickPhysicalDevice(Instance* instance) {
@@ -52,7 +53,7 @@ namespace Sierra::vk {
 
             queueInfo.queueCount = properties[i].queueCount;
             queueInfo.queueFamilyIndex = i;
-            queueInfos.push_back(queueInfo);
+            queueInfos[i] = queueInfo;
         }
 
         return queueInfos;
@@ -98,5 +99,17 @@ namespace Sierra::vk {
             else if (properties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) 
                 copyToVector(computeQueues, i, properties[i].queueCount);
         }
+    }
+
+    VkQueue Device::getQueue(VkQueueFlags queueType) {
+        if (queueType == VK_QUEUE_GRAPHICS_BIT) return graphicsQueues[++graphicsQueueIndex % graphicsQueues.size()];
+        else if(queueType == VK_QUEUE_TRANSFER_BIT) return transferQueues[++transferQueueIndex % transferQueues.size()];
+        else if(queueType == VK_QUEUE_COMPUTE_BIT) return computeQueues[++computeQueueIndex % computeQueues.size()];
+
+        return VK_NULL_HANDLE;
+    }
+ 
+    Device::~Device() {
+        vkDestroyDevice(vkDevice, nullptr);
     }
 }
