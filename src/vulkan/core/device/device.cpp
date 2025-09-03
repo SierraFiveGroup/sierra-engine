@@ -37,7 +37,7 @@ namespace Sierra::vk {
         std::vector<VkQueueFamilyProperties> properties(propertyCount);
         vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &propertyCount, properties.data());
 
-        std::vector<VkDeviceQueueCreateInfo> queueInfos(propertyCount);
+        std::vector<VkDeviceQueueCreateInfo> queueInfos;
 
         VkDeviceQueueCreateInfo queueInfo{};
         queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -53,7 +53,7 @@ namespace Sierra::vk {
 
             queueInfo.queueCount = properties[i].queueCount;
             queueInfo.queueFamilyIndex = i;
-            queueInfos[i] = queueInfo;
+            queueInfos.push_back(queueInfo);
         }
 
         return queueInfos;
