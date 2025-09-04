@@ -10,7 +10,7 @@ namespace Sierra {
     double InputHandler::mScrollOffset = 0.0;
     
     InputHandler::InputHandler(ResourceRef<Window> window) {
-        GLFWwindow *ref = window->get_glfw_window();
+        GLFWwindow *ref = window->getGLFWWindow();
         
         glfwSetKeyCallback(ref, keyCallback);
         glfwSetMouseButtonCallback(ref, mouseButtonCallback);

@@ -31,7 +31,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 #endif
 
 
-const std::vector<const char*> extenstions = {};
+const std::vector<const char*> extensions = {};
 
 namespace Sierra::vk {
     Instance::Instance() {
@@ -94,15 +94,15 @@ namespace Sierra::vk {
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-        std::vector<const char*> combinedExtensions(glfwExtensionCount + extenstions.size());
+        std::vector<const char*> combinedExtensions(glfwExtensionCount + extensions.size());
 
         memcpy(combinedExtensions.data(), glfwExtensions, glfwExtensionCount * sizeof(size_t));
-        std::copy(extenstions.begin(), extenstions.end(), combinedExtensions.begin() + glfwExtensionCount);
+        std::copy(extensions.begin(), extensions.end(), combinedExtensions.begin() + glfwExtensionCount);
 
-        return extenstions;
+        return combinedExtensions;
     }
 
-    VkInstance Instance::getVkInstance() { 
+    VkInstance Instance::getInstance() { 
         return vkInstance;
     }
 

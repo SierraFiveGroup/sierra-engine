@@ -1,5 +1,9 @@
 #include "device.hpp"
 
+const std::vector<const char*> requiredExtensions = {
+    "VK_KHR_swapchain"
+};
+
 namespace Sierra::vk {
 
     Device::Device(Instance* instance) {
@@ -10,11 +14,11 @@ namespace Sierra::vk {
 
     void Device::pickPhysicalDevice(Instance* instance) {
         uint32_t devCount;
-        vkEnumeratePhysicalDevices(instance->getVkInstance(), &devCount, nullptr);
+        vkEnumeratePhysicalDevices(instance->getInstance(), &devCount, nullptr);
         
         std::vector<VkPhysicalDevice> physicalDevices;
         physicalDevices.resize(devCount);
-        vkEnumeratePhysicalDevices(instance->getVkInstance(), &devCount, physicalDevices.data());
+        vkEnumeratePhysicalDevices(instance->getInstance(), &devCount, physicalDevices.data());
 
         if (!devCount) throw new std::runtime_error("No physical devices(GPUs) found");
         
@@ -60,6 +64,8 @@ namespace Sierra::vk {
     }
 
     void Device::createLogicalDevice() {
+        const std::vector<const char*> extensions = getExtensions();
+
         std::vector<VkDeviceQueueCreateInfo> queueInfos = getQueueInfos();
 
         VkDeviceCreateInfo deviceInfo{};
@@ -68,7 +74,9 @@ namespace Sierra::vk {
         deviceInfo.pQueueCreateInfos = queueInfos.data();
         deviceInfo.queueCreateInfoCount = queueInfos.size();
 
-        deviceInfo.enabledExtensionCount = 0;
+        deviceInfo.enabledExtensionCount = extensions.size();
+        deviceInfo.ppEnabledExtensionNames = extensions.data();
+
         deviceInfo.enabledLayerCount = 0;
 
         VK_ERR(vkCreateDevice(physicalDevice, &deviceInfo, nullptr, &vkDevice));
@@ -109,12 +117,36 @@ namespace Sierra::vk {
         return VK_NULL_HANDLE;
     }
 
+    std::vector<const char*> Device::getExtensions() {
+        uint32_t deviceExtensionCount;
+        vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &deviceExtensionCount, nullptr);
+
+        std::vector<VkExtensionProperties> deviceExtensions(deviceExtensionCount);
+        vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &deviceExtensionCount, deviceExtensions.data());
+
+        for(const char* ext : requiredExtensions) {
+            bool found = false;
+            for(VkExtensionProperties property : deviceExtensions) {
+                if(strcmp(property.extensionName, ext)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found){
+                throw new std::runtime_error("Not all required device extensions found");
+            }
+        }
+
+        return requiredExtensions;
+    }
+
     VkPhysicalDevice Device::getPhysicalDevice() {
         return physicalDevice;
     }
 
     VkDevice Device::getDevice() {
-        vkDevice;
+        return vkDevice;
     }
  
     Device::~Device() {

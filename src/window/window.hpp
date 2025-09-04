@@ -30,8 +30,8 @@ namespace Sierra {
             bool shouldClose();
             void update();
 
-            Resolution get_resolution();
-            GLFWwindow* get_glfw_window();
+            Resolution getResolution();
+            GLFWwindow* getGLFWWindow();
     
         private:
             void init_glfw();
@@ -40,9 +40,9 @@ namespace Sierra {
     
             Resolution resolution;
     
-            GLFWwindow* glfw_win;
+            GLFWwindow* glfwWin;
     
     
-            static size_t instance_count;
+            static size_t instanceCount;
     };
 }

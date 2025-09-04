@@ -1,8 +1,9 @@
 #pragma once
 
+#include "instance/instance.hpp"
+#include "device/device.hpp"
+
 namespace Sierra::vk {
-    class Instance;
-    class Device;
 
     struct Context {
         Instance* instance;

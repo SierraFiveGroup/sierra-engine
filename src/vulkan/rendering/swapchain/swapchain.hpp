@@ -3,20 +3,32 @@
 #include <vulkan/vulkan.h>
 
 #include "../../core/context.hpp"
+#include "window/window.hpp"
 
 namespace Sierra::vk {
     class Swapchain {
         public:
-            Swapchain(Context& context);
+            Swapchain();
+            Swapchain(Context& context, Window& window);
 
-            Swapchain(Swapchain&);
+            Swapchain(Swapchain&) = delete;
+
+            void operator=(Swapchain&&);
             Swapchain(Swapchain&&);
 
             ~Swapchain();
         private:
-            void createSwapchain(Context& context);
-            VkFormat selectImageFormat(Context& context);
+            void createWindowSurface(Window& window);
+            void createSwapchain();
+            VkSurfaceFormatKHR selectImageFormat();
+
 
             VkSwapchainKHR vkSwapchain;
+            VkSurfaceKHR surface;
+
+            Context* context;
+
+            const uint32_t PREFERRED_IMAGE_COUNT = 2; 
+
     };
 }

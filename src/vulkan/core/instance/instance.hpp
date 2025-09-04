@@ -19,7 +19,7 @@ namespace Sierra::vk {
 
             ~Instance();
 
-            VkInstance getVkInstance();
+            VkInstance getInstance();
 
         private:
 #ifdef DEBUG 

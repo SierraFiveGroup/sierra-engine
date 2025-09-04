@@ -35,31 +35,31 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 // During init, enable debug output
 
 namespace Sierra {
-    size_t Window::instance_count = 0;
+    size_t Window::instanceCount = 0;
 
     Window::Window(std::string name, Resolution resolution):
-     resolution(resolution), glfw_win(nullptr) {
+     resolution(resolution), glfwWin(nullptr) {
     
-        if (instance_count == 0) {
+        if (instanceCount == 0) {
             init_glfw();
         }
     
         create_window(name);
-        init_glad();
+        //init_glad();
     
-        instance_count++;
+        instanceCount++;
     }
     
     void Window::create_window(std::string name) {
-        glfw_win = glfwCreateWindow(resolution.w, resolution.h, name.c_str(), nullptr, nullptr);
+        glfwWin = glfwCreateWindow(resolution.w, resolution.h, name.c_str(), nullptr, nullptr);
     
-        if ( glfw_win == nullptr ) {
+        if ( glfwWin == nullptr ) {
             throw new std::runtime_error("Failed to create new GLFW window");
         }
 
-        glfwMakeContextCurrent(glfw_win);
+        glfwMakeContextCurrent(glfwWin);
 
-        glfwSetWindowSizeCallback(glfw_win, framebufferSizeCallback);
+        glfwSetWindowSizeCallback(glfwWin, framebufferSizeCallback);
         //glfwSwapInterval(1);
     }
     
@@ -74,9 +74,10 @@ namespace Sierra {
             throw new std::runtime_error("Failed to init GLFW");
         }
     
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); //TOOD make interchangable
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
 #endif
@@ -99,43 +100,43 @@ namespace Sierra {
     }
 
     bool Window::shouldClose() {
-        return glfwWindowShouldClose(glfw_win);
+        return glfwWindowShouldClose(glfwWin);
     }
 
     void Window::update() {
-        glfwSwapBuffers(glfw_win);
+        glfwSwapBuffers(glfwWin);
         glfwPollEvents();
     }
     
-    GLFWwindow* Window::get_glfw_window() {
-        return glfw_win;
+    GLFWwindow* Window::getGLFWWindow() {
+        return glfwWin;
     }
     
     Window::Window(Window&& other) noexcept{
         resolution = other.resolution;
-        glfw_win = other.glfw_win;
+        glfwWin = other.glfwWin;
     
-        other.glfw_win = nullptr;
+        other.glfwWin = nullptr;
     }
     
     void Window::operator=(Window&& other) noexcept {
         resolution = other.resolution;
-        glfw_win = other.glfw_win;
+        glfwWin = other.glfwWin;
     
-        other.glfw_win = nullptr;
+        other.glfwWin = nullptr;
     }
     
     Window::~Window() {
-        if ( glfw_win == nullptr ) {
+        if ( glfwWin == nullptr ) {
             return;
         }
     
-        glfwDestroyWindow(glfw_win);
+        glfwDestroyWindow(glfwWin);
     
-        if ( instance_count == 1 ) {
+        if ( instanceCount == 1 ) {
             glfwTerminate();
         }
     
-        instance_count--;
+        instanceCount--;
     }
 }

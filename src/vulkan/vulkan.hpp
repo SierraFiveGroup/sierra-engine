@@ -5,11 +5,12 @@
 #include "core/instance/instance.hpp"
 #include "core/device/device.hpp"
 #include "core/context.hpp"
+#include "rendering/swapchain/swapchain.hpp"
 
 namespace Sierra::vk {
     class Vulkan {
         public:
-            Vulkan();
+            Vulkan(Window& window);
 
             Vulkan(Vulkan&) = delete;
             Vulkan(Vulkan&&) = delete;
@@ -19,6 +20,7 @@ namespace Sierra::vk {
 
             Instance instance;
             Device device;
+            Swapchain swapchain;
     };
 }
 

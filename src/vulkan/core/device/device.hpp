@@ -27,6 +27,8 @@ namespace Sierra::vk {
             void createLogicalDevice();
             void retrieveQueues();
 
+            std::vector<const char*> getExtensions();
+
             std::vector<VkQueue> computeQueues;
             std::vector<VkQueue> graphicsQueues;
             std::vector<VkQueue> transferQueues;
