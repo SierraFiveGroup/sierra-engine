@@ -108,6 +108,14 @@ namespace Sierra::vk {
 
         return VK_NULL_HANDLE;
     }
+
+    VkPhysicalDevice Device::getPhysicalDevice() {
+        return physicalDevice;
+    }
+
+    VkDevice Device::getDevice() {
+        vkDevice;
+    }
  
     Device::~Device() {
         vkDestroyDevice(vkDevice, nullptr);

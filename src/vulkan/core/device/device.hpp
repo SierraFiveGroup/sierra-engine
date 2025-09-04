@@ -16,6 +16,9 @@ namespace Sierra::vk {
 
             VkQueue getQueue(VkQueueFlags queueType);
 
+            VkPhysicalDevice getPhysicalDevice();
+            VkDevice getDevice();
+
             ~Device();
         private:
 
