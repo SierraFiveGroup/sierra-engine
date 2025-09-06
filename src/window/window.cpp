@@ -41,16 +41,16 @@ namespace Sierra {
      resolution(resolution), glfwWin(nullptr) {
     
         if (instanceCount == 0) {
-            init_glfw();
+            initGLFW();
         }
     
-        create_window(name);
+        createWindow(name);
         //init_glad();
     
         instanceCount++;
     }
     
-    void Window::create_window(std::string name) {
+    void Window::createWindow(std::string name) {
         glfwWin = glfwCreateWindow(resolution.w, resolution.h, name.c_str(), nullptr, nullptr);
     
         if ( glfwWin == nullptr ) {
@@ -63,7 +63,7 @@ namespace Sierra {
         //glfwSwapInterval(1);
     }
     
-    void Window::init_glfw() {
+    void Window::initGLFW() {
 #ifdef __linux__
 #ifdef DEBUG
         glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
@@ -83,7 +83,7 @@ namespace Sierra {
 #endif
     }
     
-    void Window::init_glad() {
+    void Window::initGLAD() {
         if ( !gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) ) {
             throw new std::runtime_error("Failed to init GLAD, womp womp");
         }

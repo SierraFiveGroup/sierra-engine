@@ -64,6 +64,7 @@ namespace Sierra::vk {
 
         other.vkSwapchain = VK_NULL_HANDLE;
         other.surface = VK_NULL_HANDLE;
+        other.context = VK_NULL_HANDLE;
     }
 
     void Swapchain::operator=(Swapchain&& other) {
@@ -74,10 +75,13 @@ namespace Sierra::vk {
 
         other.vkSwapchain = VK_NULL_HANDLE;
         other.surface = VK_NULL_HANDLE;
+        other.context = VK_NULL_HANDLE;
     }
 
     Swapchain::~Swapchain() {
-        vkDestroySwapchainKHR(context->device->getDevice(), vkSwapchain, nullptr);
-        vkDestroySurfaceKHR(context->instance->getInstance(), surface, nullptr);
+        if(vkSwapchain)
+            vkDestroySwapchainKHR(context->device->getDevice(), vkSwapchain, nullptr);
+        if(surface)
+            vkDestroySurfaceKHR(context->instance->getInstance(), surface, nullptr);
     }
 }

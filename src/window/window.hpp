@@ -34,9 +34,9 @@ namespace Sierra {
             GLFWwindow* getGLFWWindow();
     
         private:
-            void init_glfw();
-            void create_window(std::string name);
-            void init_glad();
+            void initGLFW();
+            void createWindow(std::string name);
+            void initGLAD();
     
             Resolution resolution;
     
