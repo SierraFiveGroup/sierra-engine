@@ -7,7 +7,7 @@
 #include "../../core/context.hpp"
 #include "../../util.hpp"
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
     class RenderPass {
         public:
             struct CreateInfo {

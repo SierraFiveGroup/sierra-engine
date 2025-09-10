@@ -1,6 +1,6 @@
 #include "render_pass.hpp"
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
 
     RenderPass::RenderPass(): vkRenderPass(VK_NULL_HANDLE), context(nullptr) {
 

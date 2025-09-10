@@ -6,8 +6,9 @@
 #include "core/device/device.hpp"
 #include "core/context.hpp"
 #include "rendering/swapchain/swapchain.hpp"
+#include "vk/scene/scene.hpp"
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
     class Vulkan {
         public:
             Vulkan(Window& window);
@@ -15,6 +16,7 @@ namespace Sierra::vk {
             Vulkan(Vulkan&) = delete;
             Vulkan(Vulkan&&) = delete;
 
+            Scene createScene();
         private:
             Context ctx;
 

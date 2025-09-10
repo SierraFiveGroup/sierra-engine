@@ -3,7 +3,7 @@
 #include "instance/instance.hpp"
 #include "device/device.hpp"
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
 
     struct Context {
         Instance* instance;

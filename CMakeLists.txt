@@ -38,7 +38,6 @@ include_directories(/usr/include) # Just in case :)
 include_directories($ENV{VULKAN_SDK}/Include)
 include_directories($ENV{GLFW_INCLUDE_DIR})  # Optional, if GLFW headers are not in a standard include path
 include_directories(src)
-include_directories(src/vulkan)
 include_directories(glad)
 include_directories(stb/stb_image)
 include_directories(stb/stb_truetype)

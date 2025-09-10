@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
     class Device {
         public:
             Device(Instance* instance);

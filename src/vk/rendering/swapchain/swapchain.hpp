@@ -2,10 +2,12 @@
 
 #include <vulkan/vulkan.h>
 
+#include <algorithm>
+
 #include "../../core/context.hpp"
 #include "window/window.hpp"
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
     class Swapchain {
         public:
             Swapchain();
@@ -17,6 +19,8 @@ namespace Sierra::vk {
             Swapchain(Swapchain&&);
 
             ~Swapchain();
+
+            VkSurfaceFormatKHR getSurfaceFormat();
         private:
             void createWindowSurface(Window& window);
             void createSwapchain();
@@ -25,6 +29,7 @@ namespace Sierra::vk {
 
             VkSwapchainKHR vkSwapchain;
             VkSurfaceKHR surface;
+            VkSurfaceFormatKHR surfaceFormat;
 
             Context* context;
 

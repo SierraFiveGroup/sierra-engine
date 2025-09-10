@@ -9,7 +9,7 @@
 #include "../../util.hpp"
 #include "io/logging/logger.hpp"
 
-namespace Sierra::vk { 
+namespace Sierra::vlk { 
     class Instance {
         public:
             Instance();

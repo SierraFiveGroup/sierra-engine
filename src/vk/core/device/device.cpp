@@ -4,7 +4,7 @@ const std::vector<const char*> requiredExtensions = {
     "VK_KHR_swapchain"
 };
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
 
     Device::Device(Instance* instance) {
         pickPhysicalDevice(instance);

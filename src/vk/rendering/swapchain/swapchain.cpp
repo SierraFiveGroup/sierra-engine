@@ -1,6 +1,6 @@
 #include "swapchain.hpp"
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
 
     Swapchain::Swapchain() {
 
@@ -12,7 +12,7 @@ namespace Sierra::vk {
     }
 
     void Swapchain::createSwapchain() {
-        VkSurfaceFormatKHR surfaceFormat = selectImageFormat();
+        surfaceFormat = selectImageFormat();
 
         VkSurfaceCapabilitiesKHR capabilites;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(context->device->getPhysicalDevice(), surface, &capabilites);
@@ -57,10 +57,15 @@ namespace Sierra::vk {
         return surfaceFormats.front();
     }
 
+    VkSurfaceFormatKHR Swapchain::getSurfaceFormat() {
+        return surfaceFormat;
+    }
+
     Swapchain::Swapchain(Swapchain&& other): context(other.context) {
         vkSwapchain = other.vkSwapchain;
         context = other.context;
         surface = other.surface;
+        surfaceFormat = other.surfaceFormat;
 
         other.vkSwapchain = VK_NULL_HANDLE;
         other.surface = VK_NULL_HANDLE;
@@ -71,6 +76,7 @@ namespace Sierra::vk {
         vkSwapchain = other.vkSwapchain;
         context = other.context;
         surface = other.surface;
+        surfaceFormat = other.surfaceFormat;
 
 
         other.vkSwapchain = VK_NULL_HANDLE;

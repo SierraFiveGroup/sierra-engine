@@ -33,7 +33,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 
 const std::vector<const char*> extensions = {};
 
-namespace Sierra::vk {
+namespace Sierra::vlk {
     Instance::Instance() {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
