@@ -7,12 +7,13 @@
 
 #include "descriptor.hpp"
 #include "vk/util.hpp"
+#include "vk/core/context.hpp"
 
 namespace Sierra::vlk {
     class DescriptorPool {
         public:
             DescriptorPool();
-            DescriptorPool(std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes);
+            DescriptorPool(Context& context, std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes);
 
             DescriptorPool(DescriptorPool&&);
             void operator=(DescriptorPool&&);
@@ -23,5 +24,6 @@ namespace Sierra::vlk {
             void createPool(std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes);
 
             VkDescriptorPool pool;
+            Context* context;
     };
 }

@@ -39,6 +39,11 @@ namespace Sierra::vlk {
         VK_ERR(vkCreateShaderModule(ctx->device->getDevice(), &moduleInfo, nullptr, &module));
     }
 
+    std::vector<VkDescriptorSetLayoutBinding> Shader::getDescriptorBindings() {
+        //TODO
+        throw new std::runtime_error("TODO implement");
+    }
+
     size_t* Shader::getDescriptorCounts() {
         return descriptorSizes;
     }
@@ -52,6 +57,7 @@ namespace Sierra::vlk {
 
         other.module = VK_NULL_HANDLE;
     }
+
     void Shader::operator=(Shader&& other) {
         module = other.module;
 

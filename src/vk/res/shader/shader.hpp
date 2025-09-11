@@ -32,6 +32,8 @@ namespace Sierra::vlk {
 
             VkShaderModule getShader();
             size_t* getDescriptorCounts();
+
+            std::vector<VkDescriptorSetLayoutBinding> getDescriptorBindings();
         private:
             void readFile(std::string path, std::vector<char>& buff);
             void createShader(std::string path);
