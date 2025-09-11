@@ -8,6 +8,9 @@ namespace Sierra::vlk {
     }
 
     Scene Vulkan::createScene() {
-        return Scene(ctx, swapchain);
+        Scene::Info info = {
+            .swapchain = swapchain
+        };
+        return Scene(ctx, info);
     }
 }

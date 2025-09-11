@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.h>
 
 #include "vk/core/context.hpp"
+#include "descriptor/descriptor.hpp"
 
 //just notes so ion forget
 //Shaders will have 4 descriptor rings-ish since thats the max amount of sets that can be bound at a time on a lot of devices
@@ -17,6 +18,7 @@
 // r4: reserved 
 
 // should descriptors (and pools) be managed per object or per scene
+
 namespace Sierra::vlk {
     class Shader {
         public:
@@ -29,11 +31,16 @@ namespace Sierra::vlk {
             ~Shader();
 
             VkShaderModule getShader();
+            size_t* getDescriptorCounts();
         private:
             void readFile(std::string path, std::vector<char>& buff);
             void createShader(std::string path);
 
             VkShaderModule module;
             Context* ctx;
+
+            std::vector<Descriptor> descriptors[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT]; 
+            size_t descriptorSizes[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT];
+
     };
 }

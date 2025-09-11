@@ -39,6 +39,10 @@ namespace Sierra::vlk {
         VK_ERR(vkCreateShaderModule(ctx->device->getDevice(), &moduleInfo, nullptr, &module));
     }
 
+    size_t* Shader::getDescriptorCounts() {
+        return descriptorSizes;
+    }
+
     VkShaderModule Shader::getShader() {
         return module;
     }

@@ -1,7 +1,7 @@
 #include "scene.hpp"
 
 namespace Sierra::vlk {
-    Scene::Scene(Context& context, Swapchain& swapchain) {
-        sceneRenderer = SceneRenderer(context, swapchain);
+    Scene::Scene(Context& context, Info& info) {
+        sceneRenderer = SceneRenderer(context, info.swapchain);
     }
 }
