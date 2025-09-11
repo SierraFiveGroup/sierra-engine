@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <stdexcept>
+#include <cstring>
 
 #include <vulkan/vulkan.h>
 
@@ -18,6 +19,11 @@
 // r4: reserved 
 
 // should descriptors (and pools) be managed per object or per scene
+
+//above any descriptors in shaders there should be a commented "decoration" in the following format
+//to help in the parsing
+//@descriptor_type binding
+
 
 namespace Sierra::vlk {
     class Shader {
@@ -38,11 +44,14 @@ namespace Sierra::vlk {
             void readFile(std::string path, std::vector<char>& buff);
             void createShader(std::string path);
 
+            void parseShader(std::vector<char>& buff);
+            uint32_t parseLine(char* line);
+            uint32_t seekEndl(char* line);
+
             VkShaderModule module;
             Context* ctx;
 
             std::vector<Descriptor> descriptors[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT]; 
             size_t descriptorSizes[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT];
-
     };
 }

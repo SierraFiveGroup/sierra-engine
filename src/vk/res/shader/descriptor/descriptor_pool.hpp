@@ -20,6 +20,8 @@ namespace Sierra::vlk {
 
             ~DescriptorPool();
 
+            void allocateSets(std::vector<VkDescriptorSetLayout>& layouts, std::vector<VkDescriptorSet>& sets);
+
         private:
             void createPool(std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes);
 

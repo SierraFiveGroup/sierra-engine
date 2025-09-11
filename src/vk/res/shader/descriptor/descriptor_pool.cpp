@@ -27,6 +27,18 @@ namespace Sierra::vlk {
         VK_ERR((vkCreateDescriptorPool(context->device->getDevice(), &poolInfo, nullptr, &pool)));
     }
 
+    void DescriptorPool::allocateSets(std::vector<VkDescriptorSetLayout>& layouts, std::vector<VkDescriptorSet>& sets) {
+        VkDescriptorSetAllocateInfo allocInfo{};
+
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = pool;
+
+        allocInfo.descriptorSetCount = layouts.size();
+        allocInfo.pSetLayouts = layouts.data();
+
+        VK_ERR(vkAllocateDescriptorSets(context->device->getDevice(), nullptr, sets.data()));
+    }
+
     DescriptorPool::DescriptorPool(DescriptorPool&& other) {
         pool = other.pool;
         context = other.context;

@@ -15,9 +15,11 @@ namespace Sierra::vlk {
 
             static void destroy(Context& context);
 
-            static VkDescriptorSetLayout getLayout(Context& context);
+            static VkDescriptorSetLayout getLayout(Context& context, std::vector<VkDescriptorSetLayoutBinding>& bindings);
 
         private:
+            static VkDescriptorSetLayout createLayout(Context& context, std::vector<VkDescriptorSetLayoutBinding>& bindings);
+
             static Layouts_t layouts;
     };
 }
