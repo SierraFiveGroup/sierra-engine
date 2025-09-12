@@ -7,11 +7,7 @@ uint64_t combineHashes(uint64_t h1, uint64_t h2) {
 
 namespace Sierra::vlk {
 
-    DescriptorLayout::Layouts_t layouts = {};
-
-    void DescriptorLayout::destroy(Context& context) {
-        layouts.erase(context.device->getDevice());
-    }
+    DescriptorLayout::Layouts_t DescriptorLayout::layouts = {};
 
     VkDescriptorSetLayout DescriptorLayout::getLayout(Context& context, std::vector<VkDescriptorSetLayoutBinding>& bindings) {
         uint64_t hash = 0;
@@ -41,6 +37,20 @@ namespace Sierra::vlk {
 
         layoutInfo.bindingCount = bindings.size();
         layoutInfo.pBindings = bindings.data();
+        
+        layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+
+        std::vector<VkDescriptorBindingFlags> bindingFlags(bindings.size());
+        for(VkDescriptorBindingFlags& flags : bindingFlags) {
+            flags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+        }
+
+        VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{};
+        flagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+        flagsInfo.pBindingFlags = bindingFlags.data();
+        flagsInfo.bindingCount = bindingFlags.size();
+
+        layoutInfo.pNext = &flagsInfo;
 
         VkDescriptorSetLayout layout;
 
@@ -49,5 +59,9 @@ namespace Sierra::vlk {
         return layout;
     }
 
-
+    void DescriptorLayout::destroy(Context& context) {
+        for(auto layout : layouts[context.device->getDevice()]) {
+            vkDestroyDescriptorSetLayout(context.device->getDevice(), layout.second, nullptr);
+        }
+    }
 } 

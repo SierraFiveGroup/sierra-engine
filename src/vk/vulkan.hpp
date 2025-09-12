@@ -17,8 +17,9 @@ namespace Sierra::vlk {
             Vulkan(Vulkan&&) = delete;
 
             Scene createScene();
+            Context& getContext();
         private:
-            Context ctx;
+            Context context;
 
             Instance instance;
             Device device;

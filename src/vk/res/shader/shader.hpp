@@ -29,7 +29,7 @@ namespace Sierra::vlk {
     class Shader {
         public:
             Shader();
-            Shader(Context& ctx, std::string path);
+            Shader(Context& ctx, std::string path, std::string sourcePath);
 
             Shader(Shader&&);
             void operator=(Shader&&);
@@ -37,14 +37,15 @@ namespace Sierra::vlk {
             ~Shader();
 
             VkShaderModule getShader();
-            size_t* getDescriptorCounts();
 
             std::vector<VkDescriptorSetLayoutBinding> getDescriptorBindings();
+            std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> getDescriptorSizes();
+
         private:
             void readFile(std::string path, std::vector<char>& buff);
             void createShader(std::string path);
 
-            void parseShader(std::vector<char>& buff);
+            void parseShader(std::string path);
             uint32_t parseLine(char* line);
             uint32_t seekEndl(char* line);
 
@@ -52,6 +53,6 @@ namespace Sierra::vlk {
             Context* ctx;
 
             std::vector<Descriptor> descriptors[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT]; 
-            size_t descriptorSizes[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT];
+            std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> descriptorSizes;
     };
 }

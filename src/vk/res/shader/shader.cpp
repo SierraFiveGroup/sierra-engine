@@ -22,8 +22,9 @@ namespace Sierra::vlk {
 
     }
     
-    Shader::Shader(Context& ctx, std::string path): ctx(&ctx), module(VK_NULL_HANDLE), descriptorSizes() {
+    Shader::Shader(Context& ctx, std::string path, std::string sourcePath): ctx(&ctx), module(VK_NULL_HANDLE), descriptorSizes() {
         createShader(path);
+        parseShader(sourcePath);
     }
 
     void Shader::readFile(std::string path, std::vector<char>& buff) {
@@ -46,8 +47,6 @@ namespace Sierra::vlk {
         std::vector<char> buff;
         readFile(path, buff);
 
-        parseShader(buff);
-
         VkShaderModuleCreateInfo moduleInfo{};
         moduleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 
@@ -57,7 +56,10 @@ namespace Sierra::vlk {
         VK_ERR(vkCreateShaderModule(ctx->device->getDevice(), &moduleInfo, nullptr, &module));
     }
 
-    void Shader::parseShader(std::vector<char>& buff) {
+    void Shader::parseShader(std::string path) {
+        std::vector<char> buff;
+        readFile(path, buff);
+
         for(int i = 0; i < buff.size(); i++) {
             if(buff[i] == '@')
                 i += parseLine(&buff[i]);
@@ -67,17 +69,17 @@ namespace Sierra::vlk {
     uint32_t Shader::parseLine(char* line) {
         char buf[64]; 
 
-        size_t bindingOffset = 0;
+        size_t offset = 0;
         size_t endlOffset = seekEndl(line);
 
         bool match = false;
         for(uint32_t i = 0; i < MAX_DESCRIPTOR_TYPE_NAME_LENGTH; i++) {
-            if(line[i + 2] != ' ') continue;
+            if(line[i] != ' ') continue;
 
             memcpy(buf, line + 1, i-1);
             buf[i] = '\0';
             match = true;
-            bindingOffset = i + 1;
+            offset = i + 1;
 
             break;
         }
@@ -102,9 +104,14 @@ namespace Sierra::vlk {
             return endlOffset;
         }
 
-        uint32_t binding = std::stoi(&line[bindingOffset]);
+        uint32_t binding = std::stoi(&line[offset]);
 
-        LOG("BINDING:" << binding);
+        for(; line[offset] != ' '; offset++);
+        offset++;
+
+        memcpy(buf, line + offset, endlOffset - offset); 
+        buf[endlOffset - offset] = '\0';
+
         return endlOffset;
     }
 
@@ -120,7 +127,7 @@ namespace Sierra::vlk {
         throw new std::runtime_error("TODO implement");
     }
 
-    size_t* Shader::getDescriptorCounts() {
+    std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> Shader::getDescriptorSizes() {
         return descriptorSizes;
     }
 

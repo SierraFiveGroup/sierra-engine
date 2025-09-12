@@ -2,15 +2,19 @@
 
 namespace Sierra::vlk {
     Vulkan::Vulkan(Window& window): instance(), device(&instance) {
-        ctx.instance = &instance;
-        ctx.device = &device;
-        swapchain = Swapchain(ctx, window);
+        context.instance = &instance;
+        context.device = &device;
+        swapchain = Swapchain(context, window);
     }
 
     Scene Vulkan::createScene() {
         Scene::Info info = {
             .swapchain = swapchain
         };
-        return Scene(ctx, info);
+        return Scene(context, info);
+    }
+
+    Context& Vulkan::getContext() {
+        return context;
     }
 }
