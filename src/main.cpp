@@ -13,24 +13,19 @@ int main() {
     vlk::Scene scene = vulkan.createScene();
     vlk::Shader shader = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
 
-    auto sizes = shader.getDescriptorSizes();
-    std::vector<VkDescriptorSetLayoutBinding> bindings{};
+    auto descriptors = shader.getDescriptors();
 
-    for(int i = 0; i < bindings.size(); i++) {
-        if(!sizes[i]) continue;
+    std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes;
+    std::vector<Descriptor*> descriptorPtrs;
 
-        VkDescriptorSetLayoutBinding binding{};
-        binding.binding = i;
-        binding.descriptorType = (VkDescriptorType)i;
-        binding.descriptorCount = sizes[i];
-        binding.stageFlags = VK_SHADER_STAGE_ALL;
-
-        bindings.push_back(binding);
+    for(auto& descriptor : descriptors) {
+        sizes[descriptor.getType()]++;
+        descriptorPtrs.push_back(&descriptor);
     }
 
     vlk::DescriptorPool pool = vlk::DescriptorPool(vulkan.getContext(), sizes);
 
-    vlk::DescriptorSet set = vlk::DescriptorSet(vulkan.getContext(), bindings, pool);
+    vlk::DescriptorSet set = vlk::DescriptorSet(vulkan.getContext(), descriptorPtrs, pool);
 
     vlk::DescriptorLayout::destroy(vulkan.getContext());
 

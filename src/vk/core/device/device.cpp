@@ -64,6 +64,25 @@ namespace Sierra::vlk {
     }
 
     void Device::createLogicalDevice() {
+        VkPhysicalDeviceFeatures2 features2{};
+        features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+        vkGetPhysicalDeviceFeatures2(physicalDevice, &features2);
+
+        VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
+        descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+        descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingStorageImageUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingUniformTexelBufferUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingStorageTexelBufferUpdateAfterBind = true;
+        descriptorIndexingFeatures.descriptorBindingPartiallyBound = true;
+
+        features2.pNext = &descriptorIndexingFeatures;
+
+
         const std::vector<const char*> extensions = getExtensions();
 
         std::vector<VkDeviceQueueCreateInfo> queueInfos = getQueueInfos();
@@ -76,6 +95,8 @@ namespace Sierra::vlk {
 
         deviceInfo.enabledExtensionCount = extensions.size();
         deviceInfo.ppEnabledExtensionNames = extensions.data();
+
+        deviceInfo.pNext = &features2;
 
         deviceInfo.enabledLayerCount = 0;
 

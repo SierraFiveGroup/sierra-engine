@@ -5,6 +5,8 @@
 #include <vector>
 #include <stdexcept>
 #include <cstring>
+#include <unordered_map>
+#include <list>
 
 #include <vulkan/vulkan.h>
 
@@ -39,7 +41,7 @@ namespace Sierra::vlk {
             VkShaderModule getShader();
 
             std::vector<VkDescriptorSetLayoutBinding> getDescriptorBindings();
-            std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> getDescriptorSizes();
+            std::vector<Descriptor>& getDescriptors();
 
         private:
             void readFile(std::string path, std::vector<char>& buff);
@@ -52,7 +54,7 @@ namespace Sierra::vlk {
             VkShaderModule module;
             Context* ctx;
 
-            std::vector<Descriptor> descriptors[SIERRA_VLK_DESCRIPTOR_TYPE_COUNT]; 
-            std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> descriptorSizes;
+            std::vector<Descriptor> descriptors;
+            std::unordered_map<std::string, Descriptor*> descriptorMap;
     };
 }

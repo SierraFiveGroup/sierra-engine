@@ -4,25 +4,25 @@
 
 namespace Sierra::vlk {
 
-    const std::vector<const char*> descriptorTypeNames = {
-        "SAMPLER",
-        "COMBINED_IMAGE_SAMPLER",
-        "SAMPLED_IMAGE",
-        "STORAGE_IMAGE",
-        "UNIFORM_TEXEL_BUFFER",
-        "STORAGE_TEXEL_BUFFER",
-        "UNIFORM_BUFFER",
-        "STORAGE_BUFFER",
-        "UNIFORM_BUFFER_DYNAMIC",
-        "STORAGE_BUFFER_DYNAMIC",
-        "INPUT_ATTACHMENT"
+    const std::vector<std::pair<const char*, uint32_t>> descriptorTypeNames = {
+        {"SAMPLER", 0},
+        {"COMBINED_IMAGE_SAMPLER", 1},
+        {"SAMPLED_IMAGE", 2},
+        {"STORAGE_IMAGE", 3},
+        {"UNIFORM_TEXEL_BUFFER", 4},
+        {"STORAGE_TEXEL_BUFFER", 5},
+        {"UNIFORM_BUFFER", 6},
+        {"STORAGE_BUFFER", 7},
+        //"UNIFORM_BUFFER_DYNAMIC",
+        //"STORAGE_BUFFER_DYNAMIC",
+        //{"INPUT_ATTACHMENT", 10}
     };
 
-    Shader::Shader(): ctx(nullptr), module(VK_NULL_HANDLE), descriptorSizes() {
+    Shader::Shader(): ctx(nullptr), module(VK_NULL_HANDLE) {
 
     }
     
-    Shader::Shader(Context& ctx, std::string path, std::string sourcePath): ctx(&ctx), module(VK_NULL_HANDLE), descriptorSizes() {
+    Shader::Shader(Context& ctx, std::string path, std::string sourcePath): ctx(&ctx), module(VK_NULL_HANDLE) {
         createShader(path);
         parseShader(sourcePath);
     }
@@ -66,13 +66,17 @@ namespace Sierra::vlk {
         }
     }
 
-    uint32_t Shader::parseLine(char* line) {
+    uint32_t Shader::parseLine(char* line) { // TODO cleanup this ugly piece of shit
         char buf[64]; 
 
         size_t offset = 0;
         size_t endlOffset = seekEndl(line);
-
         bool match = false;
+
+        
+        /////// descriptor type
+        VkDescriptorType type;
+
         for(uint32_t i = 0; i < MAX_DESCRIPTOR_TYPE_NAME_LENGTH; i++) {
             if(line[i] != ' ') continue;
 
@@ -92,9 +96,9 @@ namespace Sierra::vlk {
 
         match = false;
         for(uint32_t i = 0; i < descriptorTypeNames.size(); i++) {
-            if (strcmp(buf, descriptorTypeNames[i])) continue;
+            if (strcmp(buf, descriptorTypeNames[i].first)) continue;
 
-            descriptorSizes[i]++;
+            type = (VkDescriptorType)descriptorTypeNames[i].second;
             match = true;
         }
 
@@ -103,14 +107,22 @@ namespace Sierra::vlk {
             ERRPRINTF("Offending line: %.*s\n", endlOffset, line);
             return endlOffset;
         }
+        /////
 
+        ///// get binding
         uint32_t binding = std::stoi(&line[offset]);
+        /////////
 
+
+        /////// get name
         for(; line[offset] != ' '; offset++);
         offset++;
 
         memcpy(buf, line + offset, endlOffset - offset); 
         buf[endlOffset - offset] = '\0';
+        ////////
+
+        descriptors.emplace_back(std::string(buf), type);
 
         return endlOffset;
     }
@@ -127,8 +139,8 @@ namespace Sierra::vlk {
         throw new std::runtime_error("TODO implement");
     }
 
-    std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> Shader::getDescriptorSizes() {
-        return descriptorSizes;
+    std::vector<Descriptor>& Shader::getDescriptors() {
+        return descriptors;
     }
 
     VkShaderModule Shader::getShader() {

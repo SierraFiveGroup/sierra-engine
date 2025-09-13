@@ -5,12 +5,34 @@ namespace Sierra::vlk {
 
     }
 
-    DescriptorSet::DescriptorSet(Context& context, std::vector<VkDescriptorSetLayoutBinding>& bindings, DescriptorPool& pool): context(&context), set(VK_NULL_HANDLE) {
-       createSet(bindings, pool); 
+    DescriptorSet::DescriptorSet(Context& context, std::vector<Descriptor*>& descriptors, DescriptorPool& pool): context(&context), set(VK_NULL_HANDLE) {
+       createSet(descriptors, pool); 
     }
     
     
-    void DescriptorSet::createSet(std::vector<VkDescriptorSetLayoutBinding>& bindings, DescriptorPool& pool) {
+    void DescriptorSet::createSet(std::vector<Descriptor*>& descriptors, DescriptorPool& pool) {
+        std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes {};
+        std::vector<VkDescriptorSetLayoutBinding> bindings {};
+
+        for(Descriptor* descriptor : descriptors) {
+            sizes[descriptor->getType()]++;
+
+            descriptor->setIndex(descriptorHandles[descriptor->getType()].size() - 1);
+            descriptorHandles[descriptor->getType()].push_back(descriptor);
+        }
+
+        for(int i = 0; i < SIERRA_VLK_DESCRIPTOR_TYPE_COUNT; i++) {
+            if(!sizes[i]) continue;
+
+            VkDescriptorSetLayoutBinding binding{};
+            binding.binding = i;
+            binding.descriptorType = (VkDescriptorType)i;
+            binding.descriptorCount = sizes[i];
+            binding.stageFlags = VK_SHADER_STAGE_ALL;
+
+            bindings.push_back(binding);
+        }
+
         VkDescriptorSetLayout layoutHandle = DescriptorLayout::getLayout(*context, bindings);
 
         VkDescriptorSetAllocateInfo allocInfo{};
