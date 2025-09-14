@@ -33,7 +33,7 @@ namespace Sierra::vlk {
             bindings.push_back(binding);
         }
 
-        VkDescriptorSetLayout layoutHandle = DescriptorLayout::getLayout(*context, bindings);
+        layout = DescriptorLayout::getLayout(*context, bindings);
 
         VkDescriptorSetAllocateInfo allocInfo{};
 
@@ -42,9 +42,17 @@ namespace Sierra::vlk {
         allocInfo.descriptorPool = pool.getPool();
 
         allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts = &layoutHandle;
+        allocInfo.pSetLayouts = &layout;
 
         VK_ERR(vkAllocateDescriptorSets(context->device->getDevice(), &allocInfo, &set));
+    }
+
+    VkDescriptorSet DescriptorSet::getSet() {
+        return set;
+    }
+
+    VkDescriptorSetLayout DescriptorSet::getLayout() {
+        return layout;
     }
 
     DescriptorSet::DescriptorSet(DescriptorSet&& other) {

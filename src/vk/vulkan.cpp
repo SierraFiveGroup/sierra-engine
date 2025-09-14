@@ -17,4 +17,8 @@ namespace Sierra::vlk {
     Context& Vulkan::getContext() {
         return context;
     }
+
+    Swapchain& Vulkan::getSwapchain() {
+        return swapchain;
+    }
 }

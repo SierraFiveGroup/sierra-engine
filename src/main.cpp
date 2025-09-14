@@ -2,6 +2,8 @@
 #include "window/window.hpp"
 
 #include "vk/res/shader/descriptor/descriptor_set.hpp"
+#include "vk/rendering/graphics_pipeline/pipeline_layout.hpp"
+#include "vk/rendering/graphics_pipeline/graphics_pipeline.hpp"
 
 using namespace Sierra;
 using namespace vlk;
@@ -11,9 +13,10 @@ int main() {
     Window window = Window("hehe", {1280, 720});
     Vulkan vulkan = Vulkan(window);
     vlk::Scene scene = vulkan.createScene();
-    vlk::Shader shader = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
+    vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
+    vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
 
-    auto descriptors = shader.getDescriptors();
+    auto descriptors = shaderVert.getDescriptors();
 
     std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes;
     std::vector<Descriptor*> descriptorPtrs;
@@ -27,6 +30,62 @@ int main() {
 
     vlk::DescriptorSet set = vlk::DescriptorSet(vulkan.getContext(), descriptorPtrs, pool);
 
+    std::vector<VkPushConstantRange> ranges{};
+    VkPipelineLayout layout = vlk::PipelineLayout::getLayout(vulkan.getContext(), set.getLayout(), ranges);
+
+    VkAttachmentDescription attachmentDescription{};
+    attachmentDescription.format = vulkan.getSwapchain().getSurfaceFormat().format;
+    attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+    attachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference colorAttachmentRef{};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &colorAttachmentRef;
+
+    vlk::RenderPass::CreateInfo renderPassInfo{};
+    renderPassInfo.attachments = {attachmentDescription};
+    renderPassInfo.dependencies = {};
+    renderPassInfo.subpasses = {subpass};
+
+
+    vlk::RenderPass renderPass = vlk::RenderPass(vulkan.getContext(), renderPassInfo);
+
+    VkPipelineVertexInputStateCreateInfo inputState{};
+    inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+    VkPipelineShaderStageCreateInfo vertexStage{};
+    vertexStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertexStage.module = shaderVert.getShader();
+    vertexStage.pName = "main";
+    vertexStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
+
+    VkPipelineShaderStageCreateInfo fragStage{};
+    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragStage.module = shaderFrag.getShader();
+    fragStage.pName = "main";
+    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    vlk::GraphicsPipeline::PipelineInfo pipelineInfo = {};
+    pipelineInfo.renderPass = &renderPass;
+    pipelineInfo.basePipeline = VK_NULL_HANDLE;
+    pipelineInfo.inputState = inputState;
+    pipelineInfo.layout = layout;
+    pipelineInfo.subpass = 0;
+    pipelineInfo.stages = {vertexStage, fragStage};
+    
+    VkPipeline pipeline = vlk::GraphicsPipeline::getPipeline(vulkan.getContext(), pipelineInfo);
+
     vlk::DescriptorLayout::destroy(vulkan.getContext());
+
 
 }

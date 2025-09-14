@@ -18,6 +18,7 @@ namespace Sierra::vlk {
 
             Scene createScene();
             Context& getContext();
+            Swapchain& getSwapchain();
         private:
             Context context;
 
