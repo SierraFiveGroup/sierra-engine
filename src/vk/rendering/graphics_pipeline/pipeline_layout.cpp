@@ -51,4 +51,10 @@ namespace Sierra::vlk {
 
         return layout;
     }
+
+    void PipelineLayout::destroy(Context& context) {
+        for (auto layout : layouts[context.device->getDevice()]) {
+            vkDestroyPipelineLayout(context.device->getDevice(), layout.second, nullptr);
+        }
+    }
 }

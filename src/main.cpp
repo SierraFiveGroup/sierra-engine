@@ -14,12 +14,12 @@ int main() {
     Vulkan vulkan = Vulkan(window);
     vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
-    vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
+    vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.frag.spv", "test_shaders/vk/tri.frag");
 
     auto descriptors = shaderVert.getDescriptors();
 
-    std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes;
-    std::vector<Descriptor*> descriptorPtrs;
+    std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes = {};
+    std::vector<Descriptor*> descriptorPtrs = {};
 
     for(auto& descriptor : descriptors) {
         sizes[descriptor.getType()]++;
@@ -86,6 +86,8 @@ int main() {
     VkPipeline pipeline = vlk::GraphicsPipeline::getPipeline(vulkan.getContext(), pipelineInfo);
 
     vlk::DescriptorLayout::destroy(vulkan.getContext());
+    vlk::GraphicsPipeline::destroy(vulkan.getContext());
+    vlk::PipelineLayout::destroy(vulkan.getContext());
 
 
 }

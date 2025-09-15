@@ -127,4 +127,10 @@ namespace Sierra::vlk {
 
         return hash;
     }
+
+    void GraphicsPipeline::destroy(Context& context) {
+        for (auto pipeline : pipelines[context.device->getDevice()]) {
+            vkDestroyPipeline(context.device->getDevice(), pipeline.second, nullptr);
+        }
+    }
 }

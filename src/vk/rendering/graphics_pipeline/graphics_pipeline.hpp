@@ -33,6 +33,8 @@ namespace Sierra::vlk {
             GraphicsPipeline() = delete;
 
             static VkPipeline getPipeline(Context& context, PipelineInfo& info);
+
+            static void destroy(Context& context);
         private:
             static uint64_t getHash(Context& context, PipelineInfo& info);
 

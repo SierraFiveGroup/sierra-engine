@@ -17,6 +17,8 @@ namespace Sierra::vlk {
             PipelineLayout() = delete;
 
             static VkPipelineLayout getLayout(Context& context, VkDescriptorSetLayout setLayout, std::vector<VkPushConstantRange>& pushConstantRanges);
+
+            static void destroy(Context& context);
         private:
             static VkPipelineLayout createLayout(Context& context, VkDescriptorSetLayout setLayout, std::vector<VkPushConstantRange>& pushConstantRanges);
 
