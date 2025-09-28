@@ -49,7 +49,8 @@ namespace Sierra::vlk {
             Mem(Context& context, Info& info, VkImageCreateInfo& imageInfo, VkImage& image);
 
             Mem(Mem&) = delete;
-            Mem(Mem&&) = delete;
+            Mem(Mem&&);
+            void operator=(Mem&&);
 
             ~Mem();
 

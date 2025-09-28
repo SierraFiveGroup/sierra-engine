@@ -103,6 +103,30 @@ namespace Sierra::vlk {
         VK_ERR(vmaCreateImage(*allocator.getLock(), &imageInfo, &allocInfo, &image, &allocation, nullptr));
     }
 
+    Mem::Mem(Mem&& other) {
+        this->allocator = other.allocator;
+        this->allocation = other.allocation;
+        this->buffer = other.buffer;
+        this->image = other.image;
+
+        other.allocator = nullptr;
+        other.allocation = nullptr;
+        other.image = VK_NULL_HANDLE;
+        other.buffer = VK_NULL_HANDLE;
+    }
+
+    void Mem::operator=(Mem&& other) {
+        this->allocator = other.allocator;
+        this->allocation = other.allocation;
+        this->buffer = other.buffer;
+        this->image = other.image;
+
+        other.allocator = nullptr;
+        other.allocation = nullptr;
+        other.image = VK_NULL_HANDLE;
+        other.buffer = VK_NULL_HANDLE;
+    }
+
     Mem::~Mem() {
         if (buffer)
             vmaDestroyBuffer(*allocator.getLock(), buffer, allocation);
