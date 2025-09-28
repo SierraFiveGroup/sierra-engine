@@ -121,12 +121,18 @@ namespace Sierra::vlk {
         };
 
         for(int i = 0; i < properties.size(); i++) {
-            if (properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) 
+            if (properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 copyToVector(graphicsQueues, i, properties[i].queueCount);
-            else if (properties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) 
+                graphicsQueueFamilyIndex = i;
+            }
+            else if (properties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) {
                 copyToVector(transferQueues, i, properties[i].queueCount);
-            else if (properties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) 
+                transferQueueFamilyIndex = i;
+            }
+            else if (properties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
                 copyToVector(computeQueues, i, properties[i].queueCount);
+                computeQueueFamilyIndex = i;
+            }
         }
     }
 
@@ -135,7 +141,31 @@ namespace Sierra::vlk {
         else if(queueType == VK_QUEUE_TRANSFER_BIT) return transferQueues[++transferQueueIndex % transferQueues.size()];
         else if(queueType == VK_QUEUE_COMPUTE_BIT) return computeQueues[++computeQueueIndex % computeQueues.size()];
 
+        switch(queueType) {
+            case VK_QUEUE_GRAPHICS_BIT:
+                return graphicsQueues[++graphicsQueueIndex % graphicsQueues.size()];
+            case VK_QUEUE_TRANSFER_BIT:
+                return transferQueues[++transferQueueIndex % transferQueues.size()];
+            case VK_QUEUE_COMPUTE_BIT:
+                return computeQueues[++computeQueueIndex % computeQueues.size()];
+        }
+
         return VK_NULL_HANDLE;
+    }
+
+    uint32_t Device::getQueueFamilyIndex(VkQueueFlags queueType) {
+        switch (queueType) {
+            case VK_QUEUE_GRAPHICS_BIT:
+                return graphicsQueueFamilyIndex;
+            case VK_QUEUE_TRANSFER_BIT:
+                return transferQueueFamilyIndex;
+            case VK_QUEUE_COMPUTE_BIT:
+                return computeQueueFamilyIndex;
+        }
+
+        ERROR("Tried to get the queue family index of nonexistent family " << queueType);
+
+        return -1;
     }
 
     std::vector<const char*> Device::getExtensions() {

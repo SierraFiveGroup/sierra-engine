@@ -15,6 +15,7 @@ namespace Sierra::vlk {
             Device(Device&&) = delete;
 
             VkQueue getQueue(VkQueueFlags queueType);
+            uint32_t getQueueFamilyIndex(VkQueueFlags queueType);
 
             VkPhysicalDevice getPhysicalDevice();
             VkDevice getDevice();
@@ -36,6 +37,10 @@ namespace Sierra::vlk {
             uint32_t computeQueueIndex;
             uint32_t graphicsQueueIndex;
             uint32_t transferQueueIndex;
+
+            uint32_t computeQueueFamilyIndex;
+            uint32_t graphicsQueueFamilyIndex;
+            uint32_t transferQueueFamilyIndex;
 
             VkPhysicalDevice physicalDevice;
             VkDevice vkDevice;
