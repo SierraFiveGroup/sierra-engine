@@ -9,3 +9,4 @@ shell.nix
 .vscode
 build/
 perf*
+/engine
