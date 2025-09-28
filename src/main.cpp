@@ -4,6 +4,9 @@
 #include "vk/res/shader/descriptor/descriptor_set.hpp"
 #include "vk/rendering/graphics_pipeline/pipeline_layout.hpp"
 #include "vk/rendering/graphics_pipeline/graphics_pipeline.hpp"
+#include "vk/res/command_buffer/command_pool.hpp"
+#include "vk/res/command_buffer/command_buffer.hpp"
+#include "vk/res/mem/buffer/buffer.hpp"
 
 using namespace Sierra;
 using namespace vlk;
@@ -12,7 +15,20 @@ int main() {
     
     Window window = Window("hehe", {1280, 720});
     Vulkan vulkan = Vulkan(window);
-    vlk::Scene scene = vulkan.createScene();
+
+    Mem::init(vulkan.getContext());
+
+    std::vector<uint32_t> transferFamilyIndex = {vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT)};
+    char testDat[] = {1, 2, 3};
+
+    Buffer::Info buffInfo{};
+    buffInfo.queueFamilyIndices = transferFamilyIndex;
+    buffInfo.size = sizeof(testDat);
+    buffInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    buffInfo.type = Buffer::Type::HOST_LOCAL;
+    Buffer buff = Buffer(vulkan.getContext(), buffInfo);
+
+   /* vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
     vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.frag.spv", "test_shaders/vk/tri.frag");
 
@@ -87,7 +103,7 @@ int main() {
 
     vlk::DescriptorLayout::destroy(vulkan.getContext());
     vlk::GraphicsPipeline::destroy(vulkan.getContext());
-    vlk::PipelineLayout::destroy(vulkan.getContext());
+    vlk::PipelineLayout::destroy(vulkan.getContext());*/
 
 
 }
