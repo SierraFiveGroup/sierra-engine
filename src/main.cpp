@@ -13,10 +13,9 @@ using namespace vlk;
 
 int main() {    
     
+    try{
     Window window = Window("hehe", {1280, 720});
     Vulkan vulkan = Vulkan(window);
-
-    Mem::init(vulkan.getContext());
 
     std::vector<uint32_t> transferFamilyIndex = {vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT)};
     char testDat[] = {1, 2, 3};
@@ -26,7 +25,20 @@ int main() {
     buffInfo.size = sizeof(testDat);
     buffInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     buffInfo.type = Buffer::Type::HOST_LOCAL;
+
     Buffer buff = Buffer(vulkan.getContext(), buffInfo);
+
+    CommandPool pool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT), 0);
+    CommandBuffer cmdBuff = CommandBuffer(pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+    buff.copyToBuff((uint8_t*)testDat, sizeof(testDat));
+
+   // cmdBuff.begin(nullptr);
+
+ //   vkCmdCopyBuffer()
+    } catch (std::exception e) {
+        std::cerr << e.what() << "\n";
+    }
 
    /* vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
