@@ -13,6 +13,8 @@
 namespace Sierra::vlk {
     class Mem {
         friend class MemPool;
+        friend class Buffer;
+        friend class Image;
 
         public:
             static uint32_t ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
@@ -54,9 +56,14 @@ namespace Sierra::vlk {
 
             ~Mem();
 
-            /// STATIC PART
+            void* map();
+            void unmap();
+            void copyToHost(uint8_t* src, size_t srcSize);
+            
         protected:
+            VmaAllocationInfo& getAllocInfo();            
         private:
+            /// STATIC PART
             static VmaAllocator createAllocator(Context& context);
             /////////
 
@@ -66,8 +73,10 @@ namespace Sierra::vlk {
             VkBuffer buffer;
             VkImage image;
 
-            VmaAllocation allocation;
+            VmaAllocation allocation;            
             ResourceRef<VmaAllocator> allocator;
+
+            VmaAllocationInfo allocInfo;
     };
 
     class MemPool {

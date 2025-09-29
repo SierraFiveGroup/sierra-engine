@@ -24,10 +24,18 @@ namespace Sierra::vlk {
 
             Buffer();
             Buffer(Context& context, Info& info);
+
+            size_t getSize();
+
+            void* map();
+            void unmap();
+            void copyToBuff(uint8_t* src, size_t srcSize);
         private:
             void createBuff(Context& context, Info& info);
 
             Mem mem;
             VkBuffer buff;
+
+            Type type;
     };
 }

@@ -63,18 +63,18 @@ namespace Sierra::vlk {
     }
 
 
-    Mem::Mem(): allocator(), allocation(), buffer(), image() {
+    Mem::Mem(): allocator(), allocation(), buffer(), image(), allocInfo() {
         
     }
 
-    Mem::Mem(Context& context, Info& info, VkBufferCreateInfo& bufferInfo, VkBuffer& buffer): allocator(), buffer(), image() {
+    Mem::Mem(Context& context, Info& info, VkBufferCreateInfo& bufferInfo, VkBuffer& buffer): allocator(), buffer(), image(), allocInfo() {
         allocator = getAllocator(context);
         createBuffer(info, bufferInfo, buffer);
 
         this->buffer = buffer;
     }
 
-    Mem::Mem(Context& context, Info& info, VkImageCreateInfo& imageInfo, VkImage& image): buffer(), image() {
+    Mem::Mem(Context& context, Info& info, VkImageCreateInfo& imageInfo, VkImage& image): buffer(), image(), allocInfo() {
         allocator = getAllocator(context);
         createImage(info, imageInfo, image);
 
@@ -103,16 +103,22 @@ namespace Sierra::vlk {
         VK_ERR(vmaCreateImage(*allocator.getLock(), &imageInfo, &allocInfo, &image, &allocation, nullptr));
     }
 
+    VmaAllocationInfo& Mem::getAllocInfo() {
+        return allocInfo;
+    }
+
     Mem::Mem(Mem&& other) {
         this->allocator = other.allocator;
         this->allocation = other.allocation;
         this->buffer = other.buffer;
         this->image = other.image;
+        this->allocInfo = other.allocInfo;
 
         other.allocator = nullptr;
         other.allocation = nullptr;
         other.image = VK_NULL_HANDLE;
         other.buffer = VK_NULL_HANDLE;
+        other.allocInfo = {0};
     }
 
     void Mem::operator=(Mem&& other) {
@@ -120,11 +126,13 @@ namespace Sierra::vlk {
         this->allocation = other.allocation;
         this->buffer = other.buffer;
         this->image = other.image;
+        this->allocInfo = other.allocInfo;
 
         other.allocator = nullptr;
         other.allocation = nullptr;
         other.image = VK_NULL_HANDLE;
         other.buffer = VK_NULL_HANDLE;
+        other.allocInfo = {0};
     }
 
     Mem::~Mem() {
@@ -132,6 +140,21 @@ namespace Sierra::vlk {
             vmaDestroyBuffer(*allocator.getLock(), buffer, allocation);
         else if(image)
             vmaDestroyImage(*allocator.getLock(), image, allocation);
+    }
+
+    void* Mem::map() {
+        void* ptr;
+        vmaMapMemory(*allocator.getLock(), allocation, &ptr);
+
+        return ptr;
+    }
+
+    void Mem::unmap() {
+        vmaUnmapMemory(*allocator.getLock(), allocation);
+    }
+
+    void Mem::copyToHost(uint8_t* src, size_t srcSize) {
+        vmaCopyMemoryToAllocation(*allocator.getLock(), src, allocation, 0, srcSize);
     }
 
     ///////
