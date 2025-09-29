@@ -122,15 +122,15 @@ namespace Sierra::vlk {
         };
 
         for(int i = 0; i < properties.size(); i++) {
-            if (properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            if (properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT && !graphicsQueueFamilyIndex) {
                 copyToVector(graphicsQueues, i, properties[i].queueCount);
                 graphicsQueueFamilyIndex = i;
             }
-            else if (properties[i].queueFlags & VK_QUEUE_TRANSFER_BIT) {
+            else if (properties[i].queueFlags & VK_QUEUE_TRANSFER_BIT && !transferQueueFamilyIndex) {
                 copyToVector(transferQueues, i, properties[i].queueCount);
                 transferQueueFamilyIndex = i;
             }
-            else if (properties[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+            else if (properties[i].queueFlags & VK_QUEUE_COMPUTE_BIT && !computeQueueFamilyIndex) {
                 copyToVector(computeQueues, i, properties[i].queueCount);
                 computeQueueFamilyIndex = i;
             }
@@ -138,10 +138,6 @@ namespace Sierra::vlk {
     }
 
     VkQueue Device::getQueue(VkQueueFlags queueType) {
-        if (queueType == VK_QUEUE_GRAPHICS_BIT) return graphicsQueues[++graphicsQueueIndex % graphicsQueues.size()];
-        else if(queueType == VK_QUEUE_TRANSFER_BIT) return transferQueues[++transferQueueIndex % transferQueues.size()];
-        else if(queueType == VK_QUEUE_COMPUTE_BIT) return computeQueues[++computeQueueIndex % computeQueues.size()];
-
         switch(queueType) {
             case VK_QUEUE_GRAPHICS_BIT:
                 return graphicsQueues[++graphicsQueueIndex % graphicsQueues.size()];
