@@ -7,6 +7,7 @@
 #include "core/context.hpp"
 #include "rendering/swapchain/swapchain.hpp"
 #include "vk/scene/scene.hpp"
+#include "vk/res/mem/mem.hpp"
 
 namespace Sierra::vlk {
     class Vulkan {
@@ -15,6 +16,8 @@ namespace Sierra::vlk {
 
             Vulkan(Vulkan&) = delete;
             Vulkan(Vulkan&&) = delete;
+
+            ~Vulkan();
 
             Scene createScene();
             Context& getContext();

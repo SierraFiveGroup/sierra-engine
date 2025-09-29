@@ -5,6 +5,7 @@ namespace Sierra::vlk {
         context.instance = &instance;
         context.device = &device;
         swapchain = Swapchain(context, window);
+        Mem::init(context);
     }
 
     Scene Vulkan::createScene() {
@@ -20,5 +21,9 @@ namespace Sierra::vlk {
 
     Swapchain& Vulkan::getSwapchain() {
         return swapchain;
+    }
+
+    Vulkan::~Vulkan() {
+        Mem::destroy(context);
     }
 }
