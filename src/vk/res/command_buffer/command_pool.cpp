@@ -7,7 +7,7 @@ namespace Sierra::vlk {
     }
 
     CommandPool::CommandPool(Context& context, uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags): commandPool(),
-     context(), resetCmdBuffer() {
+     context(&context), resetCmdBuffer() {
         createPool(context, queueFamilyIndex, flags);
 
         if(flags | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT)
