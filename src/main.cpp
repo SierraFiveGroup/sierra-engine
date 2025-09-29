@@ -7,6 +7,7 @@
 #include "vk/res/command_buffer/command_pool.hpp"
 #include "vk/res/command_buffer/command_buffer.hpp"
 #include "vk/res/mem/buffer/buffer.hpp"
+#include "vk/sync/fence/fence.hpp"
 
 using namespace Sierra;
 using namespace vlk;
@@ -23,19 +24,40 @@ int main() {
     Buffer::Info buffInfo{};
     buffInfo.queueFamilyIndices = transferFamilyIndex;
     buffInfo.size = sizeof(testDat);
-    buffInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    buffInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     buffInfo.type = Buffer::Type::HOST_LOCAL;
 
+    Buffer stagingBuff = Buffer(vulkan.getContext(), buffInfo);
+
+    buffInfo.type = Buffer::Type::DEVICE_LOCAL;
     Buffer buff = Buffer(vulkan.getContext(), buffInfo);
 
     CommandPool pool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT), 0);
     CommandBuffer cmdBuff = CommandBuffer(pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    buff.copyToBuff((uint8_t*)testDat, sizeof(testDat));
+    stagingBuff.copyToBuff((uint8_t*)testDat, sizeof(testDat));
 
-   // cmdBuff.begin(nullptr);
+    VkBufferCopy copyReg{};
+    copyReg.size = sizeof(testDat);
 
- //   vkCmdCopyBuffer()
+    cmdBuff.begin(nullptr);
+    vkCmdCopyBuffer(cmdBuff.getCommandBuffer(), stagingBuff.getBuff(), buff.getBuff(), 1, &copyReg);
+    cmdBuff.end();
+
+    VkCommandBuffer cmdBuffRaw = cmdBuff.getCommandBuffer();
+
+    Fence fence = Fence(vulkan.getContext());
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuffRaw;
+
+    VkFence fenceRaw = fence.getFence();
+
+    VK_ERR(vkQueueSubmit(vulkan.getContext().device->getQueue(VK_QUEUE_TRANSFER_BIT), 1, &submitInfo, fence.getFence()));
+    VK_ERR(vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceRaw, VK_TRUE, (uint64_t)-1));
+
     } catch (std::exception e) {
         std::cerr << e.what() << "\n";
     }
