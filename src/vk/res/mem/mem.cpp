@@ -39,7 +39,7 @@ namespace Sierra::vlk {
     void Mem::destroy(Context& context) {
         auto it = allocators.find(context.device->getDevice());
 
-        if (it != allocators.end()) {
+        if (it == allocators.end()) {
             WARN("Trying to destroy a nonexistent VmaAllocator with device " << context.device->getDevice());
             return;
         }
@@ -128,7 +128,7 @@ namespace Sierra::vlk {
     }
 
     Mem::~Mem() {
-        if (buffer)
+        if (buffer) 
             vmaDestroyBuffer(*allocator.getLock(), buffer, allocation);
         else if(image)
             vmaDestroyImage(*allocator.getLock(), image, allocation);
