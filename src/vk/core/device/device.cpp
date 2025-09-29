@@ -6,7 +6,8 @@ const std::vector<const char*> requiredExtensions = {
 
 namespace Sierra::vlk {
 
-    Device::Device(Instance* instance) {
+    Device::Device(Instance* instance): computeQueueFamilyIndex(0), transferQueueFamilyIndex(0), graphicsQueueFamilyIndex(0),
+     transferQueueIndex(0), graphicsQueueIndex(0), computeQueueIndex(0) {
         pickPhysicalDevice(instance);
         createLogicalDevice();
         retrieveQueues();
