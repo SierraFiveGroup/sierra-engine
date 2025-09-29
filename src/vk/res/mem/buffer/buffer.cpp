@@ -15,6 +15,7 @@ namespace Sierra::vlk {
         buffInfo.usage = info.usage;
         buffInfo.queueFamilyIndexCount = info.queueFamilyIndices.size();
         buffInfo.pQueueFamilyIndices = info.queueFamilyIndices.data();
+        buffInfo.size = info.size;
 
         Mem::Info memInfo{};
 
