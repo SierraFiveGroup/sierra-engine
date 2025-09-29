@@ -30,6 +30,8 @@ namespace Sierra::vlk {
             void* map();
             void unmap();
             void copyToBuff(uint8_t* src, size_t srcSize);
+
+            VkBuffer getBuff();
         private:
             void createBuff(Context& context, Info& info);
 

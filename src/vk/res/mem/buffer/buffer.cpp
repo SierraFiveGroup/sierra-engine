@@ -32,6 +32,10 @@ namespace Sierra::vlk {
         return mem.getAllocInfo().size;
     }
 
+    VkBuffer Buffer::getBuff() {
+        return buff;
+    }
+
     void* Buffer::map() {
         if(type != Type::HOST_LOCAL) {
             ERROR("Tried to map non-host memory on buff " << this);
