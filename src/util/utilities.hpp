@@ -42,6 +42,8 @@
 #define COMP(T)
 #endif
 
+#define ENUM_INT(x) (std::to_underlying(x))
+
 #if defined(_WIN32) || defined(_WIN64)
     #ifndef API_EXPORT
     #define API_EXPORT extern "C" __declspec(dllexport)
