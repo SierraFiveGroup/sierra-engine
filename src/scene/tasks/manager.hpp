@@ -18,7 +18,7 @@ namespace Sierra {
             TaskManager(TaskManager&) = delete;
             TaskManager(TaskManager&&) = delete;
 
-            void addTask(Task&& task);
+            void addTask(Task task);
 
             void start();
             bool isFinished();
@@ -26,6 +26,7 @@ namespace Sierra {
             void taskFinishedCallback();
         private:
             void advanceStage();
+            void finish();
 
             std::array<std::vector<Task>, ENUM_INT(Task::Stage::Stage_MAX)> tasks; //to_underlying gets the enum number thingy
 

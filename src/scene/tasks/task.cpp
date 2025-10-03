@@ -5,13 +5,13 @@ namespace Sierra {
 
     }
     
-    Task::Task(Stage stage, std::function<void(std::unique_ptr<uint8_t>, std::function<void()>)> func, std::unique_ptr<uint8_t> dat):
-     func(func), dat(dat.release()), stage(stage) { 
+    Task::Task(Stage stage, std::function<void(std::shared_ptr<uint8_t>, std::function<void()>)> func, std::shared_ptr<uint8_t> dat):
+     func(func), dat(dat), stage(stage) { 
 
     }
 
     std::future<void> Task::execute(std::function<void()> finished) {
-        return std::async(func, std::unique_ptr<uint8_t>(dat.release()), finished);
+        return std::async(func, dat, finished);
     }
 
     bool Task::isRunning() {
@@ -24,24 +24,5 @@ namespace Sierra {
 
     Task::Stage Task::getStage() {
         return stage;
-    }
-
-
-    Task::Task(Task&& other) {
-        dat = std::unique_ptr<uint8_t>(other.dat.release());
-        stage = other.stage;
-        func = other.func;
-
-        other.func = {0};
-        other.stage = Stage::Stage_MAX;
-    }
-
-    void Task::operator=(Task&& other) {
-        dat = std::unique_ptr<uint8_t>(other.dat.release());
-        stage = other.stage;
-        func = other.func;
-
-        other.func = {0};
-        other.stage = Stage::Stage_MAX;
     }
 }

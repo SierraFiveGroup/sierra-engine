@@ -16,24 +16,18 @@ namespace Sierra {
             };
 
             Task();
-            Task(Stage stage, std::function<void(std::unique_ptr<uint8_t>, std::function<void()>)> func, std::unique_ptr<uint8_t> dat);
+            Task(Stage stage, std::function<void(std::shared_ptr<uint8_t>, std::function<void()>)> func, std::shared_ptr<uint8_t> dat);
 
-            Task(Task&) = delete;
-
-            Task(Task&&);
-            void operator=(Task&&);
-
-            
             bool isRunning();
             bool isComplete();
             Stage getStage();
         protected:
             std::future<void> execute(std::function<void()> finished);
         private:
-            std::unique_ptr<uint8_t> dat; // NO TEMPLATES
+            std::shared_ptr<uint8_t> dat; // NO TEMPLATES
             Stage stage;
 
-            std::function<void(std::unique_ptr<uint8_t>, std::function<void()>)> func;
+            std::function<void(std::shared_ptr<uint8_t>, std::function<void()>)> func;
 
     };
     
