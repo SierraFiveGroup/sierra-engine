@@ -10,21 +10,22 @@
 #include "vk/sync/fence/fence.hpp"
 
 #include "scene/tasks/manager.hpp"
+#include "scene/loader/loadable_resource.hpp"
 
 using namespace Sierra;
 using namespace vlk;
 
-void f1(std::unique_ptr<uint8_t>, std::function<void()> f) {
+void f1(std::shared_ptr<void>, std::function<void()> f) {
     std::cerr << "1\n";
     f();
 }
 
-void f2(std::unique_ptr<uint8_t>, std::function<void()> f) {
+void f2(std::shared_ptr<void>, std::function<void()> f) {
     std::cerr << "2\n";
     f();
 }
 
-void f3(std::unique_ptr<uint8_t>, std::function<void()> f) {
+void f3(std::shared_ptr<void>, std::function<void()> f) {
     std::cerr << "3\n";
     f();
 }
@@ -76,15 +77,14 @@ int main() {
     VK_ERR(vkQueueSubmit(vulkan.getContext().device->getQueue(VK_QUEUE_TRANSFER_BIT), 1, &submitInfo, fence.getFence()));
     VK_ERR(vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceRaw, VK_TRUE, (uint64_t)-1));*/
 
-    Task t1 = Task(Task::Stage::LOAD, f1, std::make_unique<uint8_t>());
-    Task t2 = Task(Task::Stage::INIT, f2, std::make_unique<uint8_t>());
-    Task t3 = Task(Task::Stage::UPLOAD, f3, std::make_unique<uint8_t>());
 
     TaskManager manager = TaskManager();
-    manager.addTask(std::move(t1));
-    manager.addTask(std::move(t2));
-    manager.addTask(std::move(t3));
+    LoadableResource res = LoadableResource("LICENSE");
+    manager.addTask(res.getTask());
+    
+    
     manager.start();
+    std::cout << (char*)res.getDat().get().data() << "\n";
 
     while(!manager.isFinished());
 
