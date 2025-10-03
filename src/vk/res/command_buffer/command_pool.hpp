@@ -12,7 +12,9 @@ namespace Sierra::vlk {
             CommandPool(Context& context, uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags);
 
             CommandPool(CommandPool&) = delete;
-            CommandPool(CommandPool&&) = delete;
+
+            CommandPool(CommandPool&&);
+            void operator=(CommandPool&&);
 
             ~CommandPool();
         protected: // meant for the command buffrer

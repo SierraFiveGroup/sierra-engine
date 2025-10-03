@@ -44,8 +44,27 @@ namespace Sierra::vlk {
         return resetCmdBuffer;
     }
 
+    CommandPool::CommandPool(CommandPool&& other) {
+        commandPool = other.commandPool;
+        context = other.context;
+        resetCmdBuffer = other.resetCmdBuffer;
+
+        other.commandPool = VK_NULL_HANDLE;
+        context = nullptr;
+    }
+
+    void CommandPool::operator=(CommandPool&& other) {
+        commandPool = other.commandPool;
+        context = other.context;
+        resetCmdBuffer = other.resetCmdBuffer;
+
+        other.commandPool = VK_NULL_HANDLE;
+        context = nullptr;
+    }
+
     CommandPool::~CommandPool() {
         if (commandPool)
             vkDestroyCommandPool(context->device->getDevice(), commandPool, nullptr);
     }
+
 }
