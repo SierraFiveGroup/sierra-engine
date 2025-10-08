@@ -12,13 +12,14 @@ namespace Sierra {
                 INIT, // init all the resources
                 UPLOAD, // copying them onto API specific buffers and such
                 HOT_LOAD, // do something right fucking now
-                Stage_MAX = HOT_LOAD
+                Stage_MAX 
             };
 
             Task();
-            Task(Stage stage, std::function<void(std::shared_ptr<uint8_t>, std::function<void()>)> func, std::shared_ptr<uint8_t> dat);
+            Task(Stage stage, uint64_t id, std::function<void(std::shared_ptr<uint8_t>)> func, std::shared_ptr<uint8_t> dat);
 
-            bool isRunning();
+            void setOnCompleteCallback(std::function<void(Task task)> callback);
+
             bool isComplete();
             Stage getStage();
         protected:
@@ -26,8 +27,13 @@ namespace Sierra {
         private:
             std::shared_ptr<uint8_t> dat; // NO TEMPLATES
             Stage stage;
+            uint64_t id;
 
-            std::function<void(std::shared_ptr<uint8_t>, std::function<void()>)> func;
+            std::function<void(std::shared_ptr<uint8_t>)> func;
+            std::function<void(Task task)> callback;
+
+            static void funcWrapper(std::function<void(std::shared_ptr<uint8_t>)> func, std::shared_ptr<uint8_t> dat,
+             std::function<void()> finished, Task task,  std::function<void(Task task)> callback);
 
     };
     

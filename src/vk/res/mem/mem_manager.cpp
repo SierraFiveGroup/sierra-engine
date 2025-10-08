@@ -1,8 +1,8 @@
 #include "mem_manager.hpp"
 
 namespace Sierra::vlk {
-    MemoryManager::MemoryManager(Context& context): asyncDat(std::make_shared<AsyncDat>()),
-     task(Task::Stage::UPLOAD, &MemoryManager::asyncTransfer, std::reinterpret_pointer_cast<uint8_t>(asyncDat)) {
+    MemoryManager::MemoryManager(Context& context): context(&context), asyncDat(std::make_shared<AsyncDat>()),
+     task(Task::Stage::UPLOAD, 0, &MemoryManager::asyncTransfer, std::reinterpret_pointer_cast<uint8_t>(asyncDat)) {
         asyncDatMutex = std::make_shared<std::mutex>();
 
         cmdPool = CommandPool(context, context.device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
@@ -11,6 +11,7 @@ namespace Sierra::vlk {
         asyncDat->cmdBuf = &cmdBuf;
         asyncDat->context = &context;
         asyncDat->mutex = asyncDatMutex;
+        asyncDat->transferOps = &transferOps;
     }
 
     void MemoryManager::addTransferOp(TransferOp op) {
@@ -18,7 +19,7 @@ namespace Sierra::vlk {
         transferOps.push_back(op);
     }
 
-    void MemoryManager::asyncTransfer(std::shared_ptr<uint8_t> asyncDat, std::function<void()> finish) {
+    void MemoryManager::asyncTransfer(std::shared_ptr<uint8_t> asyncDat) {
         AsyncDat& dat = *(AsyncDat*)asyncDat.get();
 
         dat.cmdBuf->begin(nullptr);
@@ -68,7 +69,16 @@ namespace Sierra::vlk {
         VkFence fenceHandle = fence.getFence();
 
         vkWaitForFences(dat.context->device->getDevice(), 1, &fenceHandle, VK_TRUE, (uint64_t)-1);
+
+        for (TransferOp& op : *dat.transferOps) {
+            op.callback(op);
+        }
     }
+
+    Task MemoryManager::getTask() {
+        return task;
+    }
+
 
     MemoryManager::MemoryManager(MemoryManager&& other) {
         std::lock_guard lock(*asyncDatMutex);

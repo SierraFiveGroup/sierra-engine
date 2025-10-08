@@ -5,7 +5,9 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "vk/res/mem/buffer/buffer.hpp"
 #include "vk/res/command_buffer/command_buffer.hpp"
+
 #include "vk/core/context.hpp"
 #include "vk/sync/fence/fence.hpp"
 
@@ -29,6 +31,9 @@ namespace Sierra::vlk {
             
                 VkBuffer buffer;
                 VkImage image;
+
+                std::function<void(TransferOp)> callback;
+                void* userDat;
             };
 
             MemoryManager(Context& context);
@@ -38,10 +43,11 @@ namespace Sierra::vlk {
             MemoryManager(MemoryManager&&); 
             void operator=(MemoryManager&&);
 
+
             void addTransferOp(TransferOp op);
 
-        protected:
             Task getTask();
+        protected:
         private:
             struct AsyncDat {
                 Context* context;
@@ -52,15 +58,18 @@ namespace Sierra::vlk {
                 CommandBuffer* cmdBuf;
             };
 
-            static void asyncTransfer(std::shared_ptr<uint8_t> asyncDat, std::function<void()> finish);
+            static void asyncTransfer(std::shared_ptr<uint8_t> asyncDat);
 
             std::vector<TransferOp> transferOps;
 
             CommandPool cmdPool;
             CommandBuffer cmdBuf;
 
-            Task task;
             std::shared_ptr<AsyncDat> asyncDat;
             std::shared_ptr<std::mutex> asyncDatMutex;
+
+            Task task;
+            
+            Context* context;
     };
 }

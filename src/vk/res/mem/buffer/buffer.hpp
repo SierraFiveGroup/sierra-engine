@@ -15,11 +15,20 @@ namespace Sierra::vlk {
                 HOST_LOCAL
             };
 
+            enum class Usage {
+                NONE,
+                UNIFORM,
+                STORAGE,
+                INDEX,
+                VERTEX
+            };
+
             struct Info {
-                VkDeviceSize size;
-                VkBufferUsageFlags usage;
-                std::vector<uint32_t> queueFamilyIndices;
                 Type type;
+                Usage usage;
+                VkDeviceSize size;
+                VkBufferUsageFlags additionalUsageFlags;
+                std::vector<uint32_t> queueFamilyIndices;
             };
 
             Buffer();

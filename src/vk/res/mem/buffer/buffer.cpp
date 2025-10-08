@@ -12,7 +12,7 @@ namespace Sierra::vlk {
     void Buffer::createBuff(Context& context, Info& info) {
         VkBufferCreateInfo buffInfo{};
         buffInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        buffInfo.usage = info.usage;
+        buffInfo.usage = info.additionalUsageFlags;
         buffInfo.queueFamilyIndexCount = info.queueFamilyIndices.size();
         buffInfo.pQueueFamilyIndices = info.queueFamilyIndices.data();
         buffInfo.size = info.size;
@@ -23,7 +23,25 @@ namespace Sierra::vlk {
             memInfo.preferred = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         else
             memInfo.preferred = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            
+
+        switch(info.usage) {
+            case Usage::NONE:
+                break;
+            case Usage::UNIFORM:
+                buffInfo.usage |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+                break;
+            case Usage::STORAGE:
+                buffInfo.usage |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+                break;
+            case Usage::INDEX:
+                buffInfo.usage |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+                break;
+            case Usage::VERTEX:
+                buffInfo.usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+                break;
+            default:
+                throw new std::runtime_error("Forgot to implement");
+        }
 
         mem = Mem(context, memInfo, buffInfo, buff);
     }

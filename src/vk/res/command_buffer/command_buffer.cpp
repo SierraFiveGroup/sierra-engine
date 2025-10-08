@@ -36,6 +36,7 @@ namespace Sierra::vlk {
     CommandBuffer::CommandBuffer(CommandBuffer&& other) {
         buffer = other.buffer;
         level = other.level;
+        pool = other.pool;
         
         other.buffer = VK_NULL_HANDLE;
     }
@@ -43,6 +44,7 @@ namespace Sierra::vlk {
     void CommandBuffer::operator=(CommandBuffer&& other) {
         buffer = other.buffer;
         level = other.level;
+        pool = other.pool;
         
         other.buffer = VK_NULL_HANDLE;
     }

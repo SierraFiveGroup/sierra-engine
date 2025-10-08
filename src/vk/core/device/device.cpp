@@ -7,7 +7,7 @@ const std::vector<const char*> requiredExtensions = {
 namespace Sierra::vlk {
 
     Device::Device(Instance* instance): computeQueueFamilyIndex(0), transferQueueFamilyIndex(0), graphicsQueueFamilyIndex(0),
-     transferQueueIndex(0), graphicsQueueIndex(0), computeQueueIndex(0) {
+     transferQueueIndex(0), graphicsQueueIndex(0), computeQueueIndex(0), dedicated(false) {
         pickPhysicalDevice(instance);
         createLogicalDevice();
         retrieveQueues();
@@ -29,7 +29,11 @@ namespace Sierra::vlk {
 
             vkGetPhysicalDeviceProperties(dev, &properties);
 
-            if(properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) physicalDevice = dev; 
+            if(properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+                physicalDevice = dev; 
+                dedicated = true;
+                break;
+            } 
         }
     }
 
@@ -187,6 +191,10 @@ namespace Sierra::vlk {
         }
 
         return requiredExtensions;
+    }
+    
+    bool Device::isDedicated() {
+        return dedicated;
     }
 
     VkPhysicalDevice Device::getPhysicalDevice() {

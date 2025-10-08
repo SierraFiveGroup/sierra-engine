@@ -14,6 +14,11 @@ namespace Sierra {
         currentStage = Task::Stage::LOAD;
         finished = false;
 
+        if (!tasksRemaining) {
+            advanceStage();
+            return;
+        }
+
         for (Task& task : tasks[ENUM_INT(currentStage)]) {
             task.execute(std::bind(&TaskManager::taskFinishedCallback, this));
         }
@@ -44,13 +49,18 @@ namespace Sierra {
 
         currentStage = (Task::Stage)(ENUM_INT(currentStage) + 1);
         
-        if(currentStage == Task::Stage::HOT_LOAD || 
+        if(currentStage == Task::Stage::HOT_LOAD && 
             tasks[ENUM_INT(currentStage)].empty()) {
                 finish();
                 return;
         }
         
         tasksRemaining = tasks[ENUM_INT(currentStage)].size();
+
+        if(!tasksRemaining) {
+            advanceStage();
+            return;
+        }
 
         for (Task& task : tasks[ENUM_INT(currentStage)]) {
             task.execute(std::bind(&TaskManager::taskFinishedCallback, this));

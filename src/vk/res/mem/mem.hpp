@@ -17,17 +17,7 @@ namespace Sierra::vlk {
         friend class Image;
 
         public:
-            static uint32_t ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-            static uint32_t ALLOCATION_CREATE_NEVER_ALLOCATE_BIT;
-            static uint32_t ALLOCATION_CREATE_MAPPED_BIT;
-            static uint32_t ALLOCATION_CREATE_WITHIN_BUDGET_BIT;
-            static uint32_t ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-            static uint32_t ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
-            static uint32_t ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT;
-            static uint32_t ALLOCATION_CREATE_STRATEGY_MIN_MEMORY_BIT;
-            static uint32_t ALLOCATION_CREATE_STRATEGY_MIN_TIME_BIT;
-
-            enum class Usage {
+            enum class Type {
                 AUTO,
                 PREFER_DEVICE,
                 PREFER_HOST,
@@ -35,7 +25,7 @@ namespace Sierra::vlk {
 
             struct Info {
                 size_t flags;
-                Usage usage;
+                Type type;
                 VkMemoryPropertyFlags required;
                 VkMemoryPropertyFlags preferred;
                 float priority;

@@ -15,17 +15,6 @@ namespace Sierra::vlk {
         return it->second;
     }
 
-
-    uint32_t Mem::ALLOCATION_CREATE_DEDICATED_MEMORY_BIT = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_NEVER_ALLOCATE_BIT = VMA_ALLOCATION_CREATE_NEVER_ALLOCATE_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_MAPPED_BIT = VMA_ALLOCATION_CREATE_MAPPED_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_WITHIN_BUDGET_BIT = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT = VMA_ALLOCATION_CREATE_HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_STRATEGY_MIN_MEMORY_BIT = VMA_ALLOCATION_CREATE_STRATEGY_MIN_MEMORY_BIT;
-    uint32_t Mem::ALLOCATION_CREATE_STRATEGY_MIN_TIME_BIT = VMA_ALLOCATION_CREATE_STRATEGY_MIN_TIME_BIT;
-
     void Mem::init(Context& context) {
         if (allocators.find(context.device->getDevice()) != allocators.end()) {
             WARN("Trying to create a preexistent VmaAllocator with device " << context.device->getDevice());
@@ -87,7 +76,7 @@ namespace Sierra::vlk {
         allocInfo.requiredFlags = info.required;
         allocInfo.preferredFlags = info.preferred;
         allocInfo.priority = info.priority;
-        allocInfo.usage = (VmaMemoryUsage)info.usage;
+        allocInfo.usage = (VmaMemoryUsage)info.type;
 
         VK_ERR(vmaCreateBuffer(*allocator.getLock(), &bufferInfo, &allocInfo, &buffer, &allocation, nullptr));
     }
@@ -98,7 +87,7 @@ namespace Sierra::vlk {
         allocInfo.requiredFlags = info.required;
         allocInfo.preferredFlags = info.preferred;
         allocInfo.priority = info.priority;
-        allocInfo.usage = (VmaMemoryUsage)info.usage;
+        allocInfo.usage = (VmaMemoryUsage)info.type;
 
         VK_ERR(vmaCreateImage(*allocator.getLock(), &imageInfo, &allocInfo, &image, &allocation, nullptr));
     }

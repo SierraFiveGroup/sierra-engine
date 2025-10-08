@@ -7,10 +7,10 @@ namespace Sierra {
         dat->filePath = resourcePath;
         dat->contents = {};
 
-        task = Task(Task::Stage::LOAD, &LoadableResource::asyncLoad, std::reinterpret_pointer_cast<uint8_t>(dat));
+        task = Task(Task::Stage::LOAD, 0, &LoadableResource::asyncLoad, std::reinterpret_pointer_cast<uint8_t>(dat));
     }
 
-    void LoadableResource::asyncLoad(std::shared_ptr<void> asyncDat, std::function<void()> finished) {
+    void LoadableResource::asyncLoad(std::shared_ptr<void> asyncDat) {
         AsyncDat& dat = *(AsyncDat*)asyncDat.get();
 
         std::ifstream stream(dat.filePath, std::ios::binary | std::ios::ate); 
@@ -22,8 +22,6 @@ namespace Sierra {
         stream.read((char*)fileDat.data(), fileSize);
 
         dat.contents.set_value(std::move(fileDat));
-
-        finished();
     }
 
     std::future<std::vector<uint8_t>> LoadableResource::getDat() {

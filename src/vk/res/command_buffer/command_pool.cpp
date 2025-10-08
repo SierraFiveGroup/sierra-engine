@@ -50,7 +50,7 @@ namespace Sierra::vlk {
         resetCmdBuffer = other.resetCmdBuffer;
 
         other.commandPool = VK_NULL_HANDLE;
-        context = nullptr;
+        other.context = nullptr;
     }
 
     void CommandPool::operator=(CommandPool&& other) {
@@ -59,7 +59,7 @@ namespace Sierra::vlk {
         resetCmdBuffer = other.resetCmdBuffer;
 
         other.commandPool = VK_NULL_HANDLE;
-        context = nullptr;
+        other.context = nullptr;
     }
 
     CommandPool::~CommandPool() {

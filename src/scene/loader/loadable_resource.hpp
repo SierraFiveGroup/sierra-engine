@@ -19,9 +19,8 @@ namespace Sierra {
                 std::string filePath;
             };
 
-            
         private:
-            static void asyncLoad(std::shared_ptr<void> asyncDat, std::function<void()> finished);
+            static void asyncLoad(std::shared_ptr<void> asyncDat);
             
             std::shared_ptr<AsyncDat> dat;
             Task task;

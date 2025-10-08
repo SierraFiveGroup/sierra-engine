@@ -20,6 +20,8 @@ namespace Sierra::vlk {
             VkPhysicalDevice getPhysicalDevice();
             VkDevice getDevice();
 
+            bool isDedicated();
+
             ~Device();
         private:
 
@@ -29,6 +31,8 @@ namespace Sierra::vlk {
             void retrieveQueues();
 
             std::vector<const char*> getExtensions();
+
+            bool dedicated;
 
             std::vector<VkQueue> computeQueues;
             std::vector<VkQueue> graphicsQueues;
