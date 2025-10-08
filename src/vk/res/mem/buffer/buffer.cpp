@@ -10,11 +10,14 @@ namespace Sierra::vlk {
     }
 
     void Buffer::createBuff(Context& context, Info& info) {
+        VK_ASSERT(!info.queueFamilyIndices.empty())
+
         VkBufferCreateInfo buffInfo{};
         buffInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         buffInfo.usage = info.additionalUsageFlags;
         buffInfo.queueFamilyIndexCount = info.queueFamilyIndices.size();
         buffInfo.pQueueFamilyIndices = info.queueFamilyIndices.data();
+        buffInfo.sharingMode = info.queueFamilyIndices.size() == 1 ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
         buffInfo.size = info.size;
 
         Mem::Info memInfo{};
