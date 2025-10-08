@@ -7,6 +7,7 @@
 #include "vk/res/command_buffer/command_pool.hpp"
 #include "vk/res/command_buffer/command_buffer.hpp"
 #include "vk/res/mem/buffer/buffer.hpp"
+#include "vk/res/mem/mem_loader.hpp"
 #include "vk/sync/fence/fence.hpp"
 
 #include "scene/tasks/manager.hpp"
@@ -14,79 +15,29 @@
 
 using namespace Sierra;
 using namespace vlk;
-
-void f1(std::shared_ptr<void>, std::function<void()> f) {
-    std::cerr << "1\n";
-    f();
-}
-
-void f2(std::shared_ptr<void>, std::function<void()> f) {
-    std::cerr << "2\n";
-    f();
-}
-
-void f3(std::shared_ptr<void>, std::function<void()> f) {
-    std::cerr << "3\n";
-    f();
-}
-
 int main() {    
     
     try{
-    /*
+    
     Window window = Window("hehe", {1280, 720});
     Vulkan vulkan = Vulkan(window);
 
-    std::vector<uint32_t> transferFamilyIndex = {vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT)};
-    char testDat[] = {1, 2, 3};
+    TaskManager taskManager = TaskManager();
+    MemLoader loader = MemLoader(vulkan.getContext());
+    MemoryManager memManager = MemoryManager(vulkan.getContext());
 
-    Buffer::Info buffInfo{};
-    buffInfo.queueFamilyIndices = transferFamilyIndex;
-    buffInfo.size = sizeof(testDat);
-    buffInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    buffInfo.type = Buffer::Type::HOST_LOCAL;
+    uint8_t dat[] = {1, 2, 3, 4, 5};
 
-    Buffer stagingBuff = Buffer(vulkan.getContext(), buffInfo);
+    std::future<Buffer> devBuff = loader.memToBuff(&memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::VERTEX, dat, sizeof(dat));
 
-    buffInfo.type = Buffer::Type::DEVICE_LOCAL;
-    Buffer buff = Buffer(vulkan.getContext(), buffInfo);
+    taskManager.addTask(memManager.getTask());
+    taskManager.start();
 
-    CommandPool pool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT), 0);
-    CommandBuffer cmdBuff = CommandBuffer(pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    devBuff.get();
 
-    stagingBuff.copyToBuff((uint8_t*)testDat, sizeof(testDat));
-
-    VkBufferCopy copyReg{};
-    copyReg.size = sizeof(testDat);
-
-    cmdBuff.begin(nullptr);
-    vkCmdCopyBuffer(cmdBuff.getCommandBuffer(), stagingBuff.getBuff(), buff.getBuff(), 1, &copyReg);
-    cmdBuff.end();
-
-    VkCommandBuffer cmdBuffRaw = cmdBuff.getCommandBuffer();
-
-    Fence fence = Fence(vulkan.getContext());
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmdBuffRaw;
-
-    VkFence fenceRaw = fence.getFence();
-
-    VK_ERR(vkQueueSubmit(vulkan.getContext().device->getQueue(VK_QUEUE_TRANSFER_BIT), 1, &submitInfo, fence.getFence()));
-    VK_ERR(vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceRaw, VK_TRUE, (uint64_t)-1));*/
+    while(!taskManager.isFinished());
 
 
-    TaskManager manager = TaskManager();
-    LoadableResource res = LoadableResource("LICENSE");
-    manager.addTask(res.getTask());
-    
-    
-    manager.start();
-    std::cout << (char*)res.getDat().get().data() << "\n";
-
-    while(!manager.isFinished());
 
     } catch (std::exception e) {
         std::cerr << e.what() << "\n";
