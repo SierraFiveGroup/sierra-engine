@@ -139,6 +139,9 @@ namespace Sierra::vlk {
                 computeQueueFamilyIndex = i;
             }
         }
+
+        if(!transferQueueFamilyIndex) transferQueueFamilyIndex = graphicsQueueFamilyIndex;
+        if(!computeQueueFamilyIndex) computeQueueFamilyIndex = graphicsQueueFamilyIndex;
     }
 
     VkQueue Device::getQueue(VkQueueFlags queueType) {

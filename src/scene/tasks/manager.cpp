@@ -9,6 +9,12 @@ namespace Sierra {
         tasks[ENUM_INT(task.getStage())].push_back(task);
     }
 
+    void TaskManager::addTasks(std::vector<Task>&& tasks) {
+        for(Task& task : tasks) {
+            addTask(task);
+        }
+    }
+
     void TaskManager::start() { // TODO handle starting mid execution
         tasksRemaining = tasks[ENUM_INT(Task::Stage::LOAD)].size();
         currentStage = Task::Stage::LOAD;

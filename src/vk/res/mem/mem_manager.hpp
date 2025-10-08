@@ -36,6 +36,16 @@ namespace Sierra::vlk {
                 void* userDat;
             };
 
+            struct TransitionLayoutOp {
+                VkImage image;
+
+                VkImageLayout oldLayout;
+                VkImageLayout newLayout;
+
+                std::function<void(TransitionLayoutOp)> callback;
+                void* userDat;
+            };
+
             MemoryManager(Context& context);
 
             MemoryManager(MemoryManager&) = delete;
@@ -45,11 +55,12 @@ namespace Sierra::vlk {
 
 
             void addTransferOp(TransferOp op);
+            void addTransitionLayoutOp(TransitionLayoutOp op);
 
-            Task getTask();
+            std::vector<Task> getTasks();
         protected:
         private:
-            struct AsyncDat {
+            struct AsyncTransferDat {
                 Context* context;
 
                 std::shared_ptr<std::mutex> mutex;
@@ -58,17 +69,32 @@ namespace Sierra::vlk {
                 CommandBuffer* cmdBuf;
             };
 
+            struct AsyncTransitionDat {
+                Context* context;
+
+                std::shared_ptr<std::mutex> mutex;
+
+                std::vector<TransitionLayoutOp>* transitionOps;
+                CommandBuffer* cmdBuf;
+            };
+
             static void asyncTransfer(std::shared_ptr<uint8_t> asyncDat);
+            static void asyncTransition(std::shared_ptr<uint8_t> asyncDat);
 
             std::vector<TransferOp> transferOps;
+            std::vector<TransitionLayoutOp> transitionOps;
 
             CommandPool cmdPool;
-            CommandBuffer cmdBuf;
+            CommandBuffer transferCmdBuf;
+            CommandBuffer transitionCmdBuf;
 
-            std::shared_ptr<AsyncDat> asyncDat;
-            std::shared_ptr<std::mutex> asyncDatMutex;
+            std::shared_ptr<AsyncTransferDat> transferDat;
+            std::shared_ptr<AsyncTransitionDat> transitionDat;
+            std::shared_ptr<std::mutex> transferDatMutex;
+            std::shared_ptr<std::mutex> transitionDatMutex;
 
-            Task task;
+            Task transferTask;
+            Task transitionTask;
             
             Context* context;
     };

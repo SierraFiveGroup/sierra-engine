@@ -7,6 +7,7 @@
 #include "vk/res/command_buffer/command_pool.hpp"
 #include "vk/res/command_buffer/command_buffer.hpp"
 #include "vk/res/mem/buffer/buffer.hpp"
+#include "vk/res/mem/image/image.hpp"
 #include "vk/res/mem/mem_loader.hpp"
 #include "vk/sync/fence/fence.hpp"
 
@@ -28,16 +29,26 @@ int main() {
 
     uint8_t dat[] = {1, 2, 3, 4, 5};
 
-    std::future<Buffer> devBuff = loader.memToBuff(&memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::VERTEX, dat, sizeof(dat));
+    std::future<Buffer> devBuff = loader.createBuff(&memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::VERTEX, dat, sizeof(dat));
 
-    taskManager.addTask(memManager.getTask());
+    Image::Info imageInfo{};
+    imageInfo.extent = {100, 100, 1};
+    imageInfo.format = VK_FORMAT_R8_UINT;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    imageInfo.mipLevels = 1;
+    imageInfo.queueFamilyIndices = {vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT)};
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.type = Mem::Type::PREFER_DEVICE;
+    imageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    Image image = Image(vulkan.getContext(), memManager, imageInfo);
+
+    taskManager.addTasks(memManager.getTasks());
     taskManager.start();
 
-    devBuff.get();
-
     while(!taskManager.isFinished());
-
-
 
     } catch (std::exception e) {
         std::cerr << e.what() << "\n";

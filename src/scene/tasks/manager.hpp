@@ -19,6 +19,7 @@ namespace Sierra {
             TaskManager(TaskManager&&) = delete;
 
             void addTask(Task task);
+            void addTasks(std::vector<Task>&& tasks);
 
             void start();
             bool isFinished();
