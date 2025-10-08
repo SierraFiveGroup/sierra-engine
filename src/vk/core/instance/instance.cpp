@@ -38,7 +38,7 @@ namespace Sierra::vlk {
     Instance::Instance() {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.apiVersion = VK_MAKE_API_VERSION(1, 3, 0, 0);
+        appInfo.apiVersion = VK_MAKE_API_VERSION(1, 4, 0, 0);
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
         appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 0);
         appInfo.pApplicationName = "test app"; // todo make customizable
