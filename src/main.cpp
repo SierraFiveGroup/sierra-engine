@@ -14,10 +14,14 @@
 #include "scene/tasks/manager.hpp"
 #include "scene/loader/loadable_resource.hpp"
 
+#include "io/panic/panic_handler.hpp"
+
 using namespace Sierra;
 using namespace vlk;
 int main() {    
-    
+    //set up panic handler
+    PanicHandler::init();
+
     try{
     
     Window window = Window("hehe", {1280, 720});
