@@ -22,7 +22,7 @@ MessageCallback( GLenum source,
            break;
         case GL_DEBUG_SEVERITY_HIGH:
            ERROR(message); 
-           throw new std::runtime_error("problem izkusenj");
+           throw std::runtime_error("problem izkusenj");
            break;
     }
 }
@@ -54,7 +54,7 @@ namespace Sierra {
         glfwWin = glfwCreateWindow(resolution.w, resolution.h, name.c_str(), nullptr, nullptr);
     
         if ( glfwWin == nullptr ) {
-            throw new std::runtime_error("Failed to create new GLFW window");
+            throw std::runtime_error("Failed to create new GLFW window");
         }
 
         glfwMakeContextCurrent(glfwWin);
@@ -71,7 +71,7 @@ namespace Sierra {
 #endif
 
         if ( glfwInit() == GLFW_FALSE ) {
-            throw new std::runtime_error("Failed to init GLFW");
+            throw std::runtime_error("Failed to init GLFW");
         }
     
         //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -85,7 +85,7 @@ namespace Sierra {
     
     void Window::initGLAD() {
         if ( !gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) ) {
-            throw new std::runtime_error("Failed to init GLAD, womp womp");
+            throw std::runtime_error("Failed to init GLAD, womp womp");
         }
 
         glViewport(0, 0, resolution.w, resolution.h);

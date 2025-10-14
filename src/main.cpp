@@ -31,30 +31,23 @@ int main() {
     MemLoader loader = MemLoader(vulkan.getContext());
     MemoryManager memManager = MemoryManager(vulkan.getContext());
 
-    uint8_t dat[] = {1, 2, 3, 4, 5};
+    uint8_t dat[] = {1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5};
 
-    std::future<Buffer> devBuff = loader.createBuff(&memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::VERTEX, dat, sizeof(dat));
+    std::future<Buffer> devBuff = loader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::VERTEX, dat, sizeof(dat));
 
-    Image::Info imageInfo{};
-    imageInfo.extent = {100, 100, 1};
-    imageInfo.format = VK_FORMAT_R8_UINT;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    imageInfo.mipLevels = 1;
-    imageInfo.queueFamilyIndices = {vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT)};
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageInfo.type = Mem::Type::PREFER_DEVICE;
-    imageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    MemLoader::ImageInfo imageInfo{};
+    imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    imageInfo.extent = {5, 1, 1};
+    imageInfo.layout = VK_IMAGE_LAYOUT_GENERAL;
 
-    Image image = Image(vulkan.getContext(), memManager, imageInfo);
+    std::future<Image> img = loader.createImage(memManager, imageInfo, dat, sizeof(dat));
 
     taskManager.addTasks(memManager.getTasks());
     taskManager.start();
 
     while(!taskManager.isFinished());
 
-    } catch (std::exception e) {
+    } catch (std::runtime_error e) {
         std::cerr << e.what() << "\n";
     }
 

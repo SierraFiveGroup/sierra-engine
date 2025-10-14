@@ -9,7 +9,7 @@ namespace Sierra::vlk {
     ResourceRef<VmaAllocator> getAllocator(Context& context) {
         auto it = allocators.find(context.device->getDevice());
         if (it == allocators.end()) {
-            throw new std::runtime_error("Tried to allocate memory from nonexistent allocator");
+            throw std::runtime_error("Tried to allocate memory from nonexistent allocator");
         }
 
         return it->second;

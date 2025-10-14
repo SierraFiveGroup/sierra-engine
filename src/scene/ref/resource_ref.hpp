@@ -27,7 +27,7 @@ namespace Sierra {
 
             T* operator->() const {
                 if (isEmpty()) 
-                    throw new std::runtime_error("Tried to access an empty component");
+                    throw std::runtime_error("Tried to access an empty component");
 
                 if (rawPtr)
                     return rawPtr;
@@ -41,10 +41,10 @@ namespace Sierra {
 
             std::shared_ptr<T> getLock() {
                 if (isEmpty()) 
-                    throw new std::runtime_error("Tried to access an empty component");
+                    throw std::runtime_error("Tried to access an empty component");
                 
                 if (rawPtr) 
-                    throw new std::runtime_error("Tried to access a reference with a raw handle");
+                    throw std::runtime_error("Tried to access a reference with a raw handle");
                 
 
                 return weakPtr.lock();
@@ -52,20 +52,20 @@ namespace Sierra {
 
             std::weak_ptr<T> getSmartPtr() {
                 if (isEmpty()) 
-                    throw new std::runtime_error("Tried to access an empty component");
+                    throw std::runtime_error("Tried to access an empty component");
                 
                 if (rawPtr)
-                    throw new std::runtime_error("Tried to access a reference with a raw handle");
+                    throw std::runtime_error("Tried to access a reference with a raw handle");
 
                 return weakPtr;
             }
 
             T* getRawPtr() {
                 if (isEmpty()) 
-                    throw new std::runtime_error("Tried to access an empty component");
+                    throw std::runtime_error("Tried to access an empty component");
                 
                 if (weakPtr.use_count() == 0)
-                    throw new std::runtime_error("Tried to access a reference with a smart ptr handle");
+                    throw std::runtime_error("Tried to access a reference with a smart ptr handle");
 
                 return rawPtr;
             }

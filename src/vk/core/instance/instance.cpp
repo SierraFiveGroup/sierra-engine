@@ -24,7 +24,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         LOG(pCallbackData->pMessage);
 
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-        throw new std::runtime_error("Severe validation error, aborting");
+        throw std::runtime_error("Severe validation error, aborting");
 
     return VK_FALSE;
 }

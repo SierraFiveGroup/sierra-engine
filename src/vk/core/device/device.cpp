@@ -21,7 +21,7 @@ namespace Sierra::vlk {
         physicalDevices.resize(devCount);
         vkEnumeratePhysicalDevices(instance->getInstance(), &devCount, physicalDevices.data());
 
-        if (!devCount) throw new std::runtime_error("No physical devices(GPUs) found");
+        if (!devCount) throw std::runtime_error("No physical devices(GPUs) found");
         
         physicalDevice = physicalDevices.front(); // if we dont find a dedicated gpu we'll still have something 
         for(VkPhysicalDevice dev : physicalDevices) {
@@ -189,7 +189,7 @@ namespace Sierra::vlk {
             }
 
             if (!found){
-                throw new std::runtime_error("Not all required device extensions found");
+                throw std::runtime_error("Not all required device extensions found");
             }
         }
 

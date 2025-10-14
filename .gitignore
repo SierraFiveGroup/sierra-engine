@@ -10,3 +10,4 @@ shell.nix
 build/
 perf*
 /engine
+panic_dump.txt

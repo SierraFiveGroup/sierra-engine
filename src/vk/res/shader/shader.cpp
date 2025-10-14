@@ -34,7 +34,7 @@ namespace Sierra::vlk {
             char strBuff[128];
             snprintf(strBuff, sizeof(strBuff), "Failed to open a shader module for reading %s", path.c_str());
 
-            throw new std::runtime_error(strBuff);
+            throw std::runtime_error(strBuff);
         }
 
         buff.resize(stream.tellg());
@@ -136,7 +136,7 @@ namespace Sierra::vlk {
 
     std::vector<VkDescriptorSetLayoutBinding> Shader::getDescriptorBindings() {
         //TODO
-        throw new std::runtime_error("TODO implement");
+        throw std::runtime_error("TODO implement");
     }
 
     std::vector<Descriptor>& Shader::getDescriptors() {

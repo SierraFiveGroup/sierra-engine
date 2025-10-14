@@ -43,7 +43,7 @@ namespace Sierra::vlk {
                 buffInfo.usage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
                 break;
             default:
-                throw new std::runtime_error("Forgot to implement");
+                throw std::runtime_error("Forgot to implement");
         }
 
         mem = Mem(context, memInfo, buffInfo, buff);
@@ -81,7 +81,7 @@ namespace Sierra::vlk {
                 mem.copyToHost(src, srcSize);
                 break;
             case Type::DEVICE_LOCAL:
-                throw new std::runtime_error("UNIMPLEMENTED");
+                throw std::runtime_error("UNIMPLEMENTED");
         }
     }
 }

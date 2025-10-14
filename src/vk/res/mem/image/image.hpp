@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include <unordered_map>
 #include <memory>
@@ -20,7 +20,7 @@ namespace Sierra::vlk {
                 VkSampleCountFlagBits samples;
                 std::vector<uint32_t> queueFamilyIndices;
                 VkImageLayout layout; // todo automatically handle layout transitions??
-                VkImageUsageFlagBits usage;
+                VkImageUsageFlags usage;
 
                 Mem::Type type;
             };

@@ -2,11 +2,11 @@
 
 namespace Sierra::vlk {
 
-    MemLoader::MemLoader(): context(nullptr), selfPtr(std::make_shared<MemLoader*>(this)), stagingBuffers(), bufferPromises() {
+    MemLoader::MemLoader(): context(nullptr), selfPtr(std::make_shared<MemLoader*>(this)), stagingBuffers(), transferPromises() {
 
     }
 
-    MemLoader::MemLoader(Context& context): context(&context), selfPtr(std::make_shared<MemLoader*>(this)), stagingBuffers(), bufferPromises() {
+    MemLoader::MemLoader(Context& context): context(&context), selfPtr(std::make_shared<MemLoader*>(this)), stagingBuffers(), transferPromises() {
 
     }
 
@@ -21,7 +21,7 @@ namespace Sierra::vlk {
             return createBuffDevice(manager, usage, dat, size);
         }
 
-        throw new std::runtime_error("UNREACHABLE");
+        throw std::runtime_error("UNREACHABLE");
     }
 
     Buffer MemLoader::createBuffHost(Buffer::Usage usage, uint8_t* dat, size_t size) {
@@ -65,11 +65,17 @@ namespace Sierra::vlk {
 
         manager.addTransferOp(op);
 
-        std::shared_ptr<std::promise<Buffer>> promise = std::make_shared<std::promise<Buffer>>();
+        OpRes res{};
+        res.stagingBuff = std::move(stagingBuff);
+        res.buffer = std::move(buffer);
 
-        bufferPromises[buffer.getBuff()] = {{std::move(stagingBuff), std::move(buffer) }, promise};
+        OpPromise promise{};
+        promise.bufferPromise = std::make_shared<std::promise<Buffer>>();
 
-        return promise->get_future();
+        transferPromises[(size_t)res.stagingBuff.getBuff()] =
+         {std::move(res), promise};
+
+        return promise.bufferPromise.value()->get_future();
     }
 
     std::future<Image> MemLoader::createImage(MemoryManager& manager, ImageInfo info, uint8_t* dat, size_t size) {
@@ -85,7 +91,7 @@ namespace Sierra::vlk {
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageInfo.queueFamilyIndices = queueFamilyIndices;
         imageInfo.layout = info.layout;
-        imageInfo.usage = info.usage;
+        imageInfo.usage = info.usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         imageInfo.type = Mem::Type::PREFER_DEVICE;
 
         Image image = Image(*context, manager, imageInfo);
@@ -101,12 +107,10 @@ namespace Sierra::vlk {
         stagingBuff.copyToBuff(dat, size);
 
         VkImageSubresourceLayers layers{};
-        if (imageInfo.usage == VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-            layers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        else if (imageInfo.usage == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+        if (imageInfo.usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
             layers.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT; // TODO correct?
         else
-            throw new std::runtime_error("Image usage transfer not supported");
+            layers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         layers.layerCount = 1;
 
         MemoryManager::TransferOp op{};
@@ -122,22 +126,35 @@ namespace Sierra::vlk {
 
         manager.addTransferOp(op);
 
-        std::shared_ptr<std::promise<Image>> promise = std::make_shared<std::promise<Image>>();
+        OpRes res{};
+        res.stagingBuff = std::move(stagingBuff);
+        res.image = std::move(image);
 
-        bufferPromises[buffer.getBuff()] = {{std::move(stagingBuff), std::move(buffer) }, promise};
+        OpPromise promise{};
+        promise.imagePromise = std::make_shared<std::promise<Image>>();
 
-        return promise->get_future();
+        transferPromises[(size_t)res.stagingBuff.getBuff()] =
+         {std::move(res), promise};
+
+        return promise.imagePromise.value()->get_future();
     }
 
     void MemLoader::loadOpCallback(MemoryManager::TransferOp op) {
         MemLoader* loader = *(MemLoader**)op.userDat;
 
-        auto it = loader->bufferPromises.find(op.buffer);
+        auto it = loader->transferPromises.find((size_t)op.src);
         PromisePair_t& pair = it->second;
 
-        pair.second->set_value(std::move(pair.first.deviceBuff));
+        OpRes& res = pair.first;
+        OpPromise& promise = pair.second;
 
-        loader->bufferPromises.erase(it);
+        if (res.buffer.has_value()) {
+            promise.bufferPromise.value()->set_value(std::move(res.buffer.value()));
+        } else {
+            promise.imagePromise.value()->set_value(std::move(res.image.value()));
+        }
+
+        loader->transferPromises.erase(it);
 
         LOG("TRANSFER OP COMPLETE");
 

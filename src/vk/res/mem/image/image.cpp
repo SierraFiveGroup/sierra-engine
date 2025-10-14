@@ -49,6 +49,7 @@ namespace Sierra::vlk {
         op.image = image;
         op.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         op.newLayout = info.layout;
+        op.range = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
         op.callback = &Image::transitionOpCallback;
 
         manager.addTransitionLayoutOp(op);

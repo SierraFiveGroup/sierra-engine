@@ -42,6 +42,8 @@ namespace Sierra::vlk {
                 VkImageLayout oldLayout;
                 VkImageLayout newLayout;
 
+                VkImageSubresourceRange range;
+
                 std::function<void(TransitionLayoutOp)> callback;
                 void* userDat;
             };

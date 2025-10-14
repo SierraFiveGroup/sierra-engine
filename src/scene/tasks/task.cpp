@@ -26,7 +26,7 @@ namespace Sierra {
      }
 
     bool Task::isComplete() {
-        throw new std::runtime_error("UNIMPLEMENTED");
+        throw std::runtime_error("UNIMPLEMENTED");
     }
 
     Task::Stage Task::getStage() {

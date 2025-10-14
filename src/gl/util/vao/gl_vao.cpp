@@ -60,7 +60,7 @@ namespace Sierra {
             } else if (attrib->type == GL_INT || attrib->type == GL_UNSIGNED_INT) {
                 glVertexAttribIPointer(attrib->index, attrib->componentCount, attrib->type, attrib->stride, (const void*)attrib->offset);
             } else {
-                throw new std::runtime_error("UNIMPLEMENTED"); 
+                throw std::runtime_error("UNIMPLEMENTED"); 
             }
 
             glEnableVertexAttribArray(attrib->index);

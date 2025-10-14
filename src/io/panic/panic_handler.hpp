@@ -61,7 +61,7 @@ namespace Sierra {
                     } catch (const std::exception& e) {
                         panic(std::string("Unhandled exception: ") + e.what());
                     } catch (...) {
-                        panic("Unhandled non-standard exception");
+                        panic("Unhandled non-standard exception ");
                     }
                 } else {
                     panic("Unknown termination cause");
@@ -141,7 +141,7 @@ namespace Sierra {
                 std::cerr << "Reason: " << reason << "\n";
                 std::cerr << "Dumping panic trace...\n";
 
-                std::ofstream dump("panic_dump.txt", std::ios::app);
+                std::ofstream dump("panic_dump.txt", std::ios::trunc);
                 if (dump.is_open()) {
                     dump << "==== PANIC DUMP ====\n";
                     dump << "Time: " << currentTime() << "\n";

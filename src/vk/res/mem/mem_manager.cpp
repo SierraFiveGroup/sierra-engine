@@ -49,9 +49,10 @@ namespace Sierra::vlk {
             barrier.newLayout = op.newLayout;
             barrier.image = op.image;
 
-            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            barrier.subresourceRange.layerCount = 1;
-            barrier.subresourceRange.levelCount = 1;
+            barrier.subresourceRange = op.range;
+            
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 
             imageBarriers.push_back(barrier);
