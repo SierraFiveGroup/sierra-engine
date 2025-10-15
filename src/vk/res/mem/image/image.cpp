@@ -11,6 +11,7 @@ namespace Sierra::vlk {
     Image::Image(Context& context, MemoryManager& manager, Info info): image(), mem(), 
      available(std::make_shared<std::atomic_bool>(true)) {
         createImage(context, info);
+        createImageView(context, info);
 
         imagePtrMap[image] = std::make_shared<Image*>(this);
 
@@ -43,13 +44,22 @@ namespace Sierra::vlk {
         mem = Mem(context, memInfo, imageInfo, image);
     }
 
+    void Image::createImageView(Context& context, Info& info) {
+        ImageView::Info viewInfo{};
+        viewInfo.format = info.format;
+        viewInfo.image = image;
+        viewInfo.range = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+
+        view = ImageView(context, viewInfo);
+    }
+
     void Image::addTransitionOp(MemoryManager& manager, Info& info) {
         MemoryManager::TransitionLayoutOp op{};
 
         op.image = image;
         op.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         op.newLayout = info.layout;
-        op.range = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+        op.range = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}; // ik this will bite me in the ass later lmfao
         op.callback = &Image::transitionOpCallback;
 
         manager.addTransitionLayoutOp(op);
@@ -69,6 +79,10 @@ namespace Sierra::vlk {
 
     VkImage Image::getImage() {
         return image;
+    }
+
+    VkImageView Image::getView() {
+        return view.getView();
     }
 
     Image::Image(Image&& other) {

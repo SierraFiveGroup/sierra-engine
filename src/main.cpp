@@ -39,6 +39,7 @@ int main() {
     imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
     imageInfo.extent = {5, 1, 1};
     imageInfo.layout = VK_IMAGE_LAYOUT_GENERAL;
+    imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
 
     std::future<Image> img = loader.createImage(memManager, imageInfo, dat, sizeof(dat));
 

@@ -59,8 +59,6 @@ namespace Sierra::vlk {
         }
         dat.mutex->unlock();
 
-        DBG(imageBarriers.size());
-
         dat.cmdBuf->begin(nullptr);
         vkCmdPipelineBarrier(dat.cmdBuf->getCommandBuffer(), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, imageBarriers.size(), imageBarriers.data());
         dat.cmdBuf->end();

@@ -6,6 +6,8 @@
 #include "../mem.hpp"
 #include "../mem_manager.hpp"
 
+#include "image_view.hpp"
+
 namespace Sierra::vlk {
     class Image {
         typedef std::unordered_map<VkImage, std::shared_ptr<Image*>> ImageMap_t;
@@ -36,8 +38,11 @@ namespace Sierra::vlk {
             ~Image(); // remove from map
 
             VkImage getImage();
+            VkImageView getView();
         private:
             void createImage(Context& context, Info& info);
+            void createImageView(Context& context, Info& info);
+
             void addTransitionOp(MemoryManager& manager, Info& info);
 
             void completeTransition(); 
@@ -51,5 +56,7 @@ namespace Sierra::vlk {
 
             VkImage image;
             Mem mem;
+
+            ImageView view;
     };
 }
