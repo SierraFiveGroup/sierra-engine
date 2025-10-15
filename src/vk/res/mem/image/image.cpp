@@ -64,7 +64,6 @@ namespace Sierra::vlk {
     }
 
     void Image::completeTransition() {
-        DBG("SKIBID DZABR"); //remove
         *available = true;
     }
 
