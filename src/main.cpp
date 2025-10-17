@@ -15,12 +15,18 @@
 #include "scene/loader/loadable_resource.hpp"
 
 #include "io/panic/panic_handler.hpp"
+#include "io/memory/leak_tracker.hpp"
 
 using namespace Sierra;
 using namespace vlk;
 int main() {    
     //set up panic handler
     PanicHandler::init();
+
+    //set up leak tracking
+    //LeakTracker::init();
+
+    //std::cout << "Not hanging :)\n";
 
     try{
     
@@ -129,5 +135,5 @@ int main() {
     vlk::GraphicsPipeline::destroy(vulkan.getContext());
     vlk::PipelineLayout::destroy(vulkan.getContext());*/
 
-
+    //LeakTracker::shutdown();
 }
