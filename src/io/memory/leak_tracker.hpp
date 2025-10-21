@@ -10,8 +10,7 @@
 #include "../logging/logger.hpp"
 #include "../../util/utilities.hpp"
 
-#ifdef DEBUG || _DEBUG
-
+#if defined(DEBUG) || defined(_DEBUG)
 
 namespace Sierra {   // optional — adjust or remove if you use a different namespace
 
