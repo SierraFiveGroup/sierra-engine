@@ -52,13 +52,7 @@ int main() {
     taskManager.addTasks(memManager.getTasks());
     taskManager.start();
 
-    while(!taskManager.isFinished());
-
-    } catch (std::runtime_error e) {
-        std::cerr << e.what() << "\n";
-    }
-
-   /* vlk::Scene scene = vulkan.createScene();
+    vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
     vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.frag.spv", "test_shaders/vk/tri.frag");
 
@@ -66,11 +60,6 @@ int main() {
 
     std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes = {};
     std::vector<Descriptor*> descriptorPtrs = {};
-
-    for(auto& descriptor : descriptors) {
-        sizes[descriptor.getType()]++;
-        descriptorPtrs.push_back(&descriptor);
-    }
 
     vlk::DescriptorPool pool = vlk::DescriptorPool(vulkan.getContext(), sizes);
 
@@ -98,7 +87,7 @@ int main() {
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
 
-    vlk::RenderPass::CreateInfo renderPassInfo{};
+    vlk::RenderPass::Info renderPassInfo{};
     renderPassInfo.attachments = {attachmentDescription};
     renderPassInfo.dependencies = {};
     renderPassInfo.subpasses = {subpass};
@@ -133,7 +122,20 @@ int main() {
 
     vlk::DescriptorLayout::destroy(vulkan.getContext());
     vlk::GraphicsPipeline::destroy(vulkan.getContext());
-    vlk::PipelineLayout::destroy(vulkan.getContext());*/
+    vlk::PipelineLayout::destroy(vulkan.getContext());
+    for(auto& descriptor : descriptors) {
+        sizes[descriptor.getType()]++;
+        descriptorPtrs.push_back(&descriptor);
+    }
+
+    while(!taskManager.isFinished());
+
+    } catch (std::runtime_error e) {
+        std::cerr << e.what() << "\n";
+    }
+
+
+
 
     //LeakTracker::shutdown();
 }

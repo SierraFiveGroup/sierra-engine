@@ -6,6 +6,7 @@
 
 #include "../../core/context.hpp"
 #include "window/window.hpp"
+#include "vk/res/mem/image/image_view.hpp"
 
 namespace Sierra::vlk {
     class Swapchain {
@@ -21,15 +22,20 @@ namespace Sierra::vlk {
             ~Swapchain();
 
             VkSurfaceFormatKHR getSurfaceFormat();
+            std::vector<VkImageView> getImageViews();
         private:
             void createWindowSurface(Window& window);
             void createSwapchain();
             VkSurfaceFormatKHR selectImageFormat();
+            void createImageViews(Window& window);
 
 
             VkSwapchainKHR vkSwapchain;
             VkSurfaceKHR surface;
             VkSurfaceFormatKHR surfaceFormat;
+
+            std::vector<ImageView> imageViews;
+            std::vector<VkImageView> imageViewHandles;
 
             Context* context;
 

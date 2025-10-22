@@ -6,11 +6,12 @@ namespace Sierra::vlk {
 
     }
 
-    RenderPass::RenderPass(Context& context, CreateInfo& info): vkRenderPass(VK_NULL_HANDLE), context(&context) {
+    RenderPass::RenderPass(Context& context, Info& info): vkRenderPass(VK_NULL_HANDLE), context(&context) {
         createRenderPass(info);
+        createFramebuffers(info);
     }
     
-    void RenderPass::createRenderPass(CreateInfo& info) {
+    void RenderPass::createRenderPass(Info& info) {
         VkRenderPassCreateInfo passInfo{};
 
         passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -25,6 +26,20 @@ namespace Sierra::vlk {
         passInfo.pSubpasses = info.subpasses.data();
 
         VK_ERR(vkCreateRenderPass(context->device->getDevice(), &passInfo, nullptr, &vkRenderPass));
+    }
+
+    void RenderPass::createFramebuffers(Info& info) {
+        Framebuffer::Info framebufferInfo{};
+        framebufferInfo.width = info.width;
+        framebufferInfo.height = info.height;
+        framebufferInfo.renderPass = vkRenderPass;
+
+        framebuffers.reserve(info.imageViews.size());
+        for (VkImageView& imageView : info.imageViews) {
+            framebufferInfo.attachments = {imageView};
+
+            framebuffers.emplace_back(*context, framebufferInfo); 
+        }
     }
 
     VkRenderPass RenderPass::getRenderPass() {

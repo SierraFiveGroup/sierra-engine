@@ -31,11 +31,21 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 
 #endif
 
-
-const std::vector<const char*> extensions = {};
+const std::vector<const char*> extensions = {
+#ifdef DEBUG
+    "VK_EXT_debug_utils"
+#endif
+};
 
 namespace Sierra::vlk {
     Instance::Instance() {
+        createInstace();
+#ifdef DEBUG
+        createDebugMessenger();
+#endif
+    }
+
+    void Instance::createInstace() {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.apiVersion = VK_MAKE_API_VERSION(1, 4, 0, 0);
@@ -56,6 +66,8 @@ namespace Sierra::vlk {
 #endif
 
         std::vector<const char*> requiredExtensions = getExtentions();
+
+        requiredExtensions.insert(requiredExtensions.end(), extensions.begin(), extensions.end());
 
         instanceInfo.enabledExtensionCount = requiredExtensions.size();
         instanceInfo.ppEnabledExtensionNames = requiredExtensions.data();
@@ -88,6 +100,18 @@ namespace Sierra::vlk {
 
         return true;
     }
+
+    void Instance::createDebugMessenger() {
+        VkDebugUtilsMessengerCreateInfoEXT messengerInfo{};
+        messengerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        messengerInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        messengerInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        messengerInfo.pfnUserCallback = debugCallback;
+
+        auto createDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vkInstance, "vkCreateDebugUtilsMessengerEXT");
+
+        VK_ERR(createDebugUtilsMessenger(vkInstance, &messengerInfo, nullptr, &dbgMessenger));
+    }
 #endif
 
     std::vector<const char*> Instance::getExtentions() {
@@ -107,7 +131,19 @@ namespace Sierra::vlk {
         return vkInstance;
     }
 
+#ifdef DEBUG
+    void Instance::destroyDebugMessenger() {
+        auto destroyDebugUtilsMessenger = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vkInstance, "vkDestroyDebugUtilsMessengerEXT");
+
+        destroyDebugUtilsMessenger(vkInstance, dbgMessenger, nullptr);
+    }
+#endif
+
     Instance::~Instance() {
+#ifdef DEBUG
+        destroyDebugMessenger();
+#endif
+
         vkDestroyInstance(vkInstance, nullptr);
     }
 

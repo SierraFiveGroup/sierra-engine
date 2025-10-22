@@ -36,7 +36,7 @@ namespace Sierra::vlk {
         std::vector<VkAttachmentReference> references = {colorAttachmentRef};
         std::vector<VkSubpassDescription> subpasses = {subpass};
 
-        RenderPass::CreateInfo info = {
+        RenderPass::Info info = {
             .attachments = attachments,
             .subpasses = subpasses,
             .dependencies = {}

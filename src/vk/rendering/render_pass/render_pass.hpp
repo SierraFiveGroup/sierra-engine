@@ -6,18 +6,23 @@
 
 #include "../../core/context.hpp"
 #include "../../util.hpp"
+#include "../framebuffer/framebuffer.hpp"
 
 namespace Sierra::vlk {
     class RenderPass {
         public:
-            struct CreateInfo {
+            struct Info {
                 std::vector<VkAttachmentDescription> attachments;
                 std::vector<VkSubpassDescription> subpasses;
                 std::vector<VkSubpassDependency> dependencies;
+                std::vector<VkImageView> imageViews;
+
+                uint32_t width;
+                uint32_t height;
             };
 
             RenderPass();
-            RenderPass(Context& context, CreateInfo& info);
+            RenderPass(Context& context, Info& info);
 
             RenderPass(RenderPass&) = delete;
 
@@ -28,11 +33,14 @@ namespace Sierra::vlk {
 
             VkRenderPass getRenderPass();
         private:
-            void createRenderPass(CreateInfo& info);
+            void createRenderPass(Info& info);
+            void createFramebuffers(Info& info);
 
             VkRenderPass vkRenderPass;
 
             Context* context;
+
+            std::vector<Framebuffer> framebuffers;
     };
 
 }

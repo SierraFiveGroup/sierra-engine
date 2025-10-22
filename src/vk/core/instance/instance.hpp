@@ -22,12 +22,16 @@ namespace Sierra::vlk {
             VkInstance getInstance();
 
         private:
+            void createInstace();
 #ifdef DEBUG 
+            void createDebugMessenger();
+            void destroyDebugMessenger();
             bool checkLayerSupport();
 #endif
 
             std::vector<const char*> getExtentions();
 
             VkInstance vkInstance;
+            VkDebugUtilsMessengerEXT dbgMessenger;
     };
 }
