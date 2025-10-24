@@ -39,7 +39,10 @@ namespace Sierra::vlk {
         RenderPass::Info info = {
             .attachments = attachments,
             .subpasses = subpasses,
-            .dependencies = {}
+            .dependencies = {},
+            .imageViews = swapchain.getImageViews(),
+            .width = swapchain.getWinRes().w,
+            .height = swapchain.getWinRes().h,
         };
 
         mainPass = RenderPass(context, info);

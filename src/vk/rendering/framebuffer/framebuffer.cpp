@@ -24,6 +24,10 @@ namespace Sierra::vlk {
                 nullptr, &framebuffer));
     }
 
+    VkFramebuffer Framebuffer::getFramebuffer() {
+        return framebuffer;
+    }
+
     Framebuffer::Framebuffer(Framebuffer&& other) {
         framebuffer = other.framebuffer;
         context = other.context;

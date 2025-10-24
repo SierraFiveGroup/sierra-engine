@@ -22,6 +22,8 @@ namespace Sierra::vlk {
             void operator=(Framebuffer&&);
 
             ~Framebuffer();
+
+            VkFramebuffer getFramebuffer();
         private:
             void createFramebuffer(Info& info);
 

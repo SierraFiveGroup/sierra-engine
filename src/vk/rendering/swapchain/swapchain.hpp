@@ -22,7 +22,10 @@ namespace Sierra::vlk {
             ~Swapchain();
 
             VkSurfaceFormatKHR getSurfaceFormat();
+            VkSwapchainKHR getSwapchain();
             std::vector<VkImageView> getImageViews();
+            Resolution getWinRes();
+
         private:
             void createWindowSurface(Window& window);
             void createSwapchain();
@@ -38,6 +41,8 @@ namespace Sierra::vlk {
             std::vector<VkImageView> imageViewHandles;
 
             Context* context;
+
+            Resolution winRes;
 
             const uint32_t PREFERRED_IMAGE_COUNT = 2; 
 

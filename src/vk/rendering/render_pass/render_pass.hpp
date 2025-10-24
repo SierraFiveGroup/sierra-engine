@@ -31,6 +31,7 @@ namespace Sierra::vlk {
 
             ~RenderPass();
 
+            VkRenderPassBeginInfo getBeginInfo(uint32_t framebufferIndex);
             VkRenderPass getRenderPass();
         private:
             void createRenderPass(Info& info);
@@ -39,6 +40,9 @@ namespace Sierra::vlk {
             VkRenderPass vkRenderPass;
 
             Context* context;
+
+            uint32_t width;
+            uint32_t height;
 
             std::vector<Framebuffer> framebuffers;
     };

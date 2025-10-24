@@ -2,11 +2,13 @@
 
 namespace Sierra::vlk {
 
-    RenderPass::RenderPass(): vkRenderPass(VK_NULL_HANDLE), context(nullptr) {
+    RenderPass::RenderPass(): vkRenderPass(VK_NULL_HANDLE), context(nullptr),
+     width(), height() {
 
     }
 
-    RenderPass::RenderPass(Context& context, Info& info): vkRenderPass(VK_NULL_HANDLE), context(&context) {
+    RenderPass::RenderPass(Context& context, Info& info): vkRenderPass(VK_NULL_HANDLE), context(&context),
+     width(info.width), height(info.height) {
         createRenderPass(info);
         createFramebuffers(info);
     }
@@ -29,6 +31,8 @@ namespace Sierra::vlk {
     }
 
     void RenderPass::createFramebuffers(Info& info) {
+        VK_ASSERT(!info.imageViews.empty());
+
         Framebuffer::Info framebufferInfo{};
         framebufferInfo.width = info.width;
         framebufferInfo.height = info.height;
@@ -42,6 +46,26 @@ namespace Sierra::vlk {
         }
     }
 
+    VkRenderPassBeginInfo RenderPass::getBeginInfo(uint32_t framebufferIndex) {
+        static VkClearValue clearVal{};
+        clearVal.color.uint32[0] = 1;
+        clearVal.color.uint32[1] = 1;
+        clearVal.color.uint32[2] = 1;
+        clearVal.color.uint32[3] = 1;
+        clearVal.depthStencil.depth = 0.0;
+        clearVal.depthStencil.stencil = 0.0;
+
+        VkRenderPassBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        beginInfo.renderPass = vkRenderPass;
+        beginInfo.framebuffer = framebuffers[framebufferIndex].getFramebuffer();
+        beginInfo.renderArea = {{0, 0}, {width, height}};
+        beginInfo.clearValueCount = 1;
+        beginInfo.pClearValues = &clearVal;
+
+        return beginInfo;
+    }
+
     VkRenderPass RenderPass::getRenderPass() {
         return vkRenderPass;
     }
@@ -49,6 +73,9 @@ namespace Sierra::vlk {
     RenderPass::RenderPass(RenderPass&& other) {
         context = other.context;
         vkRenderPass = other.vkRenderPass;
+        width = other.width;
+        height = other.height;
+        framebuffers = std::move(other.framebuffers);
 
         other.context = nullptr;
         other.vkRenderPass = VK_NULL_HANDLE;
@@ -57,6 +84,9 @@ namespace Sierra::vlk {
     void RenderPass::operator=(RenderPass&& other) {
         context = other.context;
         vkRenderPass = other.vkRenderPass;
+        width = other.width;
+        height = other.height;
+        framebuffers = std::move(other.framebuffers);
 
         other.context = nullptr;
         other.vkRenderPass = VK_NULL_HANDLE;

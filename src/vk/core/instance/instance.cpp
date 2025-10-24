@@ -17,11 +17,11 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         return VK_FALSE;
 
     if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-        ERROR(pCallbackData->pMessage);
+        ERROR(pCallbackData->pMessage << "\nTRACE: \n" << std::stacktrace::current());
     else if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-        WARN(pCallbackData->pMessage);
+        WARN(pCallbackData->pMessage << "\nTRACE: \n" << std::stacktrace::current());
     else if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
-        LOG(pCallbackData->pMessage);
+        LOG(pCallbackData->pMessage << "\nTRACE: \n" << std::stacktrace::current());
 
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         throw std::runtime_error("Severe validation error, aborting");

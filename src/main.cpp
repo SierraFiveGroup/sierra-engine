@@ -27,8 +27,6 @@ int main() {
     //LeakTracker::init();
 
     //std::cout << "Not hanging :)\n";
-
-    try{
     
     Window window = Window("hehe", {1280, 720});
     Vulkan vulkan = Vulkan(window);
@@ -87,11 +85,22 @@ int main() {
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
 
+    VkSubpassDependency extDependency{};
+    extDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    extDependency.dstSubpass = 0;
+    extDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    extDependency.srcAccessMask = 0;
+    extDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    extDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    
     vlk::RenderPass::Info renderPassInfo{};
     renderPassInfo.attachments = {attachmentDescription};
-    renderPassInfo.dependencies = {};
+    renderPassInfo.dependencies = {extDependency};
     renderPassInfo.subpasses = {subpass};
-
+    renderPassInfo.imageViews = vulkan.getSwapchain().getImageViews();
+    renderPassInfo.width = window.getResolution().w;
+    renderPassInfo.height = window.getResolution().h;
+    
 
     vlk::RenderPass renderPass = vlk::RenderPass(vulkan.getContext(), renderPassInfo);
 
@@ -120,21 +129,80 @@ int main() {
     
     VkPipeline pipeline = vlk::GraphicsPipeline::getPipeline(vulkan.getContext(), pipelineInfo);
 
-    vlk::DescriptorLayout::destroy(vulkan.getContext());
-    vlk::GraphicsPipeline::destroy(vulkan.getContext());
-    vlk::PipelineLayout::destroy(vulkan.getContext());
     for(auto& descriptor : descriptors) {
         sizes[descriptor.getType()]++;
         descriptorPtrs.push_back(&descriptor);
     }
 
     while(!taskManager.isFinished());
+    
+    CommandPool cmdPool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT), 0);
+    CommandBuffer drawCmdBuffer = CommandBuffer(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    } catch (std::runtime_error e) {
-        std::cerr << e.what() << "\n";
-    }
+    uint32_t clearValue = 1.0f;
+
+    VkRenderPassBeginInfo passBegin = renderPass.getBeginInfo(0);
+
+    VkViewport viewport{};
+    viewport.width = window.getResolution().w;
+    viewport.height = window.getResolution().h;
+    viewport.minDepth = 0;
+    viewport.maxDepth = 1;
+
+    VkRect2D scissor{};
+    scissor = {{0, 0}, {window.getResolution().w, window.getResolution().h}};
+
+    Fence fence = Fence(vulkan.getContext());
+
+    uint32_t imgIndex = 0;
+
+    vkAcquireNextImageKHR(vulkan.getContext().device->getDevice(), 
+        vulkan.getSwapchain().getSwapchain(), -1, VK_NULL_HANDLE, fence.getFence(),
+        &imgIndex);
+
+    VkFence fenceHandle = fence.getFence();
+    vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
 
 
+    drawCmdBuffer.begin(nullptr);
+    vkCmdSetViewport(drawCmdBuffer.getCommandBuffer(), 0, 1, &viewport);
+    vkCmdSetScissor(drawCmdBuffer.getCommandBuffer(), 0, 1, &scissor);
+
+    vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+    vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdDraw(drawCmdBuffer.getCommandBuffer(), 3, 1, 0, 0);
+    vkCmdEndRenderPass(drawCmdBuffer.getCommandBuffer());
+    drawCmdBuffer.end();
+
+    VkCommandBuffer commandBufferHandle = drawCmdBuffer.getCommandBuffer();
+
+    VkSubmitInfo queueSubmit{};
+    queueSubmit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    queueSubmit.commandBufferCount = 1;
+    queueSubmit.pCommandBuffers = &commandBufferHandle;
+
+    vkResetFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle);
+
+    vkQueueSubmit(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), 1, &queueSubmit, fence.getFence());
+
+    vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
+
+    VkSwapchainKHR swapchainHandle = vulkan.getSwapchain().getSwapchain();
+
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.pSwapchains = &swapchainHandle;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pImageIndices = &imgIndex;
+
+
+    VK_ERR(vkQueuePresentKHR(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), &presentInfo));
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    vlk::DescriptorLayout::destroy(vulkan.getContext());
+    vlk::GraphicsPipeline::destroy(vulkan.getContext());
+    vlk::PipelineLayout::destroy(vulkan.getContext());
 
 
     //LeakTracker::shutdown();

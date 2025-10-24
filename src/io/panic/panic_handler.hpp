@@ -186,7 +186,7 @@ namespace Sierra {
             std::cerr << "Reason: " << reason << "\n";
             std::cerr << "Dumping panic trace...\n";
 
-            std::ofstream dump("panic_dump.txt", std::ios::app);
+            std::ofstream dump("panic_dump.txt", std::ios::trunc);
             if (dump.is_open()) {
                 dump << "==== PANIC DUMP ====\n";
                 dump << "Time: " << currentTime() << "\n";

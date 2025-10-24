@@ -2,11 +2,12 @@
 
 namespace Sierra::vlk {
 
-    Swapchain::Swapchain() {
+    Swapchain::Swapchain(): vkSwapchain(), context(), winRes() {
 
     }
 
-    Swapchain::Swapchain(Context& context, Window& window): vkSwapchain(VK_NULL_HANDLE), context(&context) {
+    Swapchain::Swapchain(Context& context, Window& window): vkSwapchain(VK_NULL_HANDLE), context(&context),
+     winRes(window.getResolution()) {
         createWindowSurface(window);
         createSwapchain();
         createImageViews(window);
@@ -99,6 +100,14 @@ namespace Sierra::vlk {
         return imageViewHandles; 
     }
 
+    VkSwapchainKHR Swapchain::getSwapchain() {
+        return vkSwapchain;
+    }
+
+    Resolution Swapchain::getWinRes() {
+        return winRes;
+    }
+
     Swapchain::Swapchain(Swapchain&& other): context(other.context) {
         vkSwapchain = other.vkSwapchain;
         context = other.context;
@@ -106,11 +115,13 @@ namespace Sierra::vlk {
         surfaceFormat = other.surfaceFormat;
         imageViews = std::move(other.imageViews);
         imageViewHandles = other.imageViewHandles;
+        winRes = other.winRes;
 
         other.vkSwapchain = VK_NULL_HANDLE;
         other.surface = VK_NULL_HANDLE;
         other.context = VK_NULL_HANDLE;
         other.imageViewHandles = {};
+        other.winRes = {};
     }
 
     void Swapchain::operator=(Swapchain&& other) {
@@ -120,11 +131,13 @@ namespace Sierra::vlk {
         surfaceFormat = other.surfaceFormat;
         imageViews = std::move(other.imageViews);
         imageViewHandles = other.imageViewHandles;
+        winRes = other.winRes;
 
         other.vkSwapchain = VK_NULL_HANDLE;
         other.surface = VK_NULL_HANDLE;
         other.context = VK_NULL_HANDLE;
         other.imageViewHandles = {};
+        other.winRes = {};
     }
 
     Swapchain::~Swapchain() {

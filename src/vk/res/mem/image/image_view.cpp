@@ -16,7 +16,10 @@ namespace Sierra::vlk {
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         viewInfo.format = info.format;
         viewInfo.components =
-         {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
+        {VK_COMPONENT_SWIZZLE_IDENTITY,
+         VK_COMPONENT_SWIZZLE_IDENTITY,
+         VK_COMPONENT_SWIZZLE_IDENTITY,
+         VK_COMPONENT_SWIZZLE_IDENTITY};
          // TODO SHOULD BE IDENTITY??
         viewInfo.subresourceRange = info.range;
 

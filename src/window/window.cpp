@@ -112,6 +112,10 @@ namespace Sierra {
         return glfwWin;
     }
     
+    Resolution Window::getResolution() {
+        return resolution;
+    }
+    
     Window::Window(Window&& other) noexcept{
         resolution = other.resolution;
         glfwWin = other.glfwWin;

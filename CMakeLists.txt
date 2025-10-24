@@ -46,7 +46,7 @@ include_directories(drlibs)
 include_directories(/usr/include/freetype2)
 
 # Link libraries (assuming they are in the system linker path)
-target_link_libraries(engine PRIVATE glfw OpenAL::OpenAL freetype vulkan)
+target_link_libraries(engine PRIVATE glfw OpenAL::OpenAL freetype vulkan stdc++exp)
 
 # Output some informational messages
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")

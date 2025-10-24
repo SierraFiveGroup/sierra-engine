@@ -20,7 +20,7 @@ namespace Sierra::vlk {
     }
 
     VkPipeline GraphicsPipeline::createPipeline(Context& context, PipelineInfo& info) {
-        VkPipeline pipeline;
+        VkPipeline pipeline = VK_NULL_HANDLE;
 
         VkPipelineInputAssemblyStateCreateInfo assemblyInfo{};
         assemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -40,7 +40,8 @@ namespace Sierra::vlk {
         rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL; // TODO add line option for debugging
         rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizationInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizationInfo.frontFace =  VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizationInfo.lineWidth = 1.0f;
         rasterizationInfo.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampleInfo{};
@@ -49,11 +50,13 @@ namespace Sierra::vlk {
 
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
         depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO; 
-        depthStencilInfo.depthTestEnable = VK_TRUE;
+        depthStencilInfo.depthTestEnable = VK_TRUE; 
         depthStencilInfo.minDepthBounds = 0.0;
         depthStencilInfo.maxDepthBounds = 1.0;
 
         VkPipelineColorBlendAttachmentState colorState{};
+        colorState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_R_BIT;
         colorState.blendEnable = VK_FALSE;
 
         VkPipelineColorBlendStateCreateInfo blendInfo{};
@@ -99,6 +102,7 @@ namespace Sierra::vlk {
 
     uint64_t GraphicsPipeline::getHash(Context& context, PipelineInfo& info) { //actual dogshit
         uint64_t hash = (uint64_t)context.device->getDevice(); //basically cram all the info possible
+        //and I aint hashing image views since thats stupid
 
         hash = combineHashes((uint64_t)info.renderPass->getRenderPass(), hash);
         hash = combineHashes(info.subpass, hash);
