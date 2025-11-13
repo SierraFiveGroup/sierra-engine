@@ -19,7 +19,7 @@
 
 using namespace Sierra;
 using namespace vlk;
-int main() {    
+int main() {
     //set up panic handler
     PanicHandler::init();
 
@@ -88,10 +88,10 @@ int main() {
     VkSubpassDependency extDependency{};
     extDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     extDependency.dstSubpass = 0;
-    extDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    extDependency.srcAccessMask = 0;
-    extDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    extDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    extDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    extDependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    extDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    extDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
     
     vlk::RenderPass::Info renderPassInfo{};
     renderPassInfo.attachments = {attachmentDescription};
@@ -100,9 +100,10 @@ int main() {
     renderPassInfo.imageViews = vulkan.getSwapchain().getImageViews();
     renderPassInfo.width = window.getResolution().w;
     renderPassInfo.height = window.getResolution().h;
+    renderPassInfo.hasDepth = true;
     
 
-    vlk::RenderPass renderPass = vlk::RenderPass(vulkan.getContext(), renderPassInfo);
+    vlk::RenderPass renderPass = vlk::RenderPass(vulkan.getContext(), memManager, renderPassInfo);
 
     VkPipelineVertexInputStateCreateInfo inputState{};
     inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -139,8 +140,6 @@ int main() {
     CommandPool cmdPool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT), 0);
     CommandBuffer drawCmdBuffer = CommandBuffer(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    uint32_t clearValue = 1.0f;
-
     VkRenderPassBeginInfo passBegin = renderPass.getBeginInfo(0);
 
     VkViewport viewport{};
@@ -148,6 +147,8 @@ int main() {
     viewport.height = window.getResolution().h;
     viewport.minDepth = 0;
     viewport.maxDepth = 1;
+
+    //NOTE depth clear value should be 1 not 0
 
     VkRect2D scissor{};
     scissor = {{0, 0}, {window.getResolution().w, window.getResolution().h}};
@@ -170,7 +171,7 @@ int main() {
 
     vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
     vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdDraw(drawCmdBuffer.getCommandBuffer(), 3, 1, 0, 0);
+    vkCmdDraw(drawCmdBuffer.getCommandBuffer(), 6, 1, 0, 0);
     vkCmdEndRenderPass(drawCmdBuffer.getCommandBuffer());
     drawCmdBuffer.end();
 

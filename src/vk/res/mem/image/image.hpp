@@ -29,6 +29,7 @@ namespace Sierra::vlk {
 
             Image();
             Image(Context& context, MemoryManager& manager, Info info);
+            Image(Context& context, Info info);
 
             Image(Image&) = delete;
 

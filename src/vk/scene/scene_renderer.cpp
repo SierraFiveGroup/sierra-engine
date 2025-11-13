@@ -45,6 +45,6 @@ namespace Sierra::vlk {
             .height = swapchain.getWinRes().h,
         };
 
-        mainPass = RenderPass(context, info);
+//        mainPass = RenderPass(context, info); TODO
     }
 }

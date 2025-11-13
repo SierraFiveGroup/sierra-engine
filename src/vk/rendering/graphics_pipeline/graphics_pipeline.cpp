@@ -51,13 +51,16 @@ namespace Sierra::vlk {
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
         depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO; 
         depthStencilInfo.depthTestEnable = VK_TRUE; 
+        depthStencilInfo.depthWriteEnable = VK_TRUE;
         depthStencilInfo.minDepthBounds = 0.0;
         depthStencilInfo.maxDepthBounds = 1.0;
+        depthStencilInfo.stencilTestEnable =  VK_FALSE;
+        depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
 
         VkPipelineColorBlendAttachmentState colorState{};
         colorState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_R_BIT;
-        colorState.blendEnable = VK_FALSE;
+         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_R_BIT; // LEAVE THE MASK REGARDLESS OF WHETHER YOU USE THE COLOR BLEND STATE
+        colorState.blendEnable = VK_FALSE; // SHIT GOES THROUGH HERE EITHER WAY
 
         VkPipelineColorBlendStateCreateInfo blendInfo{};
         blendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;

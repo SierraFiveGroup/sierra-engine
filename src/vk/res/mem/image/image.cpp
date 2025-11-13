@@ -19,6 +19,17 @@ namespace Sierra::vlk {
             addTransitionOp(manager, info);
     }
 
+    Image::Image(Context& context, Info info): image(), mem(), 
+     available(std::make_shared<std::atomic_bool>(true)) {
+        createImage(context, info);
+        createImageView(context, info);
+
+        imagePtrMap[image] = std::make_shared<Image*>(this);
+
+        if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED) 
+            throw std::runtime_error("If no MemoryManager is provided layout must be undefined");
+    }
+
     void Image::createImage(Context& context, Info& info) {
         VK_ASSERT(!info.queueFamilyIndices.empty());
 
@@ -45,10 +56,15 @@ namespace Sierra::vlk {
     }
 
     void Image::createImageView(Context& context, Info& info) {
+        VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+        if(info.usage == VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+            aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT; // TODO implement this properly
+            //don't just make an educated guess
+
         ImageView::Info viewInfo{};
         viewInfo.format = info.format;
         viewInfo.image = image;
-        viewInfo.range = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+        viewInfo.range = {aspectFlags, 0, 1, 0, 1};
 
         view = ImageView(context, viewInfo);
     }
@@ -89,6 +105,7 @@ namespace Sierra::vlk {
         image = other.image;
         available = other.available;
         mem = std::move(other.mem);
+        view = std::move(other.view);
 
         other.image = VK_NULL_HANDLE;
 
@@ -99,6 +116,7 @@ namespace Sierra::vlk {
         image = other.image;
         available = other.available;
         mem = std::move(other.mem);
+        view = std::move(other.view);
 
         other.image = VK_NULL_HANDLE;
 
