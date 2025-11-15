@@ -37,8 +37,8 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 namespace Sierra {
     size_t Window::instanceCount = 0;
 
-    Window::Window(std::string name, Resolution resolution):
-     resolution(resolution), glfwWin(nullptr) {
+    Window::Window(std::string name, Resolution resolution, API api): 
+     resolution(resolution), glfwWin(nullptr), api(api) {
     
         if (instanceCount == 0) {
             initGLFW();
@@ -74,13 +74,17 @@ namespace Sierra {
             throw std::runtime_error("Failed to init GLFW");
         }
     
-        //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); //TOOD make interchangable
+        if(api == API::gl) {
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
 #endif
+
+        } else {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); //TOOD make interchangable
+        }
     }
     
     void Window::initGLAD() {

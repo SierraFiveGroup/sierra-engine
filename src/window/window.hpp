@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "io/logging/logger.hpp"
+#include "api.hpp"
 
 namespace Sierra {
     struct Resolution {
@@ -17,7 +18,7 @@ namespace Sierra {
     
     class Window {
         public:
-            Window(std::string name, Resolution resolution);
+            Window(std::string name, Resolution resolution, API api);
     
             Window(Window&& other) noexcept;
             void operator=(Window&& other) noexcept;
@@ -39,6 +40,7 @@ namespace Sierra {
             void initGLAD();
     
             Resolution resolution;
+            API api;
     
             GLFWwindow* glfwWin;
     
