@@ -137,10 +137,9 @@ int main() {
 
     while(!taskManager.isFinished());
     
-    CommandPool cmdPool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT), 0);
+    CommandPool cmdPool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
     CommandBuffer drawCmdBuffer = CommandBuffer(cmdPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    VkRenderPassBeginInfo passBegin = renderPass.getBeginInfo(0);
 
     VkViewport viewport{};
     viewport.width = window.getResolution().w;
@@ -157,49 +156,58 @@ int main() {
 
     uint32_t imgIndex = 0;
 
-    vkAcquireNextImageKHR(vulkan.getContext().device->getDevice(), 
-        vulkan.getSwapchain().getSwapchain(), -1, VK_NULL_HANDLE, fence.getFence(),
-        &imgIndex);
+    while(!window.shouldClose()) {
 
-    VkFence fenceHandle = fence.getFence();
-    vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
+        vkAcquireNextImageKHR(vulkan.getContext().device->getDevice(), 
+            vulkan.getSwapchain().getSwapchain(), -1, VK_NULL_HANDLE, fence.getFence(),
+            &imgIndex);
 
+        VkRenderPassBeginInfo passBegin = renderPass.getBeginInfo(imgIndex);
 
-    drawCmdBuffer.begin(nullptr);
-    vkCmdSetViewport(drawCmdBuffer.getCommandBuffer(), 0, 1, &viewport);
-    vkCmdSetScissor(drawCmdBuffer.getCommandBuffer(), 0, 1, &scissor);
-
-    vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-    vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdDraw(drawCmdBuffer.getCommandBuffer(), 6, 1, 0, 0);
-    vkCmdEndRenderPass(drawCmdBuffer.getCommandBuffer());
-    drawCmdBuffer.end();
-
-    VkCommandBuffer commandBufferHandle = drawCmdBuffer.getCommandBuffer();
-
-    VkSubmitInfo queueSubmit{};
-    queueSubmit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    queueSubmit.commandBufferCount = 1;
-    queueSubmit.pCommandBuffers = &commandBufferHandle;
-
-    vkResetFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle);
-
-    vkQueueSubmit(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), 1, &queueSubmit, fence.getFence());
-
-    vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
-
-    VkSwapchainKHR swapchainHandle = vulkan.getSwapchain().getSwapchain();
-
-    VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.pSwapchains = &swapchainHandle;
-    presentInfo.swapchainCount = 1;
-    presentInfo.pImageIndices = &imgIndex;
+        VkFence fenceHandle = fence.getFence();
+        vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
 
 
-    VK_ERR(vkQueuePresentKHR(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), &presentInfo));
+        drawCmdBuffer.begin(nullptr);
+        vkCmdSetViewport(drawCmdBuffer.getCommandBuffer(), 0, 1, &viewport);
+        vkCmdSetScissor(drawCmdBuffer.getCommandBuffer(), 0, 1, &scissor);
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+        vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+        vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdDraw(drawCmdBuffer.getCommandBuffer(), 6, 1, 0, 0);
+        vkCmdEndRenderPass(drawCmdBuffer.getCommandBuffer());
+        drawCmdBuffer.end();
+
+        VkCommandBuffer commandBufferHandle = drawCmdBuffer.getCommandBuffer();
+
+        VkSubmitInfo queueSubmit{};
+        queueSubmit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        queueSubmit.commandBufferCount = 1;
+        queueSubmit.pCommandBuffers = &commandBufferHandle;
+
+        vkResetFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle);
+
+        vkQueueSubmit(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), 1, &queueSubmit, fence.getFence());
+
+        vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
+
+        VkSwapchainKHR swapchainHandle = vulkan.getSwapchain().getSwapchain();
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.pSwapchains = &swapchainHandle;
+        presentInfo.swapchainCount = 1;
+        presentInfo.pImageIndices = &imgIndex;
+
+        VK_ERR(vkQueuePresentKHR(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), &presentInfo));
+
+        vkResetFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle);
+        drawCmdBuffer.reset();
+
+        glfwPollEvents();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // SLEEP DON'T FORGET
+    }
 
     vlk::DescriptorLayout::destroy(vulkan.getContext());
     vlk::GraphicsPipeline::destroy(vulkan.getContext());
