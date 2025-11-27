@@ -15,7 +15,7 @@ namespace Sierra {
 
     void Model::loadScene(Assimp::Importer& importer, std::string path) {
         const aiScene* scene = importer.ReadFile(path,
-             aiProcess_Triangulate | /*aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes |*/ aiProcess_OptimizeMeshes);
+             aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes | aiProcess_OptimizeMeshes);
 
 
         if(!scene || !scene->mRootNode) {

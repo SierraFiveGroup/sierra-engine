@@ -208,6 +208,8 @@ int main() {
         VkBuffer vertexBuff = vlkModel.getVertexBuffer().getBuff();
         VkDeviceSize offsets = 0;
 
+        VkBuffer indexBuff = vlkModel.getIndexBuffer().getBuff();
+
         drawCmdBuffer.begin(nullptr);
         vkCmdSetViewport(drawCmdBuffer.getCommandBuffer(), 0, 1, &viewport);
         vkCmdSetScissor(drawCmdBuffer.getCommandBuffer(), 0, 1, &scissor);
@@ -216,9 +218,11 @@ int main() {
         vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
         vkCmdBindVertexBuffers(drawCmdBuffer.getCommandBuffer(), 0, 1, &vertexBuff, &offsets);
+        vkCmdBindIndexBuffer(drawCmdBuffer.getCommandBuffer(), indexBuff, 0, VK_INDEX_TYPE_UINT32);
         vkCmdBindDescriptorSets(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, 
             layout, 0, 1, &setHandle, 0, nullptr);
-        vkCmdDraw(drawCmdBuffer.getCommandBuffer(), vlkModel.getVertexCount(), 1, 0, 0);
+        vkCmdDrawIndexed(drawCmdBuffer.getCommandBuffer(), vlkModel.getIndexCount(), 1, 0, 0, 0);
+//        vkCmdDraw(drawCmdBuffer.getCommandBuffer(), vlkModel.getVertexCount(), 1, 0, 0);
         vkCmdEndRenderPass(drawCmdBuffer.getCommandBuffer());
         drawCmdBuffer.end();
 
