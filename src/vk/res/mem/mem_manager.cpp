@@ -139,7 +139,7 @@ namespace Sierra::vlk {
         vkWaitForFences(dat.context->device->getDevice(), 1, &fenceHandle, VK_TRUE, (uint64_t)-1);
 
         for (TransferOp& op : *dat.transferOps) {
-            if(op.callback.target<void(*)()>())
+            if(op.callback) 
                 op.callback(op);
         }
     }
