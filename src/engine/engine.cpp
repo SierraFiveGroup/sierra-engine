@@ -1,7 +1,7 @@
 #include "engine.hpp"
 
 namespace Sierra {
-    Engine::Engine(std::string &windowTitle, Resolution dimensions, uint32_t mempoolSize): mWindow(windowTitle, dimensions), mMempool(mempoolSize),
+    Engine::Engine(std::string &windowTitle, Resolution dimensions, uint32_t mempoolSize): mWindow(windowTitle, dimensions, API::vulkan), mMempool(mempoolSize),
      mALDevice() {
         if (!mALDevice.isValid()) {
             ERROR("OpenAL Device Error");
