@@ -1,12 +1,20 @@
 #include "buffer.hpp"
 
 namespace Sierra::vlk {
-    Buffer::Buffer(): mem(), buff(), type() {
+    Buffer::Buffer(): mem(), buff(), type(), descriptorInfo() {
 
     }
 
-    Buffer::Buffer(Context& context, Info& info): type(info.type) {
+    Buffer::Buffer(Context& context, Info& info): type(info.type),
+     descriptorInfo(std::make_shared<VkDescriptorBufferInfo>()) {
         createBuff(context, info);
+        initDescriptorInfo();
+    }
+
+    void Buffer::initDescriptorInfo() {
+        descriptorInfo->buffer = buff;
+        descriptorInfo->offset = 0;//mem.getOffset(); // TODO figure out why the offset is fucked
+        descriptorInfo->range = mem.getSize();
     }
 
     void Buffer::createBuff(Context& context, Info& info) {
@@ -50,11 +58,15 @@ namespace Sierra::vlk {
     }
 
     size_t Buffer::getSize() {
-        return mem.getAllocInfo().size;
+        return mem.getSize();
     }
 
     VkBuffer Buffer::getBuff() {
         return buff;
+    }
+
+    VkDescriptorBufferInfo* Buffer::getDescriptorInfo() {
+        return descriptorInfo.get();
     }
 
     void* Buffer::map() {

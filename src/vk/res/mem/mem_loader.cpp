@@ -10,7 +10,7 @@ namespace Sierra::vlk {
 
     }
 
-    std::future<Buffer> MemLoader::createBuff(MemoryManager& manager, Buffer::Type type, Buffer::Usage usage, uint8_t* dat, size_t size) {
+    std::future<Buffer> MemLoader::createBuff(MemoryManager& manager, Buffer::Type type, Buffer::Usage usage, uint8_t* dat, size_t size) {// TODO accept buffer info
         if (type == Buffer::Type::HOST_LOCAL || !context->device->isDedicated()) { // we check if we have a discrete gpu cause if we dont, never any point in copying host to host
             std::promise<Buffer> buff;
 
@@ -155,8 +155,6 @@ namespace Sierra::vlk {
         }
 
         loader->transferPromises.erase(it);
-
-        LOG("TRANSFER OP COMPLETE");
 
         //TODO signal to buffer/image transfer op is complete, or better implement a whole state machine for that
         //TODO erase staging buffers or reuse them idk

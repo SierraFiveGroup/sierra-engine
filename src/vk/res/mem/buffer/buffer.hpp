@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include "../mem.hpp"
 
@@ -41,11 +42,15 @@ namespace Sierra::vlk {
             void copyToBuff(uint8_t* src, size_t srcSize);
 
             VkBuffer getBuff();
+            VkDescriptorBufferInfo* getDescriptorInfo();
         private:
             void createBuff(Context& context, Info& info);
+            void initDescriptorInfo();
 
             Mem mem;
             VkBuffer buff;
+
+            std::shared_ptr<VkDescriptorBufferInfo> descriptorInfo;
 
             Type type;
     };

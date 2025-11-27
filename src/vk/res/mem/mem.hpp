@@ -49,6 +49,9 @@ namespace Sierra::vlk {
             void* map();
             void unmap();
             void copyToHost(uint8_t* src, size_t srcSize);
+
+            VkDeviceSize getSize();
+            VkDeviceSize getOffset();
             
         protected:
             VmaAllocationInfo& getAllocInfo();            

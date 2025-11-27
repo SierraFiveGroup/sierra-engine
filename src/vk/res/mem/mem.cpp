@@ -146,6 +146,14 @@ namespace Sierra::vlk {
         vmaCopyMemoryToAllocation(*allocator.getLock(), src, allocation, 0, srcSize);
     }
 
+    VkDeviceSize Mem::getSize() {
+        return allocation->GetSize();
+    }
+
+    VkDeviceSize Mem::getOffset() {
+        return allocation->GetOffset();
+    }
+
     ///////
 
     MemPool::MemPool() {
