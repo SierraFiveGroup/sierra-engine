@@ -10,6 +10,7 @@
 #include "vk/res/mem/image/image.hpp"
 #include "vk/res/mem/mem_loader.hpp"
 #include "vk/sync/fence/fence.hpp"
+#include "vk/res/loadable/model/vk_model.hpp"
 
 #include "scene/tasks/manager.hpp"
 #include "scene/loader/loadable_resource.hpp"
@@ -17,18 +18,21 @@
 #include "io/panic/panic_handler.hpp"
 #include "io/memory/leak_tracker.hpp"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace Sierra;
 using namespace vlk;
 int main() {
     //set up panic handler
-    PanicHandler::init();
+    //PanicHandler::init();
 
     //set up leak tracking
     //LeakTracker::init();
 
     //std::cout << "Not hanging :)\n";
     
-    Window window = Window("hehe", {1280, 720});
+    Window window = Window("hehe", {1280, 720}, API::vulkan);
     Vulkan vulkan = Vulkan(window);
 
     TaskManager taskManager = TaskManager();
@@ -47,7 +51,16 @@ int main() {
 
     std::future<Image> img = loader.createImage(memManager, imageInfo, dat, sizeof(dat));
 
+    //glm::mat4 proj = glm::perspective(45.0f, 1.67f, 0.0f, 1.0f);
+    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, 2.0f, -2.0f);
+
+    std::future<Buffer> projBuffFuture =
+        loader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::UNIFORM, (uint8_t*)glm::value_ptr(proj), 64);
+
+    Model model = Model(taskManager, "models/Orangutan/Orangutan/Orangutan.obj");
+    VlkModel vlkModel = VlkModel(memManager, loader, model);
     taskManager.addTasks(memManager.getTasks());
+
     taskManager.start();
 
     vlk::Scene scene = vulkan.createScene();
@@ -59,9 +72,16 @@ int main() {
     std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes = {};
     std::vector<Descriptor*> descriptorPtrs = {};
 
+    for(auto& descriptor : descriptors) {
+        sizes[descriptor.getType()]++;
+        descriptorPtrs.push_back(&descriptor);
+    }
+
     vlk::DescriptorPool pool = vlk::DescriptorPool(vulkan.getContext(), sizes);
 
     vlk::DescriptorSet set = vlk::DescriptorSet(vulkan.getContext(), descriptorPtrs, pool);
+
+    DBG(descriptors[0].getIndex());
 
     std::vector<VkPushConstantRange> ranges{};
     VkPipelineLayout layout = vlk::PipelineLayout::getLayout(vulkan.getContext(), set.getLayout(), ranges);
@@ -105,8 +125,24 @@ int main() {
 
     vlk::RenderPass renderPass = vlk::RenderPass(vulkan.getContext(), memManager, renderPassInfo);
 
+    VkVertexInputBindingDescription bindingDescription{};
+    bindingDescription.binding = 0;
+    bindingDescription.stride = 12;
+    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    VkVertexInputAttributeDescription attributeDescription{};
+    attributeDescription.location = 0;
+    attributeDescription.binding = 0;
+    attributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescription.offset = 0;
+
     VkPipelineVertexInputStateCreateInfo inputState{};
     inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    inputState.pVertexAttributeDescriptions = &attributeDescription;
+    inputState.pVertexBindingDescriptions = &bindingDescription;
+    inputState.vertexAttributeDescriptionCount = 1;
+    inputState.vertexBindingDescriptionCount = 1;
+
 
     VkPipelineShaderStageCreateInfo vertexStage{};
     vertexStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -130,11 +166,6 @@ int main() {
     
     VkPipeline pipeline = vlk::GraphicsPipeline::getPipeline(vulkan.getContext(), pipelineInfo);
 
-    for(auto& descriptor : descriptors) {
-        sizes[descriptor.getType()]++;
-        descriptorPtrs.push_back(&descriptor);
-    }
-
     while(!taskManager.isFinished());
     
     CommandPool cmdPool = CommandPool(vulkan.getContext(), vulkan.getContext().device->getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
@@ -144,8 +175,8 @@ int main() {
     VkViewport viewport{};
     viewport.width = window.getResolution().w;
     viewport.height = window.getResolution().h;
-    viewport.minDepth = 0;
-    viewport.maxDepth = 1;
+    viewport.minDepth = 0.0;
+    viewport.maxDepth = 1.0;
 
     //NOTE depth clear value should be 1 not 0
 
@@ -155,6 +186,12 @@ int main() {
     Fence fence = Fence(vulkan.getContext());
 
     uint32_t imgIndex = 0;
+
+    Buffer projBuff = projBuffFuture.get();
+    VkWriteDescriptorSet descriptorWrite = descriptors[0].getWriteBuffer(projBuff);
+    VkDescriptorSet setHandle = set.getSet();
+
+    vkUpdateDescriptorSets(vulkan.getContext().device->getDevice(), 1, &descriptorWrite, 0, nullptr);
 
     while(!window.shouldClose()) {
 
@@ -168,13 +205,20 @@ int main() {
         vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
 
 
+        VkBuffer vertexBuff = vlkModel.getVertexBuffer().getBuff();
+        VkDeviceSize offsets = 0;
+
         drawCmdBuffer.begin(nullptr);
         vkCmdSetViewport(drawCmdBuffer.getCommandBuffer(), 0, 1, &viewport);
         vkCmdSetScissor(drawCmdBuffer.getCommandBuffer(), 0, 1, &scissor);
 
+        
         vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdDraw(drawCmdBuffer.getCommandBuffer(), 6, 1, 0, 0);
+        vkCmdBindVertexBuffers(drawCmdBuffer.getCommandBuffer(), 0, 1, &vertexBuff, &offsets);
+        vkCmdBindDescriptorSets(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, 
+            layout, 0, 1, &setHandle, 0, nullptr);
+        vkCmdDraw(drawCmdBuffer.getCommandBuffer(), vlkModel.getVertexCount(), 1, 0, 0);
         vkCmdEndRenderPass(drawCmdBuffer.getCommandBuffer());
         drawCmdBuffer.end();
 
@@ -199,7 +243,7 @@ int main() {
         presentInfo.swapchainCount = 1;
         presentInfo.pImageIndices = &imgIndex;
 
-        VK_ERR(vkQueuePresentKHR(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), &presentInfo));
+        vkQueuePresentKHR(vulkan.getContext().device->getQueue(VK_QUEUE_GRAPHICS_BIT), &presentInfo);
 
         vkResetFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle);
         drawCmdBuffer.reset();
