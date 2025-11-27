@@ -17,17 +17,14 @@ namespace Sierra::vlk {
         for(Descriptor* descriptor : descriptors) {
             sizes[descriptor->getType()]++;
 
-            descriptor->setIndex(descriptorHandles[descriptor->getType()].size() - 1);
             descriptorHandles[descriptor->getType()].push_back(descriptor);
-        }
-
-        for(int i = 0; i < SIERRA_VLK_DESCRIPTOR_TYPE_COUNT; i++) {
-            if(!sizes[i]) continue;
+         //   descriptor->setIndex(descriptorHandles[descriptor->getType()].size() - 1);
 
             VkDescriptorSetLayoutBinding binding{};
-            binding.binding = i;
-            binding.descriptorType = (VkDescriptorType)i;
-            binding.descriptorCount = sizes[i];
+
+            binding.binding = descriptor->getIndex(); // descriptor index guys
+            binding.descriptorType = descriptor->getType();
+            binding.descriptorCount = 1;
             binding.stageFlags = VK_SHADER_STAGE_ALL;
 
             bindings.push_back(binding);
@@ -45,6 +42,10 @@ namespace Sierra::vlk {
         allocInfo.pSetLayouts = &layout;
 
         VK_ERR(vkAllocateDescriptorSets(context->device->getDevice(), &allocInfo, &set));
+
+        for(Descriptor* descriptor : descriptors) {
+            descriptor->setDescriptorSet(set);
+        }
     }
 
     VkDescriptorSet DescriptorSet::getSet() {

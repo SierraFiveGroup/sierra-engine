@@ -46,6 +46,7 @@ namespace Sierra::vlk {
         private:
             void readFile(std::string path, std::vector<char>& buff);
             void createShader(std::string path);
+            void createLayoutBindings();
 
             void parseShader(std::string path);
             uint32_t parseLine(char* line);
@@ -56,5 +57,6 @@ namespace Sierra::vlk {
 
             std::vector<Descriptor> descriptors;
             std::unordered_map<std::string, Descriptor*> descriptorMap;
+            std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
     };
 }

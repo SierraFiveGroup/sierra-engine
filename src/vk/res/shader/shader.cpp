@@ -25,6 +25,7 @@ namespace Sierra::vlk {
     Shader::Shader(Context& ctx, std::string path, std::string sourcePath): ctx(&ctx), module(VK_NULL_HANDLE) {
         createShader(path);
         parseShader(sourcePath);
+        createLayoutBindings();
     }
 
     void Shader::readFile(std::string path, std::vector<char>& buff) {
@@ -118,11 +119,15 @@ namespace Sierra::vlk {
         for(; line[offset] != ' '; offset++);
         offset++;
 
+        VK_ASSERT(endlOffset > offset); // fails if no name is provided
+
+        memset(buf, 0, sizeof(buf));
         memcpy(buf, line + offset, endlOffset - offset); 
         buf[endlOffset - offset] = '\0';
         ////////
 
         descriptors.emplace_back(std::string(buf), type);
+        descriptors.back().setIndex(binding);
 
         return endlOffset;
     }
@@ -132,6 +137,20 @@ namespace Sierra::vlk {
         for(; line[i] != '\n'; i++);
 
         return i;
+    }
+
+    void Shader::createLayoutBindings() {
+        return;
+        /*
+        layoutBindings.reserve(descriptors.size());
+
+        for(Descriptor& descriptor : descriptors) {
+            VkDescriptorSetLayoutBinding layoutBinding{};
+            layoutBinding.binding = descriptor.getIndex();
+            layoutBinding.descriptorCount = 1;
+            layoutBinding.descriptorType = descriptor.getType();
+        } // i dont even think this is needed
+        */
     }
 
     std::vector<VkDescriptorSetLayoutBinding> Shader::getDescriptorBindings() {
