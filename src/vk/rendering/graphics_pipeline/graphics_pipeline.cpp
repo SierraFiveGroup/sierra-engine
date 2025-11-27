@@ -39,7 +39,7 @@ namespace Sierra::vlk {
         VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
         rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL; // TODO add line option for debugging
-        rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
         rasterizationInfo.frontFace =  VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizationInfo.lineWidth = 1.0f;
         rasterizationInfo.depthBiasEnable = VK_FALSE;
@@ -59,13 +59,13 @@ namespace Sierra::vlk {
 
         VkPipelineColorBlendAttachmentState colorState{};
         colorState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_R_BIT; // LEAVE THE MASK REGARDLESS OF WHETHER YOU USE THE COLOR BLEND STATE
+         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT; // LEAVE THE MASK REGARDLESS OF WHETHER YOU USE THE COLOR BLEND STATE
         colorState.blendEnable = VK_FALSE; // SHIT GOES THROUGH HERE EITHER WAY
 
         VkPipelineColorBlendStateCreateInfo blendInfo{};
         blendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        blendInfo.logicOpEnable = VK_TRUE;
-        blendInfo.logicOp = VK_LOGIC_OP_AND;
+        blendInfo.logicOpEnable = false;
+//        blendInfo.logicOp = VK_LOGIC_OP_AND; WHY THE FUCK WAS THIS ENABLED???
         blendInfo.pAttachments = &colorState;
         blendInfo.attachmentCount = 1;
 
