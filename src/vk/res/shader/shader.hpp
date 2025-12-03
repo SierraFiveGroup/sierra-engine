@@ -40,13 +40,11 @@ namespace Sierra::vlk {
 
             VkShaderModule getShader();
 
-            std::vector<VkDescriptorSetLayoutBinding> getDescriptorBindings();
             std::vector<Descriptor>& getDescriptors();
 
         private:
             void readFile(std::string path, std::vector<char>& buff);
             void createShader(std::string path);
-            void createLayoutBindings();
 
             void parseShader(std::string path);
             uint32_t parseLine(char* line);
