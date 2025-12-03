@@ -22,6 +22,7 @@ namespace Sierra {
 
             bool isComplete();
             Stage getStage();
+            std::shared_ptr<uint8_t> getDat();
         protected:
             std::future<void> execute(std::function<void()> finished);
         private:
@@ -33,7 +34,9 @@ namespace Sierra {
             std::function<void(Task task)> callback;
 
             static void funcWrapper(std::function<void(std::shared_ptr<uint8_t>)> func, std::shared_ptr<uint8_t> dat,
-             std::function<void()> finished, Task task,  std::function<void(Task task)> callback);
+             std::function<void()> finished, Task task,  std::function<void(Task task)> callback, std::shared_ptr<std::atomic_bool> completed);
+
+            std::shared_ptr<std::atomic_bool> completed;
 
     };
     
