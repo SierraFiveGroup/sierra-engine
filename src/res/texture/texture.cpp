@@ -5,15 +5,27 @@
 
 namespace Sierra {
 
-    Texture::Texture() {
+    Texture::Texture(): x(), y(), channels(), data() {
 
     }
 
-    Texture::Texture(TaskManager& manager, std::string path): asyncDat(std::make_shared<AsyncDat>()) {
+    Texture::Texture(TaskManager& manager, std::string path): asyncDat(std::make_shared<AsyncDat>()), x(), y(), channels(), data() {
         asyncDat->path = path;
         asyncDat->parent = this;
 
+        getImageInfo(path);
         addTask(manager);
+    }
+
+    void Texture::getImageInfo(std::string path) {
+        stbi_info(path.c_str(), &x, &y, &channels);
+
+        if(!x || !y || !channels)
+            throw std::runtime_error((std::string)("Invalid image path ") + path);
+
+        if(channels > 1)
+            channels = 4; //loadtexture for explanation
+        asyncDat->channels = channels;
     }
 
     void Texture::addTask(TaskManager& manager) {
@@ -25,7 +37,13 @@ namespace Sierra {
     void Texture::loadTexture(std::shared_ptr<uint8_t> asyncDat) {
         AsyncDat& asyncDatRef = *(AsyncDat*)asyncDat.get();
 
-        asyncDatRef.data = stbi_load(asyncDatRef.path.c_str(), &asyncDatRef.x, &asyncDatRef.y, &asyncDatRef.channels, 0);
+        int req_comp = 0;
+        if(asyncDatRef.channels > 1)
+            req_comp = STBI_rgb_alpha; // cause of HORRIBLE format support the image has to be either red or rgba
+
+        int channelsDummy;
+        asyncDatRef.data = stbi_load(asyncDatRef.path.c_str(), &asyncDatRef.x, &asyncDatRef.y, &channelsDummy, req_comp);
+
         if(!asyncDatRef.data) throw std::runtime_error((std::string)("Invalid image path ") + asyncDatRef.path);
     }
 
@@ -41,23 +59,20 @@ namespace Sierra {
         tex.loaded = true;
     }
 
-    u_char* Texture::getPtr() {
+    u_char* Texture::getDat() {
         if(!isLoaded()) return nullptr; // prevent unlikely race condition
         return data;
     }
 
     int Texture::getWidth() {
-        if(!isLoaded()) return 0;
         return x;
     }
 
     int Texture::getHeight() {
-        if(!isLoaded()) return 0;
         return y;
     }
 
     int Texture::getChannels() {
-        if(!isLoaded()) return 0;
         return channels;
     }
 

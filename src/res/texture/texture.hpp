@@ -24,7 +24,7 @@ namespace Sierra {
             Texture(Texture&) = delete;
             void operator=(Texture&) = delete;
 
-            u_char* getPtr();
+            u_char* getDat();
             int getWidth();
             int getHeight();
             int getChannels();
@@ -33,6 +33,8 @@ namespace Sierra {
             Texture(Texture&&) ;
             void operator=(Texture&&);
         private:
+            void getImageInfo(std::string path);
+
             void addTask(TaskManager& manager);
             
             static void loadTexture(std::shared_ptr<uint8_t> asyncDat);
