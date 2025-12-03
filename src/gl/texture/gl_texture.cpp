@@ -1,7 +1,8 @@
 #include "gl_texture.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
+#include <cassert>
 
 namespace Sierra {
 	GLTexture::GLTexture(): mTex(0) {}
@@ -13,19 +14,20 @@ namespace Sierra {
     }
 
     GLTexture::GLTexture(std::string imagePath): mTex(0) {
+		assert(false);
 		stbi_set_flip_vertically_on_load(true);
 
 		int width, height, channels;
-		unsigned char *data = stbi_load(imagePath.c_str(), &width, &height, &channels, 0);
+	//	unsigned char *data = stbi_load(imagePath.c_str(), &width, &height, &channels, 0);
 
-		if (data == nullptr) {
-			ERROR("Failed to load texture from path " << imagePath);
-			return;
-		}
+	//	if (data == nullptr) {
+	//		ERROR("Failed to load texture from path " << imagePath);
+	//		return;
+	//	}
 
-		createTexture(data, width, height, channels);
+	//	createTexture(data, width, height, channels);
 
-		stbi_image_free(data);
+	//	stbi_image_free(data);
 	}
 
     void GLTexture::partialUpdate(uint8_t* data, int xOffset, int yOffset, int width,int height) {
