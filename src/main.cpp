@@ -1,6 +1,8 @@
 #include "vk/vulkan.hpp"
 #include "window/window.hpp"
 
+#include "res/texture/texture.hpp"
+
 #include "vk/res/shader/descriptor/descriptor_set.hpp"
 #include "vk/rendering/graphics_pipeline/pipeline_layout.hpp"
 #include "vk/rendering/graphics_pipeline/graphics_pipeline.hpp"
@@ -61,7 +63,11 @@ int main() {
     VlkModel vlkModel = VlkModel(memManager, loader, model);
     taskManager.addTasks(memManager.getTasks());
 
+    Texture texture = Texture(taskManager, "lepotec.jpg");
+
     taskManager.start();
+
+    while(!texture.isLoaded());
 
     vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
@@ -80,8 +86,6 @@ int main() {
     vlk::DescriptorPool pool = vlk::DescriptorPool(vulkan.getContext(), sizes);
 
     vlk::DescriptorSet set = vlk::DescriptorSet(vulkan.getContext(), descriptorPtrs, pool);
-
-    DBG(descriptors[0].getIndex());
 
     std::vector<VkPushConstantRange> ranges{};
     VkPipelineLayout layout = vlk::PipelineLayout::getLayout(vulkan.getContext(), set.getLayout(), ranges);
