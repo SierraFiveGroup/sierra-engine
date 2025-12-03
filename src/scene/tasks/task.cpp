@@ -25,8 +25,11 @@ namespace Sierra {
         } catch(std::runtime_error e) {
             ERROR((std::string)"Error while running async task: " + e.what());
         }
+
+        if(callback)
+            callback(task);
+
         finished();
-        callback(task);
 
         *completed = true;
     }
