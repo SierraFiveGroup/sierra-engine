@@ -20,7 +20,11 @@ namespace Sierra {
 
     void Task::funcWrapper(std::function<void(std::shared_ptr<uint8_t>)> func, std::shared_ptr<uint8_t> dat,
      std::function<void()> finished, Task task, std::function<void(Task task)> callback, std::shared_ptr<std::atomic_bool> completed) {
-        func(dat);
+        try {
+            func(dat);
+        } catch(std::runtime_error e) {
+            ERROR((std::string)"Error while running async task: " + e.what());
+        }
         finished();
         callback(task);
 

@@ -3,6 +3,8 @@
 #include <functional>
 #include <future>
 
+#include <io/logging/logger.hpp>
+
 namespace Sierra {
     class Task {
         public:
