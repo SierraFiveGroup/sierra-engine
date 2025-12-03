@@ -13,6 +13,7 @@
 #include "vk/res/mem/mem_loader.hpp"
 #include "vk/sync/fence/fence.hpp"
 #include "vk/res/loadable/model/vk_model.hpp"
+#include "vk/res/loadable/texture/vk_texture.hpp"
 
 #include "scene/tasks/manager.hpp"
 #include "scene/loader/loadable_resource.hpp"
@@ -61,13 +62,16 @@ int main() {
 
     Model model = Model(taskManager, "models/Orangutan/Orangutan/Orangutan.obj");
     VlkModel vlkModel = VlkModel(memManager, loader, model);
-    taskManager.addTasks(memManager.getTasks());
 
     Texture texture = Texture(taskManager, "lepotec.jpg");
+    VlkTexture vlkTexture = VlkTexture(vulkan.getContext(), taskManager, memManager, loader, {texture});
 
+    taskManager.addTasks(memManager.getTasks());
     taskManager.start();
 
     while(!texture.isLoaded());
+
+    DBG((long long)vlkTexture.getImageHandle());
 
     vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
