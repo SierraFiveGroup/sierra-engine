@@ -2,11 +2,11 @@
 
 layout(location = 0) in vec3 aVert;
 
-//@UNIFORM_BUFFER 0 projection //uhhhhhhh
+//@UNIFORM_BUFFER 0 projection
 layout(binding = 0) uniform Transform {
     mat4 proj;
 } transform;
 
 void main() {
-    gl_Position = transform.proj * vec4(aVert.xy, 0.0, 1.0);
+    gl_Position = transform.proj * vec4(aVert.xy, (aVert.z - 1) / 2, 1.0);
 }
