@@ -2,7 +2,7 @@
 
 #include <string>
 #include <atomic>
-
+#include <stb_image/stb_image.h>
 #include "io/logging/logger.hpp"
 #include "scene/tasks/manager.hpp"
 
@@ -15,6 +15,19 @@ namespace Sierra {
             std::mutex moveMutex;
 
             std::atomic<Texture*> parent;
+
+            AsyncDat() = default;
+
+            AsyncDat(const AsyncDat&) = delete; // Copy
+            AsyncDat& operator=(const AsyncDat&) = delete;
+            AsyncDat(AsyncDat&&) = default; // Move
+            AsyncDat& operator=(AsyncDat&&) = default;
+
+            ~AsyncDat() {
+                if (data) {
+                    stbi_image_free(data);
+                }
+            }
         };
 
         public:
@@ -30,7 +43,7 @@ namespace Sierra {
             int getChannels();
             bool isLoaded();
 
-            Texture(Texture&&) ;
+            Texture(Texture&&);
             void operator=(Texture&&);
         private:
             void getImageInfo(std::string path);
