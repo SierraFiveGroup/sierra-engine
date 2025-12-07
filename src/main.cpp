@@ -78,6 +78,7 @@ int main() {
     vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.frag.spv", "test_shaders/vk/tri.frag");
 
     auto descriptors = shaderVert.getDescriptors();
+    descriptors.insert(descriptors.end(), shaderFrag.getDescriptors().begin(), shaderFrag.getDescriptors().end());
 
     std::array<size_t, SIERRA_VLK_DESCRIPTOR_TYPE_COUNT> sizes = {};
     std::vector<Descriptor*> descriptorPtrs = {};
@@ -196,10 +197,14 @@ int main() {
     uint32_t imgIndex = 0;
 
     Buffer projBuff = projBuffFuture.get();
-    VkWriteDescriptorSet descriptorWrite = descriptors[0].getWriteBuffer(projBuff);
+    VkWriteDescriptorSet descriptorWrite[] = {
+        descriptors[0].getWriteBuffer(projBuff),
+        descriptors[1].getWriteImage(vlkTexture)
+    };
+
     VkDescriptorSet setHandle = set.getSet();
 
-    vkUpdateDescriptorSets(vulkan.getContext().device->getDevice(), 1, &descriptorWrite, 0, nullptr);
+    vkUpdateDescriptorSets(vulkan.getContext().device->getDevice(), 2, descriptorWrite, 0, nullptr);
 
     while(!window.shouldClose()) {
 
