@@ -265,6 +265,9 @@ target_include_directories(engine PRIVATE
 # ============================================================
 #                         Build Flags
 # ============================================================
+
+target_compile_options(engine PRIVATE -Wno-int-to-pointer-cast)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(engine PRIVATE DEBUG)
     target_compile_options(engine PRIVATE -O0 -g)
