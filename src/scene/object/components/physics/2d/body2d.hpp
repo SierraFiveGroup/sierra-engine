@@ -5,6 +5,7 @@
 #include <cassert>
 #include <limits>
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include "../../component.hpp"

@@ -1,52 +1,276 @@
-cmake_minimum_required(VERSION 3.12)
-project(engine)
+cmake_minimum_required(VERSION 3.20)
+project(engine LANGUAGES C CXX)
 
-# Set default build type to Debug if not specified
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type (Debug/Release)" FORCE)
-endif()
-
-# Set C++ standard to C++23
+# ----------------------------------------
+# Global build settings
+# ----------------------------------------
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Collect source files
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE SOURCES ${SOURCES} glad/glad.c)
-
-
-find_package(OpenAL REQUIRED)
-
-# Add executable
-add_executable(engine ${SOURCES})
-
-#add_library(engine SHARED ${SOURCES})
-#set_target_properties(engine PROPERTIES OUTPUT_NAME "SierraEngine")
-
-# Add compile options based on build type
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-# -g flag for debugging symbols
-target_compile_options(engine PRIVATE -g -DDEBUG -Wno-int-to-pointer-cast -Wno-cpp -O0 -DGLFW_INCLUDE_NONE)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-# Optimization flag for release builds. You can change -O3 to other optimization levels if desired.
-target_compile_options(engine PRIVATE -O3 -DGLFW_INCLUDE_NONE)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Debug or Release" FORCE)
 endif()
 
+include(FetchContent)
 
-# Include directories (assumes headers are in PATH-visible locations)
-include_directories(/usr/include) # Just in case :)
-include_directories($ENV{VULKAN_SDK}/Include)
-include_directories($ENV{GLFW_INCLUDE_DIR})  # Optional, if GLFW headers are not in a standard include path
-include_directories(src)
-include_directories(glad)
-include_directories(stb/stb_image)
-include_directories(stb/stb_truetype)
-include_directories(stb)
-include_directories(drlibs)
-include_directories(/usr/include/freetype2)
+# ----------------------------------------
+# Platform detection
+# ----------------------------------------
+if(WIN32)
+    set(PLATFORM_WINDOWS TRUE)
+elseif(APPLE)
+    set(PLATFORM_MAC TRUE)
+elseif(UNIX AND NOT APPLE)
+    set(PLATFORM_LINUX TRUE)
+endif()
 
-# Link libraries (assuming they are in the system linker path)
-target_link_libraries(engine PRIVATE glfw OpenAL::OpenAL freetype vulkan stdc++exp assimp)
+# ============================================================
+#                 Collect Engine Sources
+# ============================================================
+file(GLOB_RECURSE SOURCES src/*.cpp)
 
-# Output some informational messages
+# Create executable
+add_executable(engine ${SOURCES})
+
+# ============================================================
+#                      GLFW (Hybrid)
+# ============================================================
+set(BUILD_GLFW_FROM_SOURCE FALSE)
+
+if(PLATFORM_LINUX)
+    find_package(PkgConfig QUIET)
+
+    if(PkgConfig_FOUND)
+        pkg_check_modules(GLFW3 QUIET glfw3)
+
+        if(GLFW3_FOUND)
+            message(STATUS "Using system GLFW from pkg-config")
+
+            # pkg-config variables:
+            #   GLFW3_INCLUDE_DIRS
+            #   GLFW3_LIBRARY_DIRS
+            #   GLFW3_LIBRARIES
+
+            # Add include dirs and libs manually
+            target_include_directories(engine BEFORE PRIVATE ${GLFW3_INCLUDE_DIRS})
+            link_directories(${GLFW3_LIBRARY_DIRS})
+
+            set(GLFW_TARGET_NAME ${GLFW3_LIBRARIES})   # typically "glfw" or "glfw3")
+        else()
+            message(STATUS "System GLFW not found → Fetching GLFW from source.")
+            set(BUILD_GLFW_FROM_SOURCE TRUE)
+        endif()
+    else()
+        message(STATUS "pkg-config not found → Fetching GLFW from source.")
+        set(BUILD_GLFW_FROM_SOURCE TRUE)
+    endif()
+
+else()
+    # Windows/macOS always use source build
+    set(BUILD_GLFW_FROM_SOURCE TRUE)
+endif()
+
+if(BUILD_GLFW_FROM_SOURCE)
+    message(STATUS "Building GLFW from source…")
+
+    FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        master
+    )
+
+    # Disable OpenGL to avoid glad conflict
+    set(GLFW_USE_OPENGL OFF CACHE BOOL "" FORCE)
+    set(GLFW_USE_EGL OFF CACHE BOOL "" FORCE)
+    set(GLFW_USE_OSMESA OFF CACHE BOOL "" FORCE)
+    set(GLFW_CLIENT_LIBRARY None CACHE STRING "" FORCE)
+
+    # Disable examples/tests/docs
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(glfw)
+
+    set(GLFW_TARGET_NAME glfw)
+endif()
+
+# ============================================================
+#                      Assimp (Hybrid)
+# ============================================================
+set(BUILD_ASSIMP_FROM_SOURCE FALSE)
+
+if(PLATFORM_LINUX)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(ASSIMP QUIET assimp)
+    endif()
+
+    if(ASSIMP_FOUND)
+        message(STATUS "Using system Assimp (pkg-config)")
+
+        # pkg-config variables:
+        #   ASSIMP_INCLUDE_DIRS
+        #   ASSIMP_LIBRARY_DIRS
+        #   ASSIMP_LIBRARIES
+
+        # Inject headers for the engine target
+        target_include_directories(engine BEFORE PRIVATE ${ASSIMP_INCLUDE_DIRS})
+
+        # Add library search paths
+        link_directories(${ASSIMP_LIBRARY_DIRS})
+
+        # Use the raw library names (ex: "assimp")
+        set(ASSIMP_TARGET ${ASSIMP_LIBRARIES})
+    else()
+        message(STATUS "System Assimp not found → Fetching Assimp from source.")
+        set(BUILD_ASSIMP_FROM_SOURCE TRUE)
+    endif()
+
+else()
+    # Windows & macOS always build from source
+    set(BUILD_ASSIMP_FROM_SOURCE TRUE)
+endif()
+
+if(BUILD_ASSIMP_FROM_SOURCE)
+    FetchContent_Declare(
+        assimp
+        GIT_REPOSITORY https://github.com/assimp/assimp.git
+        GIT_TAG        v5.3.1
+    )
+    set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(assimp)
+
+    # FetchContent builds a target literally named "assimp"
+    set(ASSIMP_TARGET assimp)
+endif()
+
+# ============================================================
+#                    OpenAL Soft (Hybrid)
+# ============================================================
+set(BUILD_OPENAL_FROM_SOURCE FALSE)
+
+if(PLATFORM_LINUX)
+    find_package(OpenAL QUIET)
+    if(OpenAL_FOUND)
+        message(STATUS "Using system OpenAL")
+        set(OPENAL_TARGET OpenAL::OpenAL)
+    else()
+        message(STATUS "OpenAL not found → Fetching from source.")
+        set(BUILD_OPENAL_FROM_SOURCE TRUE)
+    endif()
+else()
+    set(BUILD_OPENAL_FROM_SOURCE TRUE)
+endif()
+
+if(BUILD_OPENAL_FROM_SOURCE)
+    FetchContent_Declare(
+        openal
+        GIT_REPOSITORY https://github.com/kcat/openal-soft.git
+        GIT_TAG        master
+    )
+    set(ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(openal)
+    set(OPENAL_TARGET OpenAL)
+endif()
+
+# ============================================================
+#                        Freetype (Hybrid)
+# ============================================================
+set(BUILD_FREETYPE_FROM_SOURCE FALSE)
+
+if(PLATFORM_LINUX)
+    find_package(Freetype QUIET)
+    if(Freetype_FOUND)
+        set(FREETYPE_TARGET Freetype::Freetype)
+    else()
+        message(STATUS "Freetype not found → Fetching from source.")
+        set(BUILD_FREETYPE_FROM_SOURCE TRUE)
+    endif()
+else()
+    set(BUILD_FREETYPE_FROM_SOURCE TRUE)
+endif()
+
+if(BUILD_FREETYPE_FROM_SOURCE)
+    FetchContent_Declare(
+        freetype
+        GIT_REPOSITORY https://github.com/freetype/freetype.git
+        GIT_TAG        VER-2-13-2
+    )
+    FetchContent_MakeAvailable(freetype)
+    set(FREETYPE_TARGET freetype)
+endif()
+
+# ============================================================
+#                        Vulkan
+# ============================================================
+find_package(Vulkan REQUIRED)
+
+# ============================================================
+#                        GLAD (local)
+# ============================================================
+file(GLOB_RECURSE GLAD_SOURCES glad/*.c)
+add_library(glad STATIC ${GLAD_SOURCES})
+target_include_directories(glad PUBLIC glad)
+
+# ============================================================
+#                    Include Directories
+# ============================================================
+target_include_directories(engine PRIVATE
+    src
+    stb
+    drlibs
+    ${Vulkan_INCLUDE_DIRS}
+)
+
+# ============================================================
+#                         Build Flags
+# ============================================================
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(engine PRIVATE DEBUG)
+    target_compile_options(engine PRIVATE -O0 -g)
+else()
+    target_compile_options(engine PRIVATE -O3)
+endif()
+
+if(WIN32)
+    target_compile_definitions(engine PRIVATE ENGINE_ENABLE_STACKTRACE=0)
+endif()
+
+# ============================================================
+#                     Linking Libraries
+# ============================================================
+target_link_libraries(engine PRIVATE
+    ${GLFW_TARGET_NAME}
+    ${ASSIMP_TARGET}
+    ${OPENAL_TARGET}
+    ${FREETYPE_TARGET}
+    Vulkan::Vulkan
+    glad
+    stdc++exp
+)
+
+# Extra dependencies for Windows/macOS
+if(WIN32)
+    target_link_libraries(engine PRIVATE ws2_32 winmm)
+elseif(APPLE)
+    find_library(COCOA_LIBRARY Cocoa REQUIRED)
+    find_library(IOKIT_LIBRARY IOKit REQUIRED)
+    find_library(COREVIDEO_LIBRARY CoreVideo REQUIRED)
+
+    target_link_libraries(engine PRIVATE
+        ${COCOA_LIBRARY}
+        ${IOKIT_LIBRARY}
+        ${COREVIDEO_LIBRARY}
+    )
+endif()
+
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Using GLFW target: ${GLFW_TARGET_NAME}")
+message(STATUS "Using Assimp target: ${ASSIMP_TARGET}")
+message(STATUS "Using OpenAL target: ${OPENAL_TARGET}")
+message(STATUS "Using Freetype target: ${FREETYPE_TARGET}")
