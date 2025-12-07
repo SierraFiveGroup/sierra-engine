@@ -5,6 +5,7 @@
 
 #include "vk/res/mem/mem_loader.hpp"
 #include "res/texture/texture.hpp"
+#include "vk/res/mem/image/sampler.hpp"
 
 namespace Sierra::vlk {
     class VlkTexture {
@@ -21,6 +22,7 @@ namespace Sierra::vlk {
         public:
             struct Info {
                 Texture& texture;
+                Sampler::Info samplerInfo;
             };
 
             VlkTexture();
@@ -33,6 +35,7 @@ namespace Sierra::vlk {
             void operator=(VlkTexture&&);
 
             VkImage getImageHandle();
+            VkDescriptorImageInfo* getDescriptorInfo();
 
         private:
             void createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info);
@@ -42,5 +45,7 @@ namespace Sierra::vlk {
             std::shared_ptr<AsyncDat> asyncDat;
 
             Image image;
+            Sampler sampler;
+            std::shared_ptr<VkDescriptorImageInfo> descriptorInfo;
     };
 }

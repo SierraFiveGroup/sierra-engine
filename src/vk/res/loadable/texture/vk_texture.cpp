@@ -1,13 +1,14 @@
 #include "vk_texture.hpp"
 
+#define IMG_LAYOUT VK_IMAGE_LAYOUT_GENERAL // as a sub until i figure out what the fuck to put
 namespace Sierra::vlk {
 
-    VlkTexture::VlkTexture(): image(), asyncDat() {
+    VlkTexture::VlkTexture(): image(), asyncDat(), sampler(), descriptorInfo() {
 
     }
 
     VlkTexture::VlkTexture(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info):
-     image(), asyncDat(std::make_shared<AsyncDat>()) {
+     image(), asyncDat(std::make_shared<AsyncDat>()), sampler(context, info.samplerInfo), descriptorInfo(std::make_shared<VkDescriptorImageInfo>()) {
         createTask(context, taskManager, memManager, loader, info);
     }
 
@@ -39,7 +40,7 @@ namespace Sierra::vlk {
                      + std::to_string(asyncDatRef.texture->getChannels()));
         }
         info.extent = {(uint32_t)asyncDatRef.texture->getWidth(), (uint32_t)asyncDatRef.texture->getHeight(), 1};
-        info.layout = VK_IMAGE_LAYOUT_GENERAL; // TODO WHATS RIGHT HERE
+        info.layout = IMG_LAYOUT; // TODO WHATS RIGHT HERE
         info.usage = VK_IMAGE_USAGE_SAMPLED_BIT; // color attachment?
 
         *asyncDatRef.imageFuture = asyncDatRef.loader->createImage(
@@ -54,8 +55,18 @@ namespace Sierra::vlk {
         return image.getImage();
     }
 
+    VkDescriptorImageInfo* VlkTexture::getDescriptorInfo() {
+        if(!image.getImage())
+            return nullptr;
+
+        descriptorInfo->sampler = sampler.getSampler();
+        descriptorInfo->imageView = image.getView();
+        descriptorInfo->imageLayout = IMG_LAYOUT;
+
+        return descriptorInfo.get();
+    }
+
     void VlkTexture::operator=(VlkTexture&& other) {
-        asyncDat = std::move(other.asyncDat);
-        image = std::move(other.image);
+        *this = std::move(other);
     }
 }
