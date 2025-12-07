@@ -29,8 +29,11 @@ namespace Sierra::vlk {
         return write;
     }
 
-    VkWriteDescriptorSet Descriptor::getWriteImage(Image& buffer) {
-        throw new std::runtime_error("UNIMPLEMENTED");
+    VkWriteDescriptorSet Descriptor::getWriteImage(VlkTexture& tex) {
+        VkWriteDescriptorSet write = getWrite();
+        write.pImageInfo = tex.getDescriptorInfo();
+
+        return write;
     }
 
     void Descriptor::setIndex(uint32_t index) {

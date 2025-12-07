@@ -5,6 +5,7 @@
 
 #include "vk/res/mem/buffer/buffer.hpp"
 #include "vk/res/mem/image/image.hpp"
+#include "vk/res/loadable/texture/vk_texture.hpp"
 
 #define SIERRA_VLK_DESCRIPTOR_TYPE_COUNT 10
 
@@ -23,7 +24,7 @@ namespace Sierra::vlk {
 
             VkWriteDescriptorSet getWrite();
             VkWriteDescriptorSet getWriteBuffer(Buffer& buffer);
-            VkWriteDescriptorSet getWriteImage(Image& buffer);
+            VkWriteDescriptorSet getWriteImage(VlkTexture& tex);
         
         protected:
             void setIndex(uint32_t index);
