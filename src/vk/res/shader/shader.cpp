@@ -77,7 +77,7 @@ namespace Sierra::vlk {
         /////// descriptor type
         VkDescriptorType type;
 
-        for(uint32_t i = 0; i < MAX_DESCRIPTOR_TYPE_NAME_LENGTH; i++) {
+        for(uint32_t i = 0; i <= MAX_DESCRIPTOR_TYPE_NAME_LENGTH; i++) {
             if(line[i] != ' ') continue;
 
             memcpy(buf, line + 1, i-1);
