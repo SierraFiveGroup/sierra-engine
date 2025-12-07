@@ -71,7 +71,7 @@ else()
 endif()
 
 if(BUILD_GLFW_FROM_SOURCE)
-    message(STATUS "Building GLFW from source…")
+    message(STATUS "Building GLFW from source...")
 
     FetchContent_Declare(
         glfw
