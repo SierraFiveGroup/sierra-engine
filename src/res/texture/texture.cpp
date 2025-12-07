@@ -17,6 +17,12 @@ namespace Sierra {
         addTask(manager);
     }
 
+    Texture::~Texture() {
+        if (asyncDat->data) {
+            stbi_image_free(asyncDat->data);
+        }
+    }
+
     void Texture::getImageInfo(std::string path) {
         stbi_info(path.c_str(), &x, &y, &channels);
 
