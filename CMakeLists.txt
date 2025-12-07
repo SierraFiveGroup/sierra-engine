@@ -181,28 +181,63 @@ endif()
 # ============================================================
 #                        Freetype (Hybrid)
 # ============================================================
-set(BUILD_FREETYPE_FROM_SOURCE FALSE)
+set(USE_FREETYPE TRUE)    # Set to FALSE if you want to disable it globally
 
-if(PLATFORM_LINUX)
-    find_package(Freetype QUIET)
-    if(Freetype_FOUND)
-        set(FREETYPE_TARGET Freetype::Freetype)
+if(USE_FREETYPE)
+
+    if(PLATFORM_LINUX)
+        # --- Linux: prefer system Freetype ---
+        find_package(Freetype QUIET)
+
+        if(Freetype_FOUND)
+            message(STATUS "Using system Freetype")
+            set(FREETYPE_TARGET Freetype::Freetype)
+        else()
+            message(STATUS "System Freetype not found → Building from source")
+
+            FetchContent_Declare(
+                freetype
+                GIT_REPOSITORY https://github.com/freetype/freetype.git
+                GIT_TAG        VER-2-13-2
+            )
+            set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+            set(FT_DISABLE_PNG  ON CACHE BOOL "" FORCE)
+            set(FT_DISABLE_BZIP2 ON CACHE BOOL "" FORCE)
+            set(FT_DISABLE_BROTLI ON CACHE BOOL "" FORCE)
+
+            FetchContent_MakeAvailable(freetype)
+            set(FREETYPE_TARGET freetype)
+        endif()
+
+    elseif(PLATFORM_WINDOWS)
+        # --- Windows: DO NOT build freetype from source ---
+        # Try Vulkan SDK's prebuilt Freetype first
+        message(STATUS "Checking for Freetype in Vulkan SDK...")
+
+        find_path(FREETYPE_INCLUDE_DIR freetype/config/ftheader.h
+            HINTS "$ENV{VULKAN_SDK}/Include"
+        )
+
+        find_library(FREETYPE_LIBRARY freetype
+            HINTS "$ENV{VULKAN_SDK}/Lib"
+        )
+
+        if(FREETYPE_INCLUDE_DIR AND FREETYPE_LIBRARY)
+            message(STATUS "Using Freetype from Vulkan SDK")
+            target_include_directories(engine PRIVATE ${FREETYPE_INCLUDE_DIR})
+            set(FREETYPE_TARGET ${FREETYPE_LIBRARY})
+        else()
+            # No Freetype on Windows → Disable it
+            message(WARNING "Freetype not found on Windows → Disabling Freetype")
+            set(USE_FREETYPE FALSE)
+        endif()
+
     else()
-        message(STATUS "Freetype not found → Fetching from source.")
-        set(BUILD_FREETYPE_FROM_SOURCE TRUE)
+        # macOS or unknown → disable by default
+        message(WARNING "Freetype unsupported on this platform → Disabling")
+        set(USE_FREETYPE FALSE)
     endif()
-else()
-    set(BUILD_FREETYPE_FROM_SOURCE TRUE)
-endif()
 
-if(BUILD_FREETYPE_FROM_SOURCE)
-    FetchContent_Declare(
-        freetype
-        GIT_REPOSITORY https://github.com/freetype/freetype.git
-        GIT_TAG        VER-2-13-2
-    )
-    FetchContent_MakeAvailable(freetype)
-    set(FREETYPE_TARGET freetype)
 endif()
 
 # ============================================================
@@ -248,11 +283,14 @@ target_link_libraries(engine PRIVATE
     ${GLFW_TARGET_NAME}
     ${ASSIMP_TARGET}
     ${OPENAL_TARGET}
-    ${FREETYPE_TARGET}
     Vulkan::Vulkan
     glad
     stdc++exp
 )
+
+if(USE_FREETYPE)
+    target_link_libraries(engine PRIVATE ${FREETYPE_TARGET})
+endif()
 
 # Extra dependencies for Windows/macOS
 if(WIN32)
