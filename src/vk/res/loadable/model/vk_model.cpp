@@ -18,7 +18,7 @@ namespace Sierra::vlk {
         asyncDat->modelData = model.modelData;
         asyncDat->modelPath = model.getPath();
 
-        Task task = Task(Task::Stage::PRE_UPLOAD, 0, createBuffers, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        Task task = Task(Task::Stage::INIT, 0, createBuffers, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
         task.setOnCompleteCallback(finishedCallback);
 
         taskManager.addTask(task);
