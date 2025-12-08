@@ -1,7 +1,7 @@
 #include "manager.hpp"
 
 namespace Sierra {
-    TaskManager::TaskManager(): tasks(), currentStage(Task::Stage::LOAD), finished(true), tasksRemaining() {
+    TaskManager::TaskManager(): tasks(), currentStage((Task::Stage)0), finished(true), tasksRemaining() {
 
     }
 
@@ -16,8 +16,7 @@ namespace Sierra {
     }
 
     void TaskManager::start() { // TODO handle starting mid execution
-        tasksRemaining = tasks[ENUM_INT(Task::Stage::LOAD)].size();
-        currentStage = Task::Stage::LOAD;
+        tasksRemaining = tasks[ENUM_INT(currentStage)].size();
         finished = false;
 
         if (!tasksRemaining) {
