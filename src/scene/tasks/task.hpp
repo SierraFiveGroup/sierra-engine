@@ -10,10 +10,13 @@ namespace Sierra {
         public:
             friend class TaskManager;
             enum class Stage {
+                PRE_LOAD,
                 LOAD, // loading resources from disk
                 AFTER_LOAD,
+                PRE_INIT,
                 INIT, // init all the resources
                 AFTER_INIT,
+                PRE_UPLOAD,
                 UPLOAD, // copying them onto API specific buffers and such
                 AFTER_UPLOAD,
                 HOT_LOAD, // do something right fucking now
