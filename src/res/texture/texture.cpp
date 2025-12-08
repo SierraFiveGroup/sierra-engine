@@ -18,6 +18,7 @@ namespace Sierra {
     }
 
     Texture::~Texture() {
+        if(!asyncDat) return;
         if (asyncDat->data) {
             stbi_image_free(asyncDat->data);
         }
