@@ -7,47 +7,68 @@ namespace Sierra::vlk {
 
     }
 
-    VlkModel::VlkModel(MemoryManager& memManager, MemLoader& memLoader, Model& model): model(model), vertexCount() ,indexCount() {
-        createVertexBuff(memManager, memLoader);
-        createIndexBuff(memManager, memLoader);
+    VlkModel::VlkModel(TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model): model(model), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
+        createTask(taskManager, memManager, memLoader, model);
     }
 
-    void VlkModel::createVertexBuff(MemoryManager& memManager, MemLoader& memLoader) {
-        if(model.meshes.size() == 1) {
-            vertexCount = model.meshes[0]->mNumVertices;
-            vertexBuffFuture = memLoader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, 
-                Buffer::Usage::VERTEX, (uint8_t*)model.meshes[0]->mVertices, model.meshes[0]->mNumVertices * VERTEX_SIZE);
+    void VlkModel::createTask(TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model) {
+        asyncDat->parent = this;
+        asyncDat->memManager = &memManager;
+        asyncDat->memLoader = &memLoader;
+        asyncDat->modelData = model.modelData;
+        asyncDat->modelPath = model.getPath();
+
+        Task task = Task(Task::Stage::PRE_UPLOAD, 0, createBuffers, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        task.setOnCompleteCallback(finishedCallback);
+
+        taskManager.addTask(task);
+    }
+
+    void VlkModel::createBuffers(std::shared_ptr<uint8_t> dat) {
+        AsyncDat& asyncDat = *(AsyncDat*)dat.get();
+
+        if(asyncDat.modelData->meshes.empty()) throw std::runtime_error("Model not finished loading yet: " + asyncDat.modelPath);
+        createVertexBuff(asyncDat);
+        createIndexBuff(asyncDat);
+    }
+
+    void VlkModel::createVertexBuff(AsyncDat& asyncDat) {
+
+        if(asyncDat.modelData->meshes.size() == 1) {
+            asyncDat.vertexCount = asyncDat.modelData->meshes[0]->mNumVertices;
+            asyncDat.vertexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, 
+                Buffer::Usage::VERTEX, (uint8_t*)asyncDat.modelData->meshes[0]->mVertices, asyncDat.modelData->meshes[0]->mNumVertices * VERTEX_SIZE);
              
             return; // so we dont create a whole new buffer
         } 
 
-        vertexCount = 0;
-        for(int i = 0; i < model.meshes.size(); i++) {
-            vertexCount += model.meshes[i]->mNumVertices;
+        asyncDat.vertexCount = 0;
+        for(int i = 0; i < asyncDat.modelData->meshes.size(); i++) {
+            asyncDat.vertexCount += asyncDat.modelData->meshes[i]->mNumVertices;
         }
 
-        std::vector<float> buff(vertexCount * 3);
+        std::vector<float> buff(asyncDat.vertexCount * 3);
 
         size_t prevSize = 0;
-        for(int i = 0; i < model.meshes.size(); i++) {
-            memcpy(buff.data() + prevSize, model.meshes[i]->mVertices, model.meshes[i]->mNumVertices * VERTEX_SIZE);
+        for(int i = 0; i < asyncDat.modelData->meshes.size(); i++) {
+            memcpy(buff.data() + prevSize, asyncDat.modelData->meshes[i]->mVertices, asyncDat.modelData->meshes[i]->mNumVertices * VERTEX_SIZE);
 
-            prevSize += model.meshes[i]->mNumVertices * sizeof(float);
+            prevSize += asyncDat.modelData->meshes[i]->mNumVertices * sizeof(float);
         }
 
-        vertexBuffFuture = memLoader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, 
+        asyncDat.vertexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, 
             Buffer::Usage::VERTEX, (uint8_t*)buff.data(), buff.size() * VERTEX_SIZE);
     }
 
-    void VlkModel::createIndexBuff(MemoryManager& memManager, MemLoader& memLoader) {
-        for(aiMesh* mesh : model.meshes) {
-            indexCount += mesh->mNumFaces * 3;
+    void VlkModel::createIndexBuff(AsyncDat& asyncDat) {
+        for(aiMesh* mesh : asyncDat.modelData->meshes) {
+            asyncDat.indexCount += mesh->mNumFaces * 3;
         }
 
-        std::vector<uint32_t> indices(indexCount);
+        std::vector<uint32_t> indices(asyncDat.indexCount);
 
         int i = 0;
-        for(aiMesh* mesh : model.meshes) {
+        for(aiMesh* mesh : asyncDat.modelData->meshes) {
             for(int y = 0; y < mesh->mNumFaces; y++) {
                 indices[i + y*3 + 0] = mesh->mFaces[y].mIndices[0];
                 indices[i + y*3 + 1] = mesh->mFaces[y].mIndices[1];
@@ -55,8 +76,17 @@ namespace Sierra::vlk {
             }
         }
 
-        indexBuffFuture = memLoader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::INDEX,
+        asyncDat.indexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::INDEX,
              (uint8_t*)indices.data(), indices.size() * sizeof(uint32_t));
+    }
+
+    void VlkModel::finishedCallback(Task task) {
+        AsyncDat& asyncDat = *(AsyncDat*)task.getDat().get();
+
+        asyncDat.parent->vertexBuffFuture = std::move(asyncDat.vertexBuffFuture);
+        asyncDat.parent->indexBuffFuture = std::move(asyncDat.indexBuffFuture);
+        asyncDat.parent->vertexCount = asyncDat.vertexCount;
+        asyncDat.parent->indexCount = asyncDat.indexCount;
     }
     
     size_t VlkModel::getVertexCount() {
@@ -79,5 +109,25 @@ namespace Sierra::vlk {
             indexBuff = indexBuffFuture.get();
 
         return indexBuff;
+    }
+
+    VlkModel::VlkModel(VlkModel&& other) {
+        if(!other.asyncDat) return;
+
+        vertexBuff = std::move(other.vertexBuff);
+        vertexBuffFuture = std::move(other.vertexBuffFuture);
+
+        indexBuff = std::move(other.indexBuff);
+        indexBuffFuture = std::move(other.indexBuffFuture);
+
+        vertexCount = std::move(other.vertexCount);
+        indexCount = std::move(other.indexCount);
+
+        asyncDat = other.asyncDat;
+        asyncDat->parent = this; // TODO handle concurrency cause this is hell
+    }
+
+    void VlkModel::operator=(VlkModel&& other) {
+        *this = std::move(other);
     }
 }
