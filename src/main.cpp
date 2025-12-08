@@ -61,7 +61,7 @@ int main() {
         loader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::UNIFORM, (uint8_t*)glm::value_ptr(proj), 64);
 
     Model model = Model(taskManager, "models/Orangutan/Orangutan/Orangutan.obj");
-    VlkModel vlkModel = VlkModel(memManager, loader, model);
+    VlkModel vlkModel = VlkModel(taskManager, memManager, loader, model);
 
     Texture texture = Texture(taskManager, "lepotec.jpg");
     VlkTexture vlkTexture = VlkTexture(vulkan.getContext(), taskManager, memManager, loader, {texture});
@@ -69,7 +69,7 @@ int main() {
     taskManager.addTasks(memManager.getTasks());
     taskManager.start();
 
-    while(!texture.isLoaded());
+    while(!taskManager.isFinished());
 
     DBG((long long)vlkTexture.getImageHandle());
 
