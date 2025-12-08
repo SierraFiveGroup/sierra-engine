@@ -11,3 +11,4 @@ build/
 perf*
 /engine
 panic_dump.txt
+libglad.a
