@@ -4,6 +4,8 @@
 #include <array>
 #include <utility>
 #include <atomic>
+#include <execinfo.h>
+#include <cxxabi.h>
 
 #include "task.hpp"
 #include "util/utilities.hpp"
@@ -20,6 +22,8 @@ namespace Sierra {
 
             void addTask(Task task);
             void addTasks(std::vector<Task>&& tasks);
+
+            void printTasks();
 
             void start();
             bool isFinished();

@@ -71,4 +71,36 @@ namespace Sierra {
             task.execute(std::bind(&TaskManager::taskFinishedCallback, this));
         }
     }
+
+#ifdef __linux__
+    void TaskManager::printTasks() {
+        LOG("Task Manager state:");
+        for(int i = 0; i <   (int)Task::Stage::Stage_MAX; i++) {
+            if(tasks[i].empty()) continue;
+            LOG_NO_PRETTY(i << ":");
+            for(Task task : tasks[i]) {
+                auto methodPtr = task.func.target<void(*)(std::shared_ptr<uint8_t>)>();
+
+                char** realname = backtrace_symbols((void * const*)&(*methodPtr), 1); //fuck binbows
+                //also for SOME REASOM target returns (**func) instead of (*func) so we gotta dereference it
+                std::string realNameStd = *realname;
+
+                size_t openBracketPos = realNameStd.find_first_of('(');
+                realNameStd = realNameStd.substr(openBracketPos + 1, realNameStd.find(')', openBracketPos + 1) - (openBracketPos + 1) - 2); // -2 because "+0" at the end fucks up the demangling
+                //also the mangled name is in the brackets so we just get that
+
+                char* realnameDemangled = abi::__cxa_demangle(realNameStd.c_str(), NULL, NULL, NULL);
+                //bullshit fucking system
+                //it feels like I have to summon cthulu himself just to get a damn name
+                LOG_NO_PRETTY("\t" << realnameDemangled);
+                free(realname);
+                free(realnameDemangled);
+            }
+        }
+    }
+#else 
+    void TaskManager::printTasks() {
+        throw std::runtime_error("Task manager task debugging only supported on Linux, smd");
+    }
+#endif
 };
