@@ -61,17 +61,15 @@ int main() {
         loader.createBuff(memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::UNIFORM, (uint8_t*)glm::value_ptr(proj), 64);
 
     Model model = Model(taskManager, "models/Orangutan/Orangutan/Orangutan.obj");
-    VlkModel vlkModel = VlkModel(taskManager, memManager, loader, model);
+    VlkModel vlkModel = VlkModel(vulkan.getContext(), taskManager, memManager, loader, model);
 
     Texture texture = Texture(taskManager, "lepotec.jpg");
-    VlkTexture vlkTexture = VlkTexture(vulkan.getContext(), taskManager, memManager, loader, {texture});
 
     taskManager.addTasks(memManager.getTasks());
+    taskManager.printTasks();
     taskManager.start();
 
     while(!taskManager.isFinished());
-
-    DBG((long long)vlkTexture.getImageHandle());
 
     vlk::Scene scene = vulkan.createScene();
     vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
@@ -199,7 +197,9 @@ int main() {
     Buffer projBuff = projBuffFuture.get();
     VkWriteDescriptorSet descriptorWrite[] = {
         descriptors[0].getWriteBuffer(projBuff),
-        descriptors[1].getWriteImage(vlkTexture)
+        descriptors[1].getWriteImage(
+            *vlkModel.getTexture(aiTextureType_DIFFUSE)
+        )
     };
 
     VkDescriptorSet setHandle = set.getSet();
