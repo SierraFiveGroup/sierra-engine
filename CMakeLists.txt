@@ -267,6 +267,7 @@ target_include_directories(engine PRIVATE
 # ============================================================
 
 target_compile_options(engine PRIVATE -Wno-int-to-pointer-cast)
+target_link_options(engine PRIVATE -rdynamic)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(engine PRIVATE DEBUG)
