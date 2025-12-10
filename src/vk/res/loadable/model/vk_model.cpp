@@ -7,18 +7,20 @@ namespace Sierra::vlk {
 
     }
 
-    VlkModel::VlkModel(TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model): model(model), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
-        createTask(taskManager, memManager, memLoader, model);
+    VlkModel::VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model): model(model), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
+        createTask(context, taskManager, memManager, memLoader, model);
     }
 
-    void VlkModel::createTask(TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model) {
+    void VlkModel::createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model) {
         asyncDat->parent = this;
+        asyncDat->context = &context;
         asyncDat->memManager = &memManager;
         asyncDat->memLoader = &memLoader;
+        asyncDat->taskManager = &taskManager;
         asyncDat->modelData = model.modelData;
         asyncDat->modelPath = model.getPath();
 
-        Task task = Task(Task::Stage::INIT, 0, createBuffers, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        Task task = Task(Task::Stage::LOAD, 0, createBuffers, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
         task.setOnCompleteCallback(finishedCallback);
 
         taskManager.addTask(task);
@@ -30,6 +32,7 @@ namespace Sierra::vlk {
         if(asyncDat.modelData->meshes.empty()) throw std::runtime_error("Model not finished loading yet: " + asyncDat.modelPath);
         createVertexBuff(asyncDat);
         createIndexBuff(asyncDat);
+        createTextures(asyncDat);
     }
 
     void VlkModel::createVertexBuff(AsyncDat& asyncDat) {
@@ -80,6 +83,31 @@ namespace Sierra::vlk {
              (uint8_t*)indices.data(), indices.size() * sizeof(uint32_t));
     }
 
+    void VlkModel::createTextures(AsyncDat& asyncDat) {
+        Sampler::Info samplerInfo{};
+        samplerInfo.filter = VK_FILTER_LINEAR; //TODO Option for linear/nearest
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR; //ditto
+        samplerInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.lodBias = 0.0;//??
+        samplerInfo.minLod = 0.0;
+        samplerInfo.maxLod = 1.0;
+        samplerInfo.anisotropy = false; //TODO
+
+        VlkTexture::Info texInfo{};
+        texInfo.samplerInfo = samplerInfo;
+
+        for(int i = 0; i < asyncDat.modelData->textures.size(); i++) {
+            for(Texture& tex : asyncDat.modelData->textures[i]) {
+                texInfo.texture = &tex;
+
+                asyncDat.textures[i].push_back(
+                    std::move(VlkTexture(*asyncDat.context, *asyncDat.taskManager, *asyncDat.memManager, *asyncDat.memLoader, texInfo))
+                );
+            }
+        
+        }
+    }
+
     void VlkModel::finishedCallback(Task task) {
         AsyncDat& asyncDat = *(AsyncDat*)task.getDat().get();
 
@@ -87,6 +115,9 @@ namespace Sierra::vlk {
         asyncDat.parent->indexBuffFuture = std::move(asyncDat.indexBuffFuture);
         asyncDat.parent->vertexCount = asyncDat.vertexCount;
         asyncDat.parent->indexCount = asyncDat.indexCount;
+        asyncDat.parent->textures = std::move(asyncDat.textures);
+
+        asyncDat.finished = true;
     }
     
     size_t VlkModel::getVertexCount() {
@@ -111,6 +142,17 @@ namespace Sierra::vlk {
         return indexBuff;
     }
 
+    VlkTexture* VlkModel::getTexture(aiTextureType type) {
+        if (!asyncDat->finished) 
+            throw std::runtime_error("Tried to access model texture before loading is complete");
+
+        if (textures[type].empty()) 
+            return nullptr;
+
+        return &textures[type].front();
+        
+    }
+
     VlkModel::VlkModel(VlkModel&& other) {
         if(!other.asyncDat) return;
 
@@ -128,6 +170,18 @@ namespace Sierra::vlk {
     }
 
     void VlkModel::operator=(VlkModel&& other) {
-        *this = std::move(other);
+        if(!other.asyncDat) return;
+
+        vertexBuff = std::move(other.vertexBuff);
+        vertexBuffFuture = std::move(other.vertexBuffFuture);
+
+        indexBuff = std::move(other.indexBuff);
+        indexBuffFuture = std::move(other.indexBuffFuture);
+
+        vertexCount = std::move(other.vertexCount);
+        indexCount = std::move(other.indexCount);
+
+        asyncDat = other.asyncDat;
+        asyncDat->parent = this;
     }
 }

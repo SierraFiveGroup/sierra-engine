@@ -2,9 +2,14 @@
 
 #include "res/model/model.hpp"
 #include "vk/res/mem/mem_loader.hpp"
+#include "vk/res/loadable/texture/vk_texture.hpp"
+#include "vk/res/mem/image/sampler.hpp"
 
 namespace Sierra::vlk {
     class VlkModel {
+
+        typedef std::array<std::vector<VlkTexture>, AI_TEXTURE_TYPE_COUNT> Textures_t;
+
         struct AsyncDat {
             size_t vertexCount;
             size_t indexCount;
@@ -12,19 +17,28 @@ namespace Sierra::vlk {
             std::future<Buffer> vertexBuffFuture;
             std::future<Buffer> indexBuffFuture;
 
+            Textures_t textures;
+
             std::shared_ptr<Model::AIModelData> modelData;
             std::string modelPath;
 
+            Context* context;
+            TaskManager* taskManager;
             MemoryManager* memManager;
             MemLoader* memLoader;
 
             VlkModel* parent;
+            
+            std::atomic_bool finished;
         };
 
         public:
 
             VlkModel();
-            VlkModel(TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
+            VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
+
+            VlkModel(VlkModel&) = delete;
+            void operator=(VlkModel&) = delete;
 
             VlkModel(VlkModel&&);
             void operator=(VlkModel&&);
@@ -35,11 +49,14 @@ namespace Sierra::vlk {
             Buffer& getIndexBuffer();
             size_t getIndexCount();
 
+            VlkTexture* getTexture(aiTextureType type);
+
         private:
             static void createVertexBuff(AsyncDat& asyncDat);
             static void createIndexBuff(AsyncDat& asyncDat);
+            static void createTextures(AsyncDat& asyncDat);
 
-            void createTask(TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
+            void createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
             static void createBuffers(std::shared_ptr<uint8_t> dat);
             static void finishedCallback(Task task);
 
@@ -54,7 +71,10 @@ namespace Sierra::vlk {
             size_t vertexCount;
             size_t indexCount;
 
+            Textures_t textures;
+
             Model model;
+
     };
 
 }
