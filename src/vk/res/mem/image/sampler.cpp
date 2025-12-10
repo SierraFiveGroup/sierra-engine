@@ -34,7 +34,17 @@ namespace Sierra::vlk {
     }
 
     void Sampler::operator=(Sampler&& other) {
-        *this = std::move(other);
+        sampler = std::move(other.sampler);
+        context = std::move(other.context);
+
+        other.sampler = VK_NULL_HANDLE;
+    }
+
+    Sampler::Sampler(Sampler&& other) {
+        sampler = std::move(other.sampler);
+        context = std::move(other.context);
+
+        other.sampler = VK_NULL_HANDLE;
     }
 
     Sampler::~Sampler() {

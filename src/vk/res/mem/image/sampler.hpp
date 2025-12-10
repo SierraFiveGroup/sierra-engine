@@ -24,7 +24,7 @@ namespace Sierra::vlk {
             Sampler(Sampler&) = delete;
             Sampler operator=(Sampler&) = delete;
 
-            Sampler(Sampler&&) = default;
+            Sampler(Sampler&&);
             void operator=(Sampler&&);
 
             ~Sampler();
