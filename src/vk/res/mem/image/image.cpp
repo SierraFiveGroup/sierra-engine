@@ -4,7 +4,7 @@ namespace Sierra::vlk {
 
     Image::ImageMap_t Image::imagePtrMap = {}; 
 
-    Image::Image(): image(), mem(), available() {
+    Image::Image(): image(), mem(), available(std::make_shared<std::atomic_bool>(false)) {
 
     }
 
@@ -13,7 +13,7 @@ namespace Sierra::vlk {
         createImage(context, info);
         createImageView(context, info);
 
-        imagePtrMap[image] = std::make_shared<Image*>(this);
+        imagePtrMap[image] = this;
 
         if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED) 
             addTransitionOp(manager, info);
@@ -24,7 +24,7 @@ namespace Sierra::vlk {
         createImage(context, info);
         createImageView(context, info);
 
-        imagePtrMap[image] = std::make_shared<Image*>(this);
+        imagePtrMap[image] = this;
 
         if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED) 
             throw std::runtime_error("If no MemoryManager is provided layout must be undefined");
@@ -84,7 +84,7 @@ namespace Sierra::vlk {
     }
 
     void Image::transitionOpCallback(MemoryManager::TransitionLayoutOp op) {
-        Image& image = **imagePtrMap[op.image];
+        Image& image = *imagePtrMap[op.image];
 
         image.completeTransition(); 
     }
@@ -102,29 +102,30 @@ namespace Sierra::vlk {
     }
 
     Image::Image(Image&& other) {
-        image = other.image;
-        available = other.available;
+
+        image = std::move(other.image);
+        available = std::move(other.available);
         mem = std::move(other.mem);
         view = std::move(other.view);
 
-        other.image = VK_NULL_HANDLE;
+        if(view.getView() == VK_NULL_HANDLE) return; // uninitialized, we dgaf, we dont do this before in case its done to reset it
 
-        *imagePtrMap[image] = this;
+        imagePtrMap[image] = this;
     }
 
     void Image::operator=(Image&& other) {
-        image = other.image;
-        available = other.available;
+        image = std::move(other.image);
+        available = std::move(other.available);
         mem = std::move(other.mem);
         view = std::move(other.view);
 
-        other.image = VK_NULL_HANDLE;
+        if(view.getView() == VK_NULL_HANDLE) return; 
 
-        *imagePtrMap[image] = this;
+        imagePtrMap[image] = this;
     }
 
     Image::~Image() {
-        if (image)
+        if (image && imagePtrMap[image] == this)
             imagePtrMap.erase(image);
     }
 }

@@ -10,7 +10,7 @@
 
 namespace Sierra::vlk {
     class Image {
-        typedef std::unordered_map<VkImage, std::shared_ptr<Image*>> ImageMap_t;
+        typedef std::unordered_map<VkImage, Image*> ImageMap_t;
 
         public:
             struct Info {
