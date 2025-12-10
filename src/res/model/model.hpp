@@ -10,16 +10,17 @@
 
 #include "res/texture/texture.hpp"
 
+#define AI_TEXTURE_TYPE_COUNT 28
+
 namespace Sierra {
     namespace vlk {
         class VlkModel;
     }
         
-
     class Model {
         friend class Sierra::vlk::VlkModel;
 
-        typedef std::array<std::vector<Texture>, 28/*number of material types*/> Textures_t;
+        typedef std::array<std::vector<Texture>, AI_TEXTURE_TYPE_COUNT> Textures_t;
 
         struct AIModelData { //packed into 1 struct cause fragmentation makes me sad
             Textures_t textures;

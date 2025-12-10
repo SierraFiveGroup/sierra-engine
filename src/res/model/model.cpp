@@ -18,6 +18,7 @@ namespace Sierra {
 
         taskManager.addTask(task);
 
+        asyncDat->modelData = {};
         asyncDat->taskManager = &taskManager;
         asyncDat->importer = &importer;
         asyncDat->modelPath = path;
