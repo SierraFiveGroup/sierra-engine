@@ -33,12 +33,12 @@ namespace Sierra {
             std::shared_ptr<uint8_t> getDat();
         protected:
             std::future<void> execute(std::function<void()> finished);
+            std::function<void(std::shared_ptr<uint8_t>)> func;
         private:
             std::shared_ptr<uint8_t> dat; // NO TEMPLATES
             Stage stage;
             uint64_t id;
 
-            std::function<void(std::shared_ptr<uint8_t>)> func;
             std::function<void(Task task)> callback;
 
             static void funcWrapper(std::function<void(std::shared_ptr<uint8_t>)> func, std::shared_ptr<uint8_t> dat,
