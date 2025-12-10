@@ -81,8 +81,8 @@ namespace Sierra {
             for(Task task : tasks[i]) {
                 auto methodPtr = task.func.target<void(*)(std::shared_ptr<uint8_t>)>();
 
-                char** realname = backtrace_symbols((void * const*)&(*methodPtr), 1); //fuck binbows
-                //also for SOME REASOM target returns (**func) instead of (*func) so we gotta dereference it
+                char** realname = backtrace_symbols((void * const*)methodPtr, 1); //fuck binbows
+                //also for SOME REASOM target returns (**func) instead of (*func) so we gotta keep it
                 std::string realNameStd = *realname;
 
                 size_t openBracketPos = realNameStd.find_first_of('(');
@@ -103,4 +103,5 @@ namespace Sierra {
         throw std::runtime_error("Task manager task debugging only supported on Linux, smd");
     }
 #endif
+
 };
