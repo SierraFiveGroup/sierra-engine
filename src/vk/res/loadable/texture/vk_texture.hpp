@@ -21,7 +21,7 @@ namespace Sierra::vlk {
 
         public:
             struct Info {
-                Texture& texture;
+                Texture* texture;
                 Sampler::Info samplerInfo;
             };
 

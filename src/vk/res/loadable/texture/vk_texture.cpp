@@ -17,9 +17,9 @@ namespace Sierra::vlk {
         asyncDat->context = &context;
         asyncDat->manager = &memManager;
         asyncDat->loader = &loader;
-        asyncDat->texture = &info.texture;
+        asyncDat->texture = std::move(info.texture);
 
-        Task task = Task(Task::Stage::AFTER_LOAD, 0, uploadToImage, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        Task task = Task(Task::Stage::PRE_INIT, 0, uploadToImage, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
 
         taskManager.addTask(task);
     }
@@ -57,7 +57,7 @@ namespace Sierra::vlk {
 
     VkDescriptorImageInfo* VlkTexture::getDescriptorInfo() {
         if(!image.getImage())
-            return nullptr;
+            image = asyncDat->imageFuture->get();
 
         descriptorInfo->sampler = sampler.getSampler();
         descriptorInfo->imageView = image.getView();
@@ -67,6 +67,9 @@ namespace Sierra::vlk {
     }
 
     void VlkTexture::operator=(VlkTexture&& other) {
-        *this = std::move(other);
+        asyncDat = std::move(other.asyncDat);
+        image = std::move(other.image);
+        sampler = std::move(other.sampler);
+        descriptorInfo = std::move(other.descriptorInfo);
     }
 }
