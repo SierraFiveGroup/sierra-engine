@@ -5,13 +5,15 @@
 
 #ifndef LOG
 
-#if defined(WIN32) || defined(_WIN32)
-#define LOG(msg) \
+#define LOG_NO_PRETTY(msg) \
     std::cout << "\033[0m(LOG) " << ": " << msg << "\n"
+#if defined(WIN32) || defined(_WIN32)
+    #define LOG LOG_NO_PRETTY
 #else
 #define LOG(msg) \
     std::cout << "\033[0m(LOG) " << __PRETTY_FUNCTION__  << ": " << msg << "\n"
 #endif
+
 
 #endif
 
