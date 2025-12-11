@@ -1,4 +1,4 @@
-#include "physics_manager2d.hpp"
+/*#include "physics_manager2d.hpp"
 
 namespace Sierra {
     PhysicsManager2D::PhysicsManager2D(): quadTree(glm::vec2(0.0f), glm::vec2(1000.0f, 1000.0f)) {
@@ -39,4 +39,4 @@ namespace Sierra {
     PhysicsConstants PhysicsManager2D::getConstants() {
         return *physicsConstants;
     }
-}
+}*/

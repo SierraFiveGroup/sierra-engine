@@ -1,4 +1,4 @@
-#include "quad_tree.hpp"
+/*#include "quad_tree.hpp"
                 
 namespace Sierra {
 
@@ -161,3 +161,4 @@ namespace Sierra {
         }
     }
 }
+*/

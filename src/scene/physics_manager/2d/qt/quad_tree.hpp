@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <vector>
 #include <unordered_set>
@@ -54,4 +54,4 @@ namespace Sierra {
             const size_t NODE_OBJECT_TRESHOLD = 5;
             const size_t MAX_DEPTH = 10;
     };
-}
+}*/
