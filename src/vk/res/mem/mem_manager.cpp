@@ -115,6 +115,7 @@ namespace Sierra::vlk {
                 barrier.offset = 0;
                 barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
                 barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                barrier.size = VK_WHOLE_SIZE;
 
                 buffBarriers.push_back(barrier);
 
