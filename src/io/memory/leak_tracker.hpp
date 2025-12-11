@@ -13,7 +13,6 @@
 #if defined(DEBUG) || defined(_DEBUG)
 
 namespace Sierra {   // optional — adjust or remove if you use a different namespace
-
     class LeakTracker {
     public:
         // ---- Public API ---------------------------------------------------
@@ -26,50 +25,77 @@ namespace Sierra {   // optional — adjust or remove if you use a different nam
     
         static void shutdown() {
             getInstance().reportLeaks("Shutdown leak report:");
+            trackingEnabled() = false;
             LOG("LeakTracker shutdown complete");
         }
     
         static void recordAlloc(void* ptr, size_t size) noexcept {
             if (!ptr || !trackingEnabled()) return;
-            auto& inst = getInstance();
+            LeakTracker& inst = getInstance();
             std::lock_guard<std::mutex> lock(inst.mutex_);
-            inst.allocations_[ptr] = size;
+            
+            LeakNode* node = (LeakNode*)std::malloc(sizeof(LeakNode));
+            node->ptr = ptr;
+            node->size = size;
+            node->next = inst.head_;
+
+            inst.head_ = node;
         }
     
         static void recordFree(void* ptr) noexcept {
             if (!ptr || !trackingEnabled()) return;
-            auto& inst = getInstance();
+            LeakTracker& inst = getInstance();
             std::lock_guard<std::mutex> lock(inst.mutex_);
-            inst.allocations_.erase(ptr);
+            
+            LeakNode** cur = &inst.head_;
+            while (*cur) {
+                if ((*cur)->ptr == ptr) {
+                    LeakNode* dead = *cur;
+                    *cur = dead->next;
+
+                    std::free(dead);
+                    return;
+                }
+
+                cur = &((*cur)->next);
+            }
         }
     
     private:
+        struct LeakNode {
+            void* ptr;
+            size_t size;
+            LeakNode* next;
+        };
+
         // ---- Internal details ---------------------------------------------
-        std::unordered_map<void*, size_t> allocations_;
+        LeakNode* head_ = nullptr;
         std::mutex mutex_;
+
     
-        LeakTracker() {
-            allocations_.reserve(256);  // prevent early allocations
-            LOG("LeakTracker constructed");
-        }
+        LeakTracker() = default;
     
         ~LeakTracker() {
             reportLeaks("Automatic shutdown leak report:");
         }
     
         void reportLeaks(const char* msg) noexcept {
+            LeakTracker& inst = getInstance();
             std::lock_guard<std::mutex> lock(mutex_);
             WARN(msg);
-            if (allocations_.empty()) {
-                LOG("No leaks detected.");
-            } else {
-                WARN("Outstanding allocations: " + std::to_string(allocations_.size()));
-                for (auto& [ptr, size] : allocations_) {
-                    std::string leakMsg = "Leaked block @ " +
-                                          std::to_string(reinterpret_cast<uintptr_t>(ptr)) +
-                                          " (" + std::to_string(size) + " bytes)";
-                    WARN(leakMsg);
-                }
+
+            LeakNode* node = inst.head_;
+
+            if (!node) {
+                printf("No leaks detected.\n");
+                return;
+            }
+
+            printf("===== Memory Leaks Detected =====\n");
+
+            while (node) {
+                printf("Leaked block: %p (%zu bytes)\n", node->ptr, node->size);
+                node = node->next;
             }
         }
     
@@ -84,20 +110,36 @@ namespace Sierra {   // optional — adjust or remove if you use a different nam
         }
     };
     
-    } // namespace Sierra
-    
+    }
+    #if 0
     // ---- Global operator overrides must live outside the namespace -------
-    void* operator new(size_t size) {
+    void* operator new(std::size_t size) {
         void* ptr = std::malloc(size);
         if (!ptr) throw std::bad_alloc();
+
         Sierra::LeakTracker::recordAlloc(ptr, size);
         return ptr;
     }
-    
+
     void operator delete(void* ptr) noexcept {
         Sierra::LeakTracker::recordFree(ptr);
         std::free(ptr);
     }
+
+    // ---- Arrays ----
+    void* operator new[](std::size_t size) {
+        void* ptr = std::malloc(size);
+        if (!ptr) throw std::bad_alloc();
+        
+        Sierra::LeakTracker::recordAlloc(ptr, size);
+        return ptr;
+    }
+
+    void operator delete[](void* ptr) noexcept {
+        Sierra::LeakTracker::recordFree(ptr);
+        std::free(ptr);
+    }
+    #endif
 #else
 
 namespace Sierra {
