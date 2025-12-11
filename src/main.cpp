@@ -132,23 +132,37 @@ int main() {
 
     vlk::RenderPass renderPass = vlk::RenderPass(vulkan.getContext(), memManager, renderPassInfo);
 
-    VkVertexInputBindingDescription bindingDescription{};
-    bindingDescription.binding = 0;
-    bindingDescription.stride = 12;
-    bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    VkVertexInputBindingDescription bindingDescription1{};
+    bindingDescription1.binding = 0;
+    bindingDescription1.stride = 12;
+    bindingDescription1.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-    VkVertexInputAttributeDescription attributeDescription{};
-    attributeDescription.location = 0;
-    attributeDescription.binding = 0;
-    attributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescription.offset = 0;
+    VkVertexInputBindingDescription bindingDescription2{};
+    bindingDescription2.binding = 1;
+    bindingDescription2.stride = 12;
+    bindingDescription2.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    VkVertexInputAttributeDescription attributeDescription1{};
+    attributeDescription1.location = 0;
+    attributeDescription1.binding = 0;
+    attributeDescription1.format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescription1.offset = 0;
+
+    VkVertexInputAttributeDescription attributeDescription2{};
+    attributeDescription2.location = 1;
+    attributeDescription2.binding = 1;
+    attributeDescription2.format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescription2.offset = 0;
+
+    VkVertexInputAttributeDescription attributeDescriptions[] = {attributeDescription1, attributeDescription2};
+    VkVertexInputBindingDescription bindingDescriptions[] = {bindingDescription1, bindingDescription2};
 
     VkPipelineVertexInputStateCreateInfo inputState{};
     inputState.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    inputState.pVertexAttributeDescriptions = &attributeDescription;
-    inputState.pVertexBindingDescriptions = &bindingDescription;
-    inputState.vertexAttributeDescriptionCount = 1;
-    inputState.vertexBindingDescriptionCount = 1;
+    inputState.pVertexAttributeDescriptions = attributeDescriptions;
+    inputState.pVertexBindingDescriptions = bindingDescriptions;
+    inputState.vertexAttributeDescriptionCount = 2;
+    inputState.vertexBindingDescriptionCount = 2;
 
 
     VkPipelineShaderStageCreateInfo vertexStage{};
@@ -206,6 +220,8 @@ int main() {
 
     vkUpdateDescriptorSets(vulkan.getContext().device->getDevice(), 2, descriptorWrite, 0, nullptr);
 
+    DBG(vlkModel.getMeshes()[0].vertexBuffOffset);
+    DBG(vlkModel.getMeshes()[0].texCoordBuffOffset);
     while(!window.shouldClose()) {
 
         vkAcquireNextImageKHR(vulkan.getContext().device->getDevice(), 
@@ -218,8 +234,11 @@ int main() {
         vkWaitForFences(vulkan.getContext().device->getDevice(), 1, &fenceHandle, VK_TRUE, -1);
 
 
-        VkBuffer vertexBuff = vlkModel.getVertexBuffer().getBuff();
-        VkDeviceSize offsets = 0;
+        VkBuffer vertexBuffs[] = {vlkModel.getVertexBuffer().getBuff(),
+            vlkModel.getVertexBuffer().getBuff()};
+        VkDeviceSize offsets[] = {
+            0, vlkModel.getMeshes()[0].texCoordBuffOffset
+        };
 
         VkBuffer indexBuff = vlkModel.getIndexBuffer().getBuff();
 
@@ -230,7 +249,7 @@ int main() {
         
         vkCmdBindPipeline(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         vkCmdBeginRenderPass(drawCmdBuffer.getCommandBuffer(), &passBegin, VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdBindVertexBuffers(drawCmdBuffer.getCommandBuffer(), 0, 1, &vertexBuff, &offsets);
+        vkCmdBindVertexBuffers(drawCmdBuffer.getCommandBuffer(), 0, 2, vertexBuffs, offsets);
         vkCmdBindIndexBuffer(drawCmdBuffer.getCommandBuffer(), indexBuff, 0, VK_INDEX_TYPE_UINT32);
         vkCmdBindDescriptorSets(drawCmdBuffer.getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, 
             layout, 0, 1, &setHandle, 0, nullptr);
