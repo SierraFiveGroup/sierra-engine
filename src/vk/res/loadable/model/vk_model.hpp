@@ -10,6 +10,9 @@ namespace Sierra::vlk {
 
         typedef std::array<std::vector<VlkTexture>, AI_TEXTURE_TYPE_COUNT> Textures_t;
 
+        public: struct Mesh;
+        protected:
+
         struct AsyncDat {
             size_t vertexCount;
             size_t indexCount;
@@ -18,6 +21,8 @@ namespace Sierra::vlk {
             std::future<Buffer> indexBuffFuture;
 
             Textures_t textures;
+
+            std::vector<Mesh> meshes;
 
             std::shared_ptr<Model::AIModelData> modelData;
             std::string modelPath;
@@ -33,6 +38,12 @@ namespace Sierra::vlk {
         };
 
         public:
+
+            struct Mesh {
+                size_t vertexBuffOffset;
+                size_t texCoordBuffOffset;
+                size_t vertexCount;
+            };
 
             VlkModel();
             VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
@@ -51,9 +62,11 @@ namespace Sierra::vlk {
 
             VlkTexture* getTexture(aiTextureType type);
 
+            const std::vector<Mesh>& getMeshes();
+
         private:
-            static void createVertexBuff(AsyncDat& asyncDat);
-            static void createIndexBuff(AsyncDat& asyncDat);
+            static void createVertexBuff(AsyncDat& asyncDat); // TODO, make configurable what you wanna load
+            static void createIndexBuff(AsyncDat& asyncDat); //i.e. tex coords, normals, vertices
             static void createTextures(AsyncDat& asyncDat);
 
             void createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
@@ -67,6 +80,8 @@ namespace Sierra::vlk {
 
             Buffer indexBuff;
             std::future<Buffer> indexBuffFuture;
+
+            std::vector<Mesh> meshes;
 
             size_t vertexCount;
             size_t indexCount;

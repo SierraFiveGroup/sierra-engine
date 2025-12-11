@@ -1,6 +1,7 @@
 #include "vk_model.hpp"
 
 #define VERTEX_SIZE (sizeof(float) * 3)
+#define TEXCOORD_SIZE (sizeof(float) * 3)
 
 namespace Sierra::vlk {
     VlkModel::VlkModel(): model(), vertexCount(), indexCount() {
@@ -19,6 +20,7 @@ namespace Sierra::vlk {
         asyncDat->taskManager = &taskManager;
         asyncDat->modelData = model.modelData;
         asyncDat->modelPath = model.getPath();
+        asyncDat->meshes = {};
 
         Task task = Task(Task::Stage::LOAD, 0, createBuffers, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
         task.setOnCompleteCallback(finishedCallback);
@@ -36,31 +38,34 @@ namespace Sierra::vlk {
     }
 
     void VlkModel::createVertexBuff(AsyncDat& asyncDat) {
-
-        if(asyncDat.modelData->meshes.size() == 1) {
-            asyncDat.vertexCount = asyncDat.modelData->meshes[0]->mNumVertices;
-            asyncDat.vertexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, 
-                Buffer::Usage::VERTEX, (uint8_t*)asyncDat.modelData->meshes[0]->mVertices, asyncDat.modelData->meshes[0]->mNumVertices * VERTEX_SIZE);
-             
-            return; // so we dont create a whole new buffer
-        } 
-
         asyncDat.vertexCount = 0;
         for(int i = 0; i < asyncDat.modelData->meshes.size(); i++) {
             asyncDat.vertexCount += asyncDat.modelData->meshes[i]->mNumVertices;
         }
 
-        std::vector<float> buff(asyncDat.vertexCount * 3);
+        std::vector<float> buff(asyncDat.vertexCount * 6);
+
+        asyncDat.meshes.reserve(asyncDat.modelData->meshes.size());
 
         size_t prevSize = 0;
+        size_t vertexOffset = 0;
+        size_t texCoordOffset = 0;
         for(int i = 0; i < asyncDat.modelData->meshes.size(); i++) {
-            memcpy(buff.data() + prevSize, asyncDat.modelData->meshes[i]->mVertices, asyncDat.modelData->meshes[i]->mNumVertices * VERTEX_SIZE);
+            memcpy((uint8_t*)buff.data() + prevSize, asyncDat.modelData->meshes[i]->mVertices, asyncDat.modelData->meshes[i]->mNumVertices * VERTEX_SIZE);
+            prevSize += asyncDat.modelData->meshes[i]->mNumVertices * VERTEX_SIZE;
+            
+            texCoordOffset = prevSize;
 
-            prevSize += asyncDat.modelData->meshes[i]->mNumVertices * sizeof(float);
+            memcpy((uint8_t*)buff.data() + prevSize, asyncDat.modelData->meshes[i]->mTextureCoords[0], asyncDat.modelData->meshes[i]->mNumVertices * TEXCOORD_SIZE);
+            prevSize += asyncDat.modelData->meshes[i]->mNumVertices * TEXCOORD_SIZE;
+
+            asyncDat.meshes.emplace_back(vertexOffset, texCoordOffset, asyncDat.modelData->meshes[i]->mNumVertices);
+
+            vertexOffset = prevSize;
         }
 
         asyncDat.vertexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, 
-            Buffer::Usage::VERTEX, (uint8_t*)buff.data(), buff.size() * VERTEX_SIZE);
+            Buffer::Usage::VERTEX, (uint8_t*)buff.data(), buff.size() * sizeof(float));
     }
 
     void VlkModel::createIndexBuff(AsyncDat& asyncDat) {
@@ -116,6 +121,7 @@ namespace Sierra::vlk {
         asyncDat.parent->vertexCount = asyncDat.vertexCount;
         asyncDat.parent->indexCount = asyncDat.indexCount;
         asyncDat.parent->textures = std::move(asyncDat.textures);
+        asyncDat.parent->meshes = std::move(asyncDat.meshes);
 
         asyncDat.finished = true;
     }
@@ -151,6 +157,10 @@ namespace Sierra::vlk {
 
         return &textures[type].front();
         
+    }
+
+    const std::vector<VlkModel::Mesh>& VlkModel::getMeshes() { // why does Mesh have to be qualified??
+        return meshes;
     }
 
     VlkModel::VlkModel(VlkModel&& other) {
