@@ -7,3 +7,7 @@ This project is licensed under the GNU Lesser General Public License v2.1 (LGPL-
 See the `LICENSE` file for the full text.
 
 All source and header files are licensed under the LGPL-2.1-only license.
+
+### LICENSE EXEMPTIONS
+
+Statically linking this library (engine) does not require providing relinkable object files.
