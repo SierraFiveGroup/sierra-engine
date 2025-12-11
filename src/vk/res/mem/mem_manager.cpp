@@ -92,6 +92,11 @@ namespace Sierra::vlk {
 
         dat.cmdBuf->begin(nullptr);
 
+        std::vector<VkBufferMemoryBarrier> buffBarriers{};
+        buffBarriers.reserve(dat.transferOps->size());
+
+        std::vector<VkImageMemoryBarrier> imageBarriers{};
+        imageBarriers.reserve(dat.transferOps->size());
         
         dat.mutex->lock();
         for (TransferOp& op : *dat.transferOps) {
@@ -102,6 +107,17 @@ namespace Sierra::vlk {
                 copyRegion.size = op.size;
 
                 vkCmdCopyBuffer(dat.cmdBuf->getCommandBuffer(), op.src, op.buffer, 1, &copyRegion);
+                VkBufferMemoryBarrier barrier{};
+                barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+                barrier.buffer = op.buffer;
+                barrier.dstAccessMask = VK_ACCESS_NONE;
+                barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+                barrier.offset = 0;
+                barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+                buffBarriers.push_back(barrier);
+
                 continue;
             }
             //copy to image   
@@ -115,8 +131,35 @@ namespace Sierra::vlk {
             copyRegion.imageExtent = op.imageExtent;
 
             vkCmdCopyBufferToImage(dat.cmdBuf->getCommandBuffer(), op.src, op.image, op.imageLayout, 1, &copyRegion);
+
+
+            VkImageSubresourceRange subresRange{};
+            subresRange.aspectMask = op.subResLayers.aspectMask;
+            subresRange.baseArrayLayer = 0;
+            subresRange.baseMipLevel = 0;
+            subresRange.layerCount = 1;
+            subresRange.levelCount = 1;
+
+
+            VkImageMemoryBarrier barrier{};
+            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            barrier.image = op.image;
+            barrier.dstAccessMask = VK_ACCESS_NONE;
+            barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+            barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            barrier.subresourceRange = subresRange;
+            barrier.oldLayout = op.imageLayout;
+            barrier.newLayout = op.imageLayout;
+
+            imageBarriers.push_back(barrier);
         }
         dat.mutex->unlock();
+
+        vkCmdPipelineBarrier(dat.cmdBuf->getCommandBuffer(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, buffBarriers.size(), buffBarriers.data(),
+            imageBarriers.size(), imageBarriers.data());
 
         dat.cmdBuf->end();
 
