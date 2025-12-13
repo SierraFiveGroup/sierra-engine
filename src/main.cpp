@@ -24,9 +24,20 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <scene/component/loader/component_loader.hpp>
+
+#include "foo.hpp"
+
 using namespace Sierra;
 using namespace vlk;
 int main() {
+
+    putenv("LD_LIBRARY_PATH=components/so"); // put in engine::init or smthn
+    ComponentTemplate comp = ComponentLoader::loadComponent("libfoo.so");
+    comp.init(
+        malloc(sizeof(Foo))
+    );
+
     //set up panic handler
     //PanicHandler::init();
 
@@ -36,7 +47,7 @@ int main() {
     //std::cout << "Not hanging :)\n";
     
     Window window = Window("hehe", {1280, 720}, API::vulkan);
-    Vulkan vulkan = Vulkan(window);
+    Vulkan vulkan = Vulkan(window);;
 
     TaskManager taskManager = TaskManager();
     MemLoader loader = MemLoader(vulkan.getContext());
@@ -72,8 +83,8 @@ int main() {
     while(!taskManager.isFinished());
 
     vlk::Scene scene = vulkan.createScene();
-    vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.vert.spv", "test_shaders/vk/tri.vert");
-    vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/tri.frag.spv", "test_shaders/vk/tri.frag");
+    vlk::Shader shaderVert = vlk::Shader(vulkan.getContext(), "test_shaders/vk/model.vert.spv", "test_shaders/vk/model.vert");
+    vlk::Shader shaderFrag = vlk::Shader(vulkan.getContext(), "test_shaders/vk/model.frag.spv", "test_shaders/vk/model.frag");
 
     auto descriptors = shaderVert.getDescriptors();
     descriptors.insert(descriptors.end(), shaderFrag.getDescriptors().begin(), shaderFrag.getDescriptors().end());
@@ -295,4 +306,5 @@ int main() {
 
 
     //LeakTracker::shutdown();
+
 }
