@@ -10,6 +10,7 @@ shell.nix
 build/
 perf*
 /engine
+/a
 panic_dump.txt
 libglad.a
 libgladd.a
