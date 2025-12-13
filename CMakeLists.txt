@@ -28,9 +28,10 @@ endif()
 #                 Collect Engine Sources
 # ============================================================
 file(GLOB_RECURSE SOURCES src/*.cpp)
+list(REMOVE_ITEM ${SOURCES} "src/main.cpp")
 
-# Create executable
-add_executable(engine ${SOURCES})
+# Create static object file
+add_library(engine STATIC ${SOURCES})
 
 # ============================================================
 #                      GLFW (Hybrid)
@@ -255,12 +256,14 @@ target_include_directories(glad PUBLIC glad)
 # ============================================================
 #                    Include Directories
 # ============================================================
-target_include_directories(engine PRIVATE
+set(include_dirs
     src
+    components/inc
     stb
     drlibs
     ${Vulkan_INCLUDE_DIRS}
 )
+target_include_directories(engine PRIVATE ${include_dirs})
 
 # ============================================================
 #                         Build Flags
@@ -280,10 +283,12 @@ if(WIN32)
     target_compile_definitions(engine PRIVATE ENGINE_ENABLE_STACKTRACE=0)
 endif()
 
+
 # ============================================================
 #                     Linking Libraries
 # ============================================================
-target_link_libraries(engine PRIVATE
+
+set(link_libraries
     ${GLFW_TARGET_NAME}
     ${ASSIMP_TARGET}
     ${OPENAL_TARGET}
@@ -291,6 +296,8 @@ target_link_libraries(engine PRIVATE
     glad
     stdc++exp
 )
+
+target_link_libraries(engine PRIVATE ${link_libraries})
 
 if(USE_FREETYPE)
     target_link_libraries(engine PRIVATE ${FREETYPE_TARGET})
@@ -309,6 +316,44 @@ elseif(APPLE)
         ${IOKIT_LIBRARY}
         ${COREVIDEO_LIBRARY}
     )
+endif()
+
+# ============================================================
+#                     Bulding components 
+# ============================================================
+file(GLOB_RECURSE COMP_SOURCES components/src/*.cpp)
+
+foreach(f ${COMP_SOURCES})
+    get_filename_component(target_name ${f} NAME_WE)
+    add_library(${target_name} SHARED ${f})
+
+    target_link_libraries(${target_name} PRIVATE ${link_libraries})
+    target_include_directories(${target_name} PRIVATE ${include_dirs})
+    set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/components/so)
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_definitions(${target_name} PRIVATE DEBUG)
+        target_compile_options(${target_name} PRIVATE -O0 -g)
+    else()
+        target_compile_options(${target_name} PRIVATE -O3)
+    endif()
+
+endforeach()
+
+# ============================================================
+#                     Bulding executable 
+# ============================================================
+add_executable(a "src/main.cpp")
+target_link_libraries(a PRIVATE engine)
+target_link_libraries(a PRIVATE ${link_libraries})
+target_include_directories(a PRIVATE ${include_dirs})
+target_link_directories(a PRIVATE components/so)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(a PRIVATE DEBUG)
+    target_compile_options(a PRIVATE -O0 -g)
+else()
+    target_compile_options(a PRIVATE -O3)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
