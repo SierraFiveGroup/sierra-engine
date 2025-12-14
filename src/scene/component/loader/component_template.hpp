@@ -5,7 +5,8 @@ namespace Sierra{
         void* dlptr;
 
         void* (*init)(void*);
-        void (*update)();
         void (*destruct)(void* obj);
+        size_t (*getSize)();
+        void (*setBlockOffset)(size_t);
     };
 }
