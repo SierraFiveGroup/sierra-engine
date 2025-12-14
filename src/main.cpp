@@ -1,4 +1,4 @@
-#include "vk/vulkan.hpp"
+#include <vk/vulkan.hpp>
 #include "window/window.hpp"
 
 #include "res/texture/texture.hpp"
@@ -26,12 +26,15 @@
 
 #include <scene/component/loader/component_loader.hpp>
 
+#include "engine.hpp"
+
 #include "foo.hpp"
 
 using namespace Sierra;
 using namespace vlk;
 int main() {
-
+    Engine engine = Engine();
+    /*
     putenv("LD_LIBRARY_PATH=components/so"); // put in engine::init or smthn
     ComponentTemplate comp = ComponentLoader::loadComponent("libfoo.so");
     comp.init(
@@ -306,5 +309,5 @@ int main() {
 
 
     //LeakTracker::shutdown();
-
+*/
 }
