@@ -3,6 +3,8 @@
 
 #include "res/texture/texture.hpp"
 
+#include "util/structures/hive.hpp"
+
 #include "vk/res/shader/descriptor/descriptor_set.hpp"
 #include "vk/rendering/graphics_pipeline/pipeline_layout.hpp"
 #include "vk/rendering/graphics_pipeline/graphics_pipeline.hpp"
@@ -34,6 +36,16 @@ using namespace Sierra;
 using namespace vlk;
 int main() {
     Engine engine = Engine();
+
+    Hive<size_t> hive = Hive<size_t>(128);
+
+    for(size_t i = 0; i < 256; i++) {
+        uint64_t n = hive.insert(i);
+        if(i != hive[n]) {
+            ERROR("OH NEE " << i); 
+        }
+    }
+
     /*
     putenv("LD_LIBRARY_PATH=components/so"); // put in engine::init or smthn
     ComponentTemplate comp = ComponentLoader::loadComponent("libfoo.so");
