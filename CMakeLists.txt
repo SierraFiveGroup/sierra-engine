@@ -81,10 +81,10 @@ if(BUILD_GLFW_FROM_SOURCE)
     )
 
     # Disable OpenGL to avoid glad conflict
-    set(GLFW_USE_OPENGL OFF CACHE BOOL "" FORCE)
-    set(GLFW_USE_EGL OFF CACHE BOOL "" FORCE)
-    set(GLFW_USE_OSMESA OFF CACHE BOOL "" FORCE)
-    set(GLFW_CLIENT_LIBRARY None CACHE STRING "" FORCE)
+    #set(GLFW_USE_OPENGL OFF CACHE BOOL "" FORCE)
+    #set(GLFW_USE_EGL OFF CACHE BOOL "" FORCE)
+    #set(GLFW_USE_OSMESA OFF CACHE BOOL "" FORCE)
+    #set(GLFW_CLIENT_LIBRARY None CACHE STRING "" FORCE)
 
     # Disable examples/tests/docs
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -249,9 +249,9 @@ find_package(Vulkan REQUIRED)
 # ============================================================
 #                        GLAD (local)
 # ============================================================
-file(GLOB_RECURSE GLAD_SOURCES glad/*.c)
-add_library(glad STATIC ${GLAD_SOURCES})
-target_include_directories(glad PUBLIC glad)
+#file(GLOB_RECURSE GLAD_SOURCES glad/*.c)
+#add_library(glad STATIC ${GLAD_SOURCES})
+#target_include_directories(glad PUBLIC glad)
 
 # ============================================================
 #                    Include Directories
@@ -293,7 +293,7 @@ set(link_libraries
     ${ASSIMP_TARGET}
     ${OPENAL_TARGET}
     Vulkan::Vulkan
-    glad
+    #glad
     stdc++exp
 )
 

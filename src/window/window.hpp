@@ -3,8 +3,8 @@
 #include <string>
 #include <stdexcept>
 
-#include <glad/glad.h>
-#define GLFW_INCLUDE_NONE
+//#include <glad/glad.h>
+//#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include "io/logging/logger.hpp"

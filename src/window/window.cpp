@@ -87,7 +87,7 @@ namespace Sierra {
         }
     }
     
-    void Window::initGLAD() {
+/*    void Window::initGLAD() {
         if ( !gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) ) {
             throw std::runtime_error("Failed to init GLAD, womp womp");
         }
@@ -101,7 +101,7 @@ namespace Sierra {
         glDebugMessageCallback(MessageCallback, 0);
 #endif
 
-    }
+    }*/
 
     bool Window::shouldClose() {
         return glfwWindowShouldClose(glfwWin);
