@@ -5,6 +5,10 @@
 #include "io/logging/logger.hpp"
 #include "scene/tasks/manager.hpp"
 
+#ifdef _WIN32
+using u_char = unsigned char;
+#endif
+
 namespace Sierra {
     class Texture {
         struct AsyncDat {

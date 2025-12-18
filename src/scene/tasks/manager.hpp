@@ -4,7 +4,9 @@
 #include <array>
 #include <utility>
 #include <atomic>
+#ifdef __linux__
 #include <execinfo.h>
+#endif
 #include <cxxabi.h>
 
 #include "task.hpp"

@@ -142,6 +142,8 @@ if(BUILD_ASSIMP_FROM_SOURCE)
     set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 
+    set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+
     FetchContent_MakeAvailable(assimp)
 
     # FetchContent builds a target literally named "assimp"
@@ -270,7 +272,10 @@ target_include_directories(engine PRIVATE ${include_dirs})
 # ============================================================
 
 target_compile_options(engine PRIVATE -Wno-int-to-pointer-cast)
+
+if (UNIX) # Might not work on macOS
 target_link_options(engine PRIVATE -rdynamic)
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(engine PRIVATE DEBUG)
