@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 
 #include <string>
 #include <vector>
