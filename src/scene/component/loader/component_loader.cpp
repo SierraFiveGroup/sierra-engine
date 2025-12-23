@@ -1,4 +1,5 @@
 #include "component_loader.hpp"
+#include <filesystem>
 
 namespace Sierra{
 
@@ -19,7 +20,29 @@ namespace Sierra{
     ComponentTemplate ComponentLoader::loadComponent(std::string path) {
         ComponentTemplate comp{};
 
-        comp.dlptr = dlopen(path.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        std::vector<std::string> trials;
+
+        // Prefer build-time components directory relative to current working directory
+        try {
+            std::filesystem::path cwd = std::filesystem::current_path();
+            std::filesystem::path preferred = cwd / SIERRA_COMPONENTS_SO_PATH / path;
+            trials.push_back(preferred.string());
+        } catch(...) {}
+
+        // If user passed a relative or absolute path with a separator, try it directly
+        if (path.find('/') != std::string::npos) {
+            trials.push_back(path);
+        }
+
+        // Finally, try the bare name (relies on system loader search paths)
+        trials.push_back(path);
+
+        for (const auto& candidate : trials) {
+            comp.dlptr = dlopen(candidate.c_str(), RTLD_NOW | RTLD_GLOBAL);
+            if (comp.dlptr) {
+                break;
+            }
+        }
 
         if(!comp.dlptr) throw std::runtime_error("Failed to open shared object file with error: "  + (std::string)dlerror());
 

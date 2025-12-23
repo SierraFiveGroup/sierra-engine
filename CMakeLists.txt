@@ -24,6 +24,10 @@ elseif(UNIX AND NOT APPLE)
     set(PLATFORM_LINUX TRUE)
 endif()
 
+if(APPLE)
+    message(STATUS "Reminder: VK_ICD_FILENAMES and VK_LAYER_PATH must be set at runtime")
+endif()
+
 # ============================================================
 #                 Collect Engine Sources
 # ============================================================
@@ -65,7 +69,9 @@ if(PLATFORM_LINUX)
         message(STATUS "pkg-config not found → Fetching GLFW from source.")
         set(BUILD_GLFW_FROM_SOURCE TRUE)
     endif()
-
+elseif(PLATFORM_MAC)
+    find_package(glfw3 QUIET REQUIRED)
+    set(GLFW_TARGET_NAME glfw)
 else()
     # Windows/macOS always use source build
     set(BUILD_GLFW_FROM_SOURCE TRUE)
@@ -128,8 +134,18 @@ if(PLATFORM_LINUX)
         set(BUILD_ASSIMP_FROM_SOURCE TRUE)
     endif()
 
+elseif(PLATFORM_MAC)
+    # macOS: require system Assimp (e.g., via Homebrew). Do NOT build from source.
+    # Homebrew provides a CMake config with the imported target `assimp::assimp`.
+    find_package(assimp CONFIG REQUIRED)
+    if(TARGET assimp::assimp)
+        message(STATUS "Using system Assimp (CMake config): assimp::assimp")
+        set(ASSIMP_TARGET assimp::assimp)
+    else()
+        message(FATAL_ERROR "Assimp CMake target not found on macOS. Install via Homebrew: brew install assimp")
+    endif()
 else()
-    # Windows & macOS always build from source
+    # Windows (or unknown) → build from source
     set(BUILD_ASSIMP_FROM_SOURCE TRUE)
 endif()
 
@@ -155,17 +171,70 @@ endif()
 # ============================================================
 set(BUILD_OPENAL_FROM_SOURCE FALSE)
 
-if(PLATFORM_LINUX)
+# Prefer system OpenAL on Linux and macOS to avoid toolchain quirks
+if(PLATFORM_LINUX OR PLATFORM_MAC)
     find_package(OpenAL QUIET)
     if(OpenAL_FOUND)
-        message(STATUS "Using system OpenAL")
-        set(OPENAL_TARGET OpenAL::OpenAL)
+        if(TARGET OpenAL::OpenAL)
+            message(STATUS "Using system OpenAL target OpenAL::OpenAL")
+            set(OPENAL_TARGET OpenAL::OpenAL)
+        else()
+            # Older FindOpenAL provides variables only
+            # Try common variable spellings
+            if(DEFINED OPENAL_INCLUDE_DIR OR DEFINED OPENAL_INCLUDE_DIRS)
+                set(_OPENAL_INCLUDES ${OPENAL_INCLUDE_DIR} ${OPENAL_INCLUDE_DIRS})
+                list(REMOVE_DUPLICATES _OPENAL_INCLUDES)
+                target_include_directories(engine PRIVATE ${_OPENAL_INCLUDES})
+            endif()
+            if(DEFINED OPENAL_LIBRARY OR DEFINED OPENAL_LIBRARIES)
+                set(_OPENAL_LIBS ${OPENAL_LIBRARY} ${OPENAL_LIBRARIES})
+                list(REMOVE_DUPLICATES _OPENAL_LIBS)
+                # Use the raw library names if target isn't available
+                set(OPENAL_TARGET ${_OPENAL_LIBS})
+            else()
+                # As a last resort on macOS, try pkg-config (Homebrew openal-soft)
+                if(PLATFORM_MAC)
+                    find_package(PkgConfig QUIET)
+                    if(PkgConfig_FOUND)
+                        pkg_check_modules(OPENAL_PKG QUIET openal)
+                        if(OPENAL_PKG_FOUND)
+                            message(STATUS "Using OpenAL from pkg-config (openal)")
+                            target_include_directories(engine PRIVATE ${OPENAL_PKG_INCLUDE_DIRS})
+                            link_directories(${OPENAL_PKG_LIBRARY_DIRS})
+                            set(OPENAL_TARGET ${OPENAL_PKG_LIBRARIES})
+                        endif()
+                    endif()
+                endif()
+            endif()
+            if(NOT OPENAL_TARGET)
+                message(STATUS "OpenAL found but no target/library exported; will attempt source build.")
+                set(BUILD_OPENAL_FROM_SOURCE TRUE)
+            endif()
+        endif()
     else()
         message(STATUS "OpenAL not found → Fetching from source.")
         set(BUILD_OPENAL_FROM_SOURCE TRUE)
     endif()
 else()
     set(BUILD_OPENAL_FROM_SOURCE TRUE)
+endif()
+
+# On macOS, ensure <AL/...> includes work even if only the Apple framework (<OpenAL/...>) is present.
+if(PLATFORM_MAC)
+    # If Homebrew's OpenAL Soft headers are present, prefer them implicitly.
+    if(EXISTS "/opt/homebrew/include/AL/al.h")
+        list(APPEND EXTRA_INCLUDE_DIRS "/opt/homebrew/include")
+    elseif(EXISTS "/usr/local/include/AL/al.h")
+        list(APPEND EXTRA_INCLUDE_DIRS "/usr/local/include")
+    else()
+        # Generate a tiny compatibility shim that maps <AL/...> to <OpenAL/...>
+        set(OPENAL_COMPAT_DIR "${CMAKE_BINARY_DIR}/openal_compat")
+        file(MAKE_DIRECTORY "${OPENAL_COMPAT_DIR}/AL")
+        file(WRITE "${OPENAL_COMPAT_DIR}/AL/al.h" "#pragma once\n#include <OpenAL/al.h>\n")
+        file(WRITE "${OPENAL_COMPAT_DIR}/AL/alc.h" "#pragma once\n#include <OpenAL/alc.h>\n")
+        list(APPEND EXTRA_INCLUDE_DIRS "${OPENAL_COMPAT_DIR}")
+        message(STATUS "Created OpenAL compatibility headers for <AL/...> includes: ${OPENAL_COMPAT_DIR}")
+    endif()
 endif()
 
 if(BUILD_OPENAL_FROM_SOURCE)
@@ -246,7 +315,40 @@ endif()
 # ============================================================
 #                        Vulkan
 # ============================================================
-find_package(Vulkan REQUIRED)
+if(APPLE)
+    message(STATUS "Configuring Vulkan via MoltenVK (macOS)")
+
+    # Vulkan SDK REQUIRED on macOS
+    if(NOT DEFINED ENV{VULKAN_SDK})
+        message(FATAL_ERROR "VULKAN_SDK not set. Install Vulkan SDK for macOS.")
+    endif()
+
+    find_package(Vulkan REQUIRED)
+
+    # MoltenVK is shipped with Vulkan SDK
+    find_library(MOLTENVK_LIBRARY MoltenVK
+        HINTS "$ENV{VULKAN_SDK}/lib"
+        REQUIRED
+    )
+
+    # Apple frameworks required by MoltenVK
+    find_library(METAL_LIBRARY Metal REQUIRED)
+    find_library(QUARTZCORE_LIBRARY QuartzCore REQUIRED)
+    find_library(FOUNDATION_LIBRARY Foundation REQUIRED)
+
+    set(VULKAN_LIBS
+        Vulkan::Vulkan
+        ${MOLTENVK_LIBRARY}
+        ${METAL_LIBRARY}
+        ${QUARTZCORE_LIBRARY}
+        ${FOUNDATION_LIBRARY}
+    )
+
+else()
+    # Windows & Linux → normal Vulkan
+    find_package(Vulkan REQUIRED)
+    set(VULKAN_LIBS Vulkan::Vulkan)
+endif()
 
 # ============================================================
 #                        GLAD (local)
@@ -264,6 +366,7 @@ set(include_dirs
     stb
     drlibs
     ${Vulkan_INCLUDE_DIRS}
+    ${EXTRA_INCLUDE_DIRS}
 )
 target_include_directories(engine PRIVATE ${include_dirs})
 
@@ -273,8 +376,10 @@ target_include_directories(engine PRIVATE ${include_dirs})
 
 target_compile_options(engine PRIVATE -Wno-int-to-pointer-cast)
 
-if (UNIX) # Might not work on macOS
+if (UNIX AND NOT APPLE) # Might not work on macOS
 target_link_options(engine PRIVATE -rdynamic)
+elseif(APPLE)
+target_link_options(engine PRIVATE "-Wl,-export_dynamic")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -288,19 +393,50 @@ if(WIN32)
     target_compile_definitions(engine PRIVATE ENGINE_ENABLE_STACKTRACE=0)
 endif()
 
+if(APPLE)
+    target_compile_definitions(engine PRIVATE
+        VK_USE_PLATFORM_METAL_EXT
+        VK_ENABLE_BETA_EXTENSIONS
+    )
+endif()
+
+if(APPLE)
+    set_target_properties(engine PROPERTIES
+        INSTALL_RPATH "@loader_path"
+        BUILD_RPATH "$ENV{VULKAN_SDK}/lib"
+    )
+endif()
+
+if(APPLE)
+    target_compile_definitions(engine PRIVATE ENGINE_VULKAN_MOLTENVK=1)
+endif()
+
+if(APPLE)
+    target_compile_definitions(engine PRIVATE __APPLE__)
+    target_compile_options(engine PRIVATE -include dispatch/dispatch.h)
+endif()
 
 # ============================================================
 #                     Linking Libraries
 # ============================================================
 
+if (LINUX OR WINDOWS)
 set(link_libraries
     ${GLFW_TARGET_NAME}
     ${ASSIMP_TARGET}
     ${OPENAL_TARGET}
-    Vulkan::Vulkan
+    ${VULKAN_LIBS}
     #glad
     stdc++exp
 )
+elseif(APPLE)
+set(link_libraries
+    ${GLFW_TARGET_NAME}
+    ${ASSIMP_TARGET}
+    ${OPENAL_TARGET}
+    ${VULKAN_LIBS}
+)
+endif()
 
 target_link_libraries(engine PRIVATE ${link_libraries})
 
@@ -327,6 +463,7 @@ endif()
 #                     Bulding components 
 # ============================================================
 file(GLOB_RECURSE COMP_SOURCES components/src/*.cpp)
+set(COMPONENT_TARGETS)
 
 foreach(f ${COMP_SOURCES})
     get_filename_component(target_name ${f} NAME_WE)
@@ -343,6 +480,18 @@ foreach(f ${COMP_SOURCES})
         target_compile_options(${target_name} PRIVATE -O3)
     endif()
 
+    if(APPLE)
+        # Produce .so files on macOS to match runtime loader expectations
+        set_target_properties(${target_name} PROPERTIES SUFFIX ".so")
+        target_compile_definitions(${target_name} PRIVATE
+            VK_USE_PLATFORM_METAL_EXT
+            VK_ENABLE_BETA_EXTENSIONS
+        )
+    endif()
+    if(APPLE)
+        target_compile_options(${target_name} PRIVATE -include dispatch/dispatch.h)
+    endif()
+    list(APPEND COMPONENT_TARGETS ${target_name})
 endforeach()
 
 # ============================================================
@@ -353,12 +502,33 @@ target_link_libraries(a PRIVATE engine)
 target_link_libraries(a PRIVATE ${link_libraries})
 target_include_directories(a PRIVATE ${include_dirs})
 target_link_directories(a PRIVATE components/so)
+if(COMPONENT_TARGETS)
+    add_dependencies(a ${COMPONENT_TARGETS})
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(a PRIVATE DEBUG)
     target_compile_options(a PRIVATE -O0 -g)
 else()
     target_compile_options(a PRIVATE -O3)
+endif()
+
+if(APPLE)
+    target_compile_definitions(a PRIVATE
+        VK_USE_PLATFORM_METAL_EXT
+        VK_ENABLE_BETA_EXTENSIONS
+    )
+endif()
+
+if(APPLE)
+    set_target_properties(a PROPERTIES
+        INSTALL_RPATH "@loader_path"
+        BUILD_RPATH "$ENV{VULKAN_SDK}/lib"
+    )
+endif()
+
+if(APPLE)
+    target_compile_options(a PRIVATE -include dispatch/dispatch.h)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")

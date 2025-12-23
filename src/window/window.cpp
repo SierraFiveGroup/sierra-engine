@@ -1,5 +1,6 @@
 #include "window.hpp"
 
+#if !defined(__APPLE__)
 void GLAPIENTRY
 MessageCallback( GLenum source,
                  GLenum type,
@@ -27,9 +28,10 @@ MessageCallback( GLenum source,
     }
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
+#endif // !__APPLE__
 
 
 // During init, enable debug output
@@ -57,9 +59,13 @@ namespace Sierra {
             throw std::runtime_error("Failed to create new GLFW window");
         }
 
-        glfwMakeContextCurrent(glfwWin);
-
-        glfwSetWindowSizeCallback(glfwWin, framebufferSizeCallback);
+        // Only bind GL context and callbacks when using OpenGL and not on macOS
+    #if !defined(__APPLE__)
+        if (api == API::gl) {
+            glfwMakeContextCurrent(glfwWin);
+            glfwSetWindowSizeCallback(glfwWin, framebufferSizeCallback);
+        }
+    #endif
         //glfwSwapInterval(1);
     }
     
@@ -75,15 +81,17 @@ namespace Sierra {
         }
     
         if(api == API::gl) {
+    #if defined(__APPLE__)
+            // Disable OpenGL on macOS builds entirely
+            throw std::runtime_error("OpenGL is disabled on macOS build");
+    #else
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
-#endif
-
+            // Forward-compat is not needed when OpenGL is disabled on macOS
+    #endif
         } else {
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); //TOOD make interchangable
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); //TODO make interchangable
         }
     }
     

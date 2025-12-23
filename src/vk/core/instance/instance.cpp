@@ -1,5 +1,21 @@
 #include "instance.hpp"
 
+// Guarded use of C++23 std::stacktrace to handle toolchains without it
+#if defined(__has_include)
+#  if __has_include(<stacktrace>)
+#    include <stacktrace>
+#    if defined(__cpp_lib_stacktrace)
+#      define SIERRA_HAS_STD_STACKTRACE 1
+#    else
+#      define SIERRA_HAS_STD_STACKTRACE 0
+#    endif
+#  else
+#    define SIERRA_HAS_STD_STACKTRACE 0
+#  endif
+#else
+#  define SIERRA_HAS_STD_STACKTRACE 0
+#endif
+
 #ifdef DEBUG
 
 const std::vector<const char*> validationLayers = {
@@ -16,12 +32,27 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     if (messageSeverity < VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         return VK_FALSE;
 
-    if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+    if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+    #if SIERRA_HAS_STD_STACKTRACE
         ERROR(pCallbackData->pMessage << "\nTRACE: \n" << std::stacktrace::current());
-    else if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+    #else
+        ERROR(pCallbackData->pMessage);
+    #endif
+    }
+    else if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+    #if SIERRA_HAS_STD_STACKTRACE
         WARN(pCallbackData->pMessage << "\nTRACE: \n" << std::stacktrace::current());
-    else if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+    #else
+        WARN(pCallbackData->pMessage);
+    #endif
+    }
+    else if(messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+    #if SIERRA_HAS_STD_STACKTRACE
         LOG(pCallbackData->pMessage << "\nTRACE: \n" << std::stacktrace::current());
+    #else
+        LOG(pCallbackData->pMessage);
+    #endif
+    }
 
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         throw std::runtime_error("Severe validation error, aborting");
