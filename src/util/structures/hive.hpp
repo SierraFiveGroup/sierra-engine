@@ -13,95 +13,74 @@ namespace Sierra {
     class Hive {
         struct Block{
             std::vector<uint8_t> skipField;
-            bool firstEntrySkip;
-            uint64_t id;
+            std::vector<T> objects;
 
-            T* objects;
         };
 
+        uint32_t blockSize;
+
+        std::vector<uint8_t> bSkipField;
+        std::vector<Block> blocks;
+
         public:
-            Hive(): nextBlockID(0), blocks(), freeBlocks(), blockSize(32) {
-
+            Hive(): blockSize(32) {
+                init();
             }
 
-            Hive(uint8_t blockSize): nextBlockID(0), blocks(), freeBlocks(), blockSize(blockSize) {
-
+            Hive(uint8_t blockSize): blockSize(blockSize) {
+                init();
             }
 
-            uint64_t insert(T obj) {
-                return insertPtr(&obj);
+            T* insert(T obj) { 
+                Block* block = getNextFreeBlock();
             }
 
-            //uint64_t insert(T& obj) {
-            //    return insertPtr(&obj);
-            //}
-
-            template<typename... Ts>
-            void emplace(Ts... args);
-
-            T& operator[](uint64_t id) {
-                uint64_t blockID = id >> 16;
-                uint16_t objIndex = id & (std::numeric_limits<uint16_t>::max());
-
-                return blocks[blockID]->objects[objIndex];
-            }
         private:
-
-            uint64_t insertPtr(T* obj) {
-                if(freeBlocks.empty()) allocBlock();
-
-                if(*obj == 127) {
-                    DBG("here we come");
-                }
-
-                Block& block = *freeBlocks.front();
-                uint16_t objIdx = 0;
-                if(block.firstEntrySkip) {
-                    objIdx = block.skipField[0]-1;
-                    block.objects[objIdx] = *obj;
-                    block.skipField[0]--;
-                    block.skipField[1]++;
-
-                    if(block.skipField[0] <= 0) {
-                        block.skipField[0] = block.skipField[1];
-                        std::shift_left(block.skipField.begin() + 1, block.skipField.end(), 1); // potential optimization by not shifting ALL of them
-                    }
-
-                    return (block.id << 16) + objIdx;
-                }
-               
-                objIdx = block.skipField[0];
-                block.objects[objIdx] = *obj;
-                block.skipField[0]++;
-                block.skipField[1]--;
-
-                if(block.skipField[0] <= 0) 
-                    std::shift_left(block.skipField.begin() + 1, block.skipField.end(), 1);
-
-                if(block.skipField[0] == blockSize)
-                    freeBlocks.pop_front();
-                
-                return (block.id << 16) + objIdx;
+            void init() {
+                addBlock();
+                bSkipField.push_back(0);
             }
 
-            void allocBlock() {
-                Block* block = new Block;
-                block->skipField.resize(128); //TEST WITH AND WITHOUT
-                block->skipField[0] = blockSize;
-                block->firstEntrySkip = true;
-                block->objects = new T[blockSize];
-                block->id = nextBlockID;
-
-                blocks[nextBlockID] = block;
-                freeBlocks.push_front(block);
-
-                nextBlockID++;
+            void addBlock() {
+                blocks.emplace_back();
+                blocks.back().skipField.resize(blockSize);
+                blocks.back().objects.resize(blockSize);
             }
 
-            std::unordered_map<uint64_t, Block*> blocks;
-            std::list<Block*> freeBlocks;
-            uint8_t blockSize;
+            Block* getNextFreeBlock() {
+                return &blocks[bSkipField.begin()];
+            }
 
-            uint64_t nextBlockID;
+            T* insertBlock(Block* block) {
+                Block* block = getNextFreeBlock();
+                uint32_t index = addNextSkipBlock(block);
+
+                return block->objects[index];
+            }
+
+            uint32_t addNextSkipBlock(std::vector<uint8_t>& skipField) {
+                uint32_t insertIndex = skipField[0];
+                uint32_t leftNode = !insertIndex ? 0 : skipField[0];
+                uint32_t rightNode = (insertIndex + 1 >= skipField.size()) ? 0 : skipField[insertIndex+1];
+
+                if(insertIndex == skipField.size()) return insertIndex;
+
+                if(!leftNode && !rightNode) {
+                    skipField[insertIndex] = 1;
+                }
+                else if(leftNode && !rightNode) {
+                    skipField[0]++;
+                    skipField[insertIndex] = skipField[0];
+                }
+                else if(!leftNode && rightNode) {
+                    skipField[insertIndex+1]++;
+                    skipField[insertIndex] = skipField[insertIndex+1];
+                } else {
+                    skipField[0] += skipField[insertIndex+1] + 1;
+                    skipField[insertIndex+1] = skipField[0];
+                }
+
+                return insertIndex;
+            }
     };
 }

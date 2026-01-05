@@ -39,11 +39,8 @@ int main() {
 
     Hive<size_t> hive = Hive<size_t>(128);
 
-    for(size_t i = 0; i < 256; i++) {
-        uint64_t n = hive.insert(i);
-        if(i != hive[n]) {
-            ERROR("OH NEE " << i); 
-        }
+    for(size_t i = 0; i < 1024; i++) {
+        hive.insert(i);
     }
 
     /*
