@@ -50,11 +50,11 @@ namespace Sierra {
                 }
 
                 T& operator*() {
-                    return *(T*)&blocks[blockIndex]->objects[objectIndex];
+                    return *(T*)&blocks[blockIndex].objects[objectIndex];
                 }
 
                 T* operator->() {
-                    return (T*)&blocks[blockIndex]->objects[objectIndex];
+                    return (T*)&blocks[blockIndex].objects[objectIndex];
                 }                
 
                 iterator& operator++() {
@@ -82,7 +82,7 @@ namespace Sierra {
 
                 iterator& operator--() {
                     if(!blockIndex) return *this;
-                    for(objectIndex--; objectIndex >= 0 && !blocks[blockIndex]->skipField[objectIndex]; objectIndex--);
+                    for(objectIndex--; objectIndex >= 0 && !blocks[blockIndex].skipField[objectIndex]; objectIndex--);
 
                     if((objectIndex - 1) < 0) {
                         objectIndex = oCount - 1;
@@ -98,6 +98,66 @@ namespace Sierra {
                     auto& old = *this;
                     ++*this;
                     return old;
+                }
+
+                iterator& operator+(int n) { // kind of shite but I do avoid checking it every iteration
+                    if(n > 0) {
+                        for(int i = 0; i < abs(n); i++) {
+                            ++*this;
+                        }
+                        return *this;
+                    }
+
+                    for(int i = 0; i < abs(n); i++) {
+                        --*this;
+                    }
+
+                    return *this;
+                }
+
+                iterator& operator-(int n) {
+                    if(n < 0) {
+                        for(int i = 0; i < abs(n); i++) {
+                            ++*this;
+                        }
+
+                        return *this;
+                    }
+
+                    for(int i = 0; i < abs(n); i++) {
+                        --*this;
+                    }
+
+                    return *this;
+                }
+
+
+                bool operator>(iterator& b) {
+                    return len(*this) > len(b);
+                }
+
+                bool operator<(iterator& b) {
+                    return len(*this) < len(b);
+                }
+
+                bool operator>=(iterator& b) {
+                    return len(*this) >= len(b);
+                }
+
+                bool operator<=(iterator& b) {
+                    return len(*this) <= len(b);
+                }
+
+                iterator& operator+=(int n) {
+                    *this = *this + n;
+                }
+
+                iterator& operator-=(int n) {
+                    *this = *this - n;
+                }
+
+                T* operator[](size_t offset) {
+                    return *(*this + offset);
                 }
 
                 friend void swap(iterator& a, iterator& b) {
@@ -119,6 +179,10 @@ namespace Sierra {
 
                 iterator(Block* blocks, uint32_t bCount, uint32_t oCount): blocks(blocks), bCount(bCount), oCount(oCount) {
 
+                } // fix this constructor goofyness when did I make this bruh
+
+                inline uint32_t len() {
+                    return blockIndex * oCount + objectIndex;
                 }
                 
         };
@@ -221,8 +285,6 @@ namespace Sierra {
             }
 
             bool eraseInternal(iterator it) {
-                std::cerr << it.blockIndex << " " << it.bCount << " " << it.objectIndex << " " << it.oCount << "\n";
-                std::cerr << blocks.size() << "\n";
                 Block& block = blocks[it.blockIndex];
 
                 if constexpr (std::is_destructible_v<T>) { 
