@@ -32,15 +32,23 @@
 
 #include "foo.hpp"
 
+#include <unordered_set>
+
 using namespace Sierra;
 using namespace vlk;
 int main() {
-    Engine engine = Engine();
+    //Engine engine = Engine();
 
-    Hive<size_t> hive = Hive<size_t>(128);
+    Hive<size_t> hive = Hive<size_t>(8);
 
-    for(size_t i = 0; i < 1024; i++) {
+    for(size_t i = 0; i < 20; i++) {
         hive.insert(i);
+    }
+    
+
+    auto it = hive.begin();
+    for(int i = 0; i < 20; i++) {
+       it = hive.erase(it);
     }
 
     /*
