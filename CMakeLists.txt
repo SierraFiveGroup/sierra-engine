@@ -357,12 +357,29 @@ endif()
 #add_library(glad STATIC ${GLAD_SOURCES})
 #target_include_directories(glad PUBLIC glad)
 
+
+# ============================================================
+#                        Renderer
+# ============================================================
+
+file(GLOB_RECURSE RENDERER_SRC renderer/*.cpp)
+add_library(renderer SHARED ${RENDERER_SRC})
+
+target_include_directories(renderer PRIVATE renderer/vk src)
+target_link_libraries(renderer PRIVATE
+    ${GLFW_TARGET_NAME}
+    ${ASSIMP_TARGET}
+    Vulkan::Vulkan
+)   
+
 # ============================================================
 #                    Include Directories
 # ============================================================
 set(include_dirs
     src
+    renderer/vk
     components/inc
+    renderer
     stb
     drlibs
     ${Vulkan_INCLUDE_DIRS}
