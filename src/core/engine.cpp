@@ -6,6 +6,9 @@
 namespace Sierra {
     Engine::Engine() {
         loadComponents();
+        loadRenderer();
+
+        renderer.init({}, resManager);
     }
 
     void Engine::loadComponents() {
@@ -17,5 +20,13 @@ namespace Sierra {
         }
 
         compLoader = ComponentLoader(componentNames);
+    }
+
+    void Engine::loadRenderer() {
+        renderer = Renderer("./librenderer.so"); // make it non const at some point in the future 
+    }
+
+    Engine::~Engine() {
+        renderer.cleanup();
     }
 }
