@@ -34,8 +34,14 @@ endif()
 file(GLOB_RECURSE SOURCES src/core/*.cpp)
 list(REMOVE_ITEM ${SOURCES} "src/core/main.cpp")
 
+# ============================================================
+#                    Common Sources   
+# ============================================================
+find_file(GLOB_RECURSE COMMON_SRC src/common/*.cpp)
+
+
 # Create static object file
-add_library(engine STATIC ${SOURCES})
+add_library(engine STATIC ${SOURCES} ${COMMON_SRC})
 
 # ============================================================
 #                      GLFW (Hybrid)
@@ -358,27 +364,17 @@ endif()
 #target_include_directories(glad PUBLIC glad)
 
 
-# ============================================================
-#                        Renderer
-# ============================================================
-
-file(GLOB_RECURSE RENDERER_SRC src/renderer/*.cpp)
-add_library(renderer SHARED ${RENDERER_SRC})
-
-target_include_directories(renderer PRIVATE src/renderer/vk src/core)
-target_link_libraries(renderer PRIVATE
-    ${GLFW_TARGET_NAME}
-    ${ASSIMP_TARGET}
-    Vulkan::Vulkan
-)   
 
 # ============================================================
 #                    Include Directories
 # ============================================================
 set(include_dirs
+    src
     src/core
+    src/common
     src/renderer/vk
     src/renderer
+    src/resource_manager
     components/inc
     renderer
     stb
@@ -386,13 +382,41 @@ set(include_dirs
     ${Vulkan_INCLUDE_DIRS}
     ${EXTRA_INCLUDE_DIRS}
 )
-target_include_directories(engine PRIVATE ${include_dirs})
+
+# ============================================================
+#                        Renderer
+# ============================================================
+
+file(GLOB_RECURSE RENDERER_SRC src/renderer/*.cpp)
+add_library(renderer SHARED ${RENDERER_SRC} ${COMMON_SRC})
+
+target_include_directories(renderer PRIVATE ${include_dirs})
+target_link_libraries(renderer PRIVATE
+    ${GLFW_TARGET_NAME}
+    ${ASSIMP_TARGET}
+    Vulkan::Vulkan
+)   
+
+# ============================================================
+#                        Resource Manager
+# ============================================================
+
+file(GLOB_RECURSE RES_MANAGER_SRC src/resource_manager/*.cpp)
+add_library(resource_manager SHARED ${RES_MANAGER_SRC} ${COMMON_SRC})
+
+target_include_directories(resource_manager PRIVATE ${include_dirs})
+target_link_libraries(resource_manager PRIVATE
+    ${ASSIMP_TARGET}
+    Vulkan::Vulkan
+)
+
 
 # ============================================================
 #                         Build Flags
 # ============================================================
 
 target_compile_options(engine PRIVATE -Wno-int-to-pointer-cast)
+target_include_directories(engine PRIVATE ${include_dirs})
 
 if (UNIX AND NOT APPLE) # Might not work on macOS
 target_link_options(engine PRIVATE -rdynamic)
@@ -434,6 +458,7 @@ if(APPLE)
     target_compile_options(engine PRIVATE -include dispatch/dispatch.h)
 endif()
 
+
 # ============================================================
 #                     Linking Libraries
 # ============================================================
@@ -446,6 +471,7 @@ set(link_libraries
     ${VULKAN_LIBS}
     #glad
     stdc++exp
+    resource_manager
 )
 elseif(APPLE)
 set(link_libraries
@@ -453,6 +479,7 @@ set(link_libraries
     ${ASSIMP_TARGET}
     ${OPENAL_TARGET}
     ${VULKAN_LIBS}
+    resource_manager
 )
 endif()
 
@@ -518,8 +545,8 @@ endforeach()
 add_executable(a "src/main.cpp")
 target_link_libraries(a PRIVATE engine)
 target_link_libraries(a PRIVATE ${link_libraries})
+target_link_libraries(a PRIVATE resource_manager)
 target_include_directories(a PRIVATE ${include_dirs})
-target_link_directories(a PRIVATE components/so)
 if(COMPONENT_TARGETS)
     add_dependencies(a ${COMPONENT_TARGETS})
 endif()
