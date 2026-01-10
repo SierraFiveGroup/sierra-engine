@@ -31,8 +31,8 @@ endif()
 # ============================================================
 #                 Collect Engine Sources
 # ============================================================
-file(GLOB_RECURSE SOURCES src/*.cpp)
-list(REMOVE_ITEM ${SOURCES} "src/main.cpp")
+file(GLOB_RECURSE SOURCES src/core/*.cpp)
+list(REMOVE_ITEM ${SOURCES} "src/core/main.cpp")
 
 # Create static object file
 add_library(engine STATIC ${SOURCES})
@@ -362,10 +362,10 @@ endif()
 #                        Renderer
 # ============================================================
 
-file(GLOB_RECURSE RENDERER_SRC renderer/*.cpp)
+file(GLOB_RECURSE RENDERER_SRC src/renderer/*.cpp)
 add_library(renderer SHARED ${RENDERER_SRC})
 
-target_include_directories(renderer PRIVATE renderer/vk src)
+target_include_directories(renderer PRIVATE src/renderer/vk src/core)
 target_link_libraries(renderer PRIVATE
     ${GLFW_TARGET_NAME}
     ${ASSIMP_TARGET}
@@ -376,8 +376,9 @@ target_link_libraries(renderer PRIVATE
 #                    Include Directories
 # ============================================================
 set(include_dirs
-    src
-    renderer/vk
+    src/core
+    src/renderer/vk
+    src/renderer
     components/inc
     renderer
     stb
