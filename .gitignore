@@ -15,5 +15,6 @@ panic_dump.txt
 libglad.a
 libgladd.a
 *.a
-components/so/*
+/components/so/*.so
 _deps
+*.so
