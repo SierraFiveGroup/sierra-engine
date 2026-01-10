@@ -4,9 +4,6 @@
 namespace Sierra{
 
     ComponentLoader::ComponentLoader(std::vector<std::string> componentNames): blockSize(0), templates() {
-        std::string envStr = (std::string)"LD_LIBRARY_PATH=" + SIERRA_COMPONENTS_SO_PATH;
-        putenv((char*)envStr.c_str());
-
         templates.reserve(componentNames.size());
         for(std::string& name : componentNames) {
             templates.emplace_back(

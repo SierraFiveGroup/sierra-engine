@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "window/window.hpp"
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 #include "scene/ref/resource_ref.hpp"
 
 namespace Sierra {

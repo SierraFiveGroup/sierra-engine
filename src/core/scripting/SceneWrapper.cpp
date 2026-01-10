@@ -3,7 +3,7 @@
 #include "scene/scene.hpp"
 #include <string>
 
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 #include "util/utilities.hpp"
 namespace Sierra {
     class SceneWrapper : public Scripting::Scene {

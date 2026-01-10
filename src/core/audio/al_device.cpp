@@ -1,5 +1,5 @@
 #include "al_device.hpp"
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 
 namespace Sierra {
     ALDevice::ALDevice(const std::string &deviceName) {

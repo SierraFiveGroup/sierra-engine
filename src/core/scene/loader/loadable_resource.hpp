@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 
-#include "scene/tasks/task.hpp"
+#include "tasks/task.hpp"
 
 namespace Sierra {
     class LoadableResource {

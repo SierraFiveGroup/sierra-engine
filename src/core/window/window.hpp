@@ -7,7 +7,7 @@
 //#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 #include "api.hpp"
 
 namespace Sierra {

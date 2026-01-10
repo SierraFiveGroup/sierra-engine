@@ -9,7 +9,7 @@
 #include <cstring>
 #include <algorithm>
 #include <unordered_map>
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 #include "util/utilities.hpp"
 
 //This mempool is not meant for efficient allocation, rather it is meant

@@ -2,8 +2,8 @@
 
 #include <string>
 #include <atomic>
-#include "io/logging/logger.hpp"
-#include "scene/tasks/manager.hpp"
+#include "logging/logger.hpp"
+#include "tasks/manager.hpp"
 
 #ifdef _WIN32
 using u_char = unsigned char;

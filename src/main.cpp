@@ -17,7 +17,7 @@
 #include "vk/res/loadable/model/vk_model.hpp"
 #include "vk/res/loadable/texture/vk_texture.hpp"
 
-#include "scene/tasks/manager.hpp"
+#include "tasks/manager.hpp"
 #include "scene/loader/loadable_resource.hpp"
 
 #include "io/panic/panic_handler.hpp"
@@ -37,19 +37,7 @@
 using namespace Sierra;
 using namespace vlk;
 int main() {
-    //Engine engine = Engine();
-
-    Hive<size_t> hive = Hive<size_t>(8);
-
-    for(size_t i = 0; i < 20; i++) {
-        hive.insert(i);
-    }
-    
-
-    auto it = hive.begin();
-    for(int i = 0; i < 20; i++) {
-       it = hive.erase(it);
-    }
+    Engine engine = Engine();
 
     /*
     putenv("LD_LIBRARY_PATH=components/so"); // put in engine::init or smthn

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/utilities.hpp"
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 
 namespace Sierra {
     class DeltaTime {

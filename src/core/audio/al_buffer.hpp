@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 #include "util/utilities.hpp"
 #include <AL/al.h>
 #include <string>

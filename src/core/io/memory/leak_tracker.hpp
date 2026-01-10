@@ -7,8 +7,8 @@
 #include <cstddef>
 #include <string>
 
-#include "../logging/logger.hpp"
-#include "../../util/utilities.hpp"
+#include "logging/logger.hpp"
+#include "util/utilities.hpp"
 
 #if defined(DEBUG) || defined(_DEBUG)
 
