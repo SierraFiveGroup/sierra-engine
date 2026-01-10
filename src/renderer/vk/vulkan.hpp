@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vulkan/vulkan.h"
+#include "renderer.hpp"
 
 #include "core/instance/instance.hpp"
 #include "core/device/device.hpp"

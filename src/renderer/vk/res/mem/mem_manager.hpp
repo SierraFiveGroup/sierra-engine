@@ -11,7 +11,7 @@
 #include "core/context.hpp"
 #include "sync/fence/fence.hpp"
 
-#include "scene/tasks/task.hpp"
+#include "tasks/task.hpp"
 
 namespace Sierra::vlk {
 

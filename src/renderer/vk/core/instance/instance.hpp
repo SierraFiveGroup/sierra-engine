@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "../../util.hpp"
-#include "io/logging/logger.hpp"
+#include "logging/logger.hpp"
 
 namespace Sierra::vlk { 
     class Instance {
