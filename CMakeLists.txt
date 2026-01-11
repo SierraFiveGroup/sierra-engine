@@ -37,11 +37,11 @@ list(REMOVE_ITEM ${SOURCES} "src/core/main.cpp")
 # ============================================================
 #                    Common Sources   
 # ============================================================
-find_file(GLOB_RECURSE COMMON_SRC src/common/*.cpp)
+file(GLOB_RECURSE COMMON_SRC src/common/*.cpp)
 
 
 # Create static object file
-add_library(engine STATIC ${SOURCES} ${COMMON_SRC})
+add_library(engine SHARED ${SOURCES} ${COMMON_SRC})
 
 # ============================================================
 #                      GLFW (Hybrid)
