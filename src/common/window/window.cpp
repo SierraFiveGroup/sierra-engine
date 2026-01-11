@@ -29,7 +29,7 @@ MessageCallback( GLenum source,
 }
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+    //glViewport(0, 0, width, height);
 }
 #endif // !__APPLE__
 
