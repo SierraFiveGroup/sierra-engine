@@ -22,4 +22,9 @@ namespace Sierra {
 
         return ids;
     }
+
+    bool ResourceManager::isLoaded(ResID res) {
+        Res::ResourceAny& resAny = resIDs[res];
+        return resIDs[res].base.isLoaded(resAny);
+    }
 }

@@ -7,6 +7,7 @@
 #include "scene/component/loader/component_loader.hpp"
 
 #include "renderer.hpp"
+#include "window/window.hpp"
 
 namespace Sierra{
     class Engine{
@@ -22,8 +23,10 @@ namespace Sierra{
             void loadComponents();
             void loadRenderer();
 
+            Window window;
             Renderer renderer;
             ResourceManager resManager;
             ComponentLoader compLoader;
+            TaskManager taskManager;
     };
 }

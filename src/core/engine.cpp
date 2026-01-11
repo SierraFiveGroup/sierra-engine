@@ -4,11 +4,18 @@
 
 
 namespace Sierra {
-    Engine::Engine() {
+    Engine::Engine(): window("Sierra ma balls", {800, 600}, API::vulkan), taskManager() {
         loadComponents();
         loadRenderer();
 
-        renderer.init({}, resManager);
+        resManager = ResourceManager(taskManager, renderer.getLoadFunc());
+
+        ResourceManager::LoadPacket packet{};
+        packet.loadInfos = {
+            ResourceManager::LoadInfo(ResourceManager::ResourceType::IMAGE, "sigma balls")
+        };
+
+        resManager.loadResources(packet);
     }
 
     void Engine::loadComponents() {
@@ -16,7 +23,7 @@ namespace Sierra {
         std::vector<std::string> componentNames;
 
         for(auto const& entry : std::filesystem::directory_iterator(path)) {
-            componentNames.push_back(entry.path().filename());            
+            componentNames.push_back(entry.path().filename());
         }
 
         compLoader = ComponentLoader(componentNames);
@@ -24,6 +31,12 @@ namespace Sierra {
 
     void Engine::loadRenderer() {
         renderer = Renderer("./librenderer.so"); // make it non const at some point in the future 
+
+        Renderer::Configuration conf{};
+        conf.window = &window;
+
+        renderer.init(conf, resManager);
+
     }
 
     Engine::~Engine() {
