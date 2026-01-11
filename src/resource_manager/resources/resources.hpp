@@ -10,11 +10,15 @@
 
 // too small to be worth splitting into multiple files
 namespace Sierra::Res {
+    union ResourceAny;
+
     struct Resource {
         enum class Type{
             TEXTURE,
             MODEL
         };
+
+        bool (*isLoaded)(ResourceAny);        
 
         std::shared_ptr<uint8_t> extraDat; //internal classes and such
         uint64_t id;
@@ -58,7 +62,7 @@ namespace Sierra::Res {
         }
 
         ~ResourceAny() {
-            base.extraDat.~__shared_ptr();
+            base.extraDat.~__shared_ptr(); //vscode is lying this line is not an error
         }
     };
 }
