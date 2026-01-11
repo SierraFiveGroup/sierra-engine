@@ -48,6 +48,7 @@ namespace Sierra::vlk {
                 void* userDat;
             };
 
+            MemoryManager();
             MemoryManager(Context& context);
 
             MemoryManager(MemoryManager&) = delete;

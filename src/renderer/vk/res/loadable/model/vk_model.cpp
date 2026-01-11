@@ -163,6 +163,12 @@ namespace Sierra::vlk {
         return meshes;
     }
 
+    bool VlkModel::isLoaded(Res::ResourceAny res) {
+        VlkModel* model = (VlkModel*)res.base.extraDat.get(); 
+
+        return model->asyncDat->finished;
+    }
+
     VlkModel::VlkModel(VlkModel&& other) {
         if(!other.asyncDat) return;
 

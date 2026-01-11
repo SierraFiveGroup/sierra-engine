@@ -9,10 +9,13 @@
 namespace Sierra::vlk {
     class Device {
         public:
+            Device();
             Device(Instance* instance);
 
             Device(Device&) = delete;
             Device(Device&&) = delete;
+
+            ~Device();
 
             VkQueue getQueue(VkQueueFlags queueType);
             uint32_t getQueueFamilyIndex(VkQueueFlags queueType);
@@ -22,7 +25,6 @@ namespace Sierra::vlk {
 
             bool isDedicated();
 
-            ~Device();
         private:
 
             void pickPhysicalDevice(Instance* instance);

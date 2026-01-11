@@ -1,6 +1,12 @@
 #include "mem_manager.hpp"
 
 namespace Sierra::vlk {
+
+    MemoryManager::MemoryManager(): transferOps(), transitionOps(), cmdPool(), transferCmdBuf(), transitionCmdBuf(),
+     transferDat(), transitionDat(), transferDatMutex(), transitionDatMutex(), transferTask(), transitionTask(), context() {
+
+     }
+
     MemoryManager::MemoryManager(Context& context): context(&context),
      transferDat(std::make_shared<AsyncTransferDat>()), transitionDat(std::make_shared<AsyncTransitionDat>()),
      transferTask(Task::Stage::UPLOAD, 0, &MemoryManager::asyncTransfer, std::reinterpret_pointer_cast<uint8_t>(transferDat)),

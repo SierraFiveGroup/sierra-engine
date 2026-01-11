@@ -5,6 +5,10 @@ const std::vector<const char*> requiredExtensions = {
 };
 
 namespace Sierra::vlk {
+    Device::Device(): computeQueueFamilyIndex(0), transferQueueFamilyIndex(0), graphicsQueueFamilyIndex(0),
+     transferQueueIndex(0), graphicsQueueIndex(0), computeQueueIndex(0), dedicated(false) {
+
+    }
 
     Device::Device(Instance* instance): computeQueueFamilyIndex(0), transferQueueFamilyIndex(0), graphicsQueueFamilyIndex(0),
      transferQueueIndex(0), graphicsQueueIndex(0), computeQueueIndex(0), dedicated(false) {
@@ -207,8 +211,9 @@ namespace Sierra::vlk {
     VkDevice Device::getDevice() {
         return vkDevice;
     }
- 
+
     Device::~Device() {
-        vkDestroyDevice(vkDevice, nullptr);
+        if(vkDevice)
+            vkDestroyDevice(vkDevice, nullptr);
     }
 }

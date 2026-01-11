@@ -2,10 +2,12 @@
 
 
 namespace Sierra::vlk {
-    Vulkan::Vulkan(Window& window): instance(), device(&instance) {
-        context.instance = &instance;
-        context.device = &device;
-        swapchain = Swapchain(context, window);
+    Vulkan::Vulkan() {
+
+    }
+
+    Vulkan::Vulkan(Window& window): instance(), device(&instance), context(&instance, &device),
+     swapchain(context, window), memLoader(context), memManager(context) {
         Mem::init(context);
     }
 
@@ -16,6 +18,18 @@ namespace Sierra::vlk {
         return Scene(context, info);
     }
 
+    std::vector<Res::ResourceAny> Vulkan::loadResources(ResourceManager::LoadPacket loadInfo) {
+        for(ResourceManager::LoadInfo& info : loadInfo.loadInfos) {
+            if(info.type == ResourceManager::ResourceType::MODEL) {
+                Res::Model modelRes{};
+                modelRes.isLoaded = VlkModel::isLoaded;
+                //modelRes.extraDat = std::make_shared<uint8_t*>(new VlkModel(context, ));
+            }
+        }
+
+        return {};
+    }
+
     Context& Vulkan::getContext() {
         return context;
     }
@@ -24,35 +38,11 @@ namespace Sierra::vlk {
         return swapchain;
     }
 
-    Vulkan::~Vulkan() {
+    void Vulkan::cleanup() {
         Mem::destroy(context);
     }
 
-    extern "C" int init(Renderer::Configuration configuration, ResourceManager& resourceManager) {
-        return 0;
-    }
+    Vulkan::~Vulkan() {
 
-    extern "C" int update() {
-        return 0;
-    }
-
-    extern "C" int cleanup() {
-        return 0;
-    }
-
-    extern "C" int setConfiguration(Renderer::Configuration configuration) {
-        return 0;
-    }
-
-    extern "C" Renderer::Configuration getConfiguration() {
-        return {};
-    }
-
-    extern "C" Renderer::Error getError(/*int?*/) {
-        return {};
-    }
-
-    extern "C" void* loadResource(ResourceManager::LoadInfo loadInfo) {
-        return nullptr;
     }
 }

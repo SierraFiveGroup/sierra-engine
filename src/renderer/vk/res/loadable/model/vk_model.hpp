@@ -4,6 +4,7 @@
 #include "res/mem/mem_loader.hpp"
 #include "res/loadable/texture/vk_texture.hpp"
 #include "res/mem/image/sampler.hpp"
+#include "resource_manager/resources/resources.hpp"
 
 namespace Sierra::vlk {
     class VlkModel {
@@ -63,6 +64,8 @@ namespace Sierra::vlk {
             VlkTexture* getTexture(aiTextureType type);
 
             const std::vector<Mesh>& getMeshes();
+
+            static bool isLoaded(Res::ResourceAny res);
 
         private:
             static void createVertexBuff(AsyncDat& asyncDat); // TODO, make configurable what you wanna load

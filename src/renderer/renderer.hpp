@@ -9,6 +9,7 @@
 
 #include "logging/logger.hpp"
 #include "resource_manager.hpp"
+#include "window/window.hpp"
 
 namespace Sierra{
 
@@ -25,7 +26,7 @@ namespace Sierra{
             };
 
             struct Configuration {
-
+                Window* window;
             };
 
             Renderer(): _init(), _update(), _cleanup(), _setConfiguration(), _getConfiguration(), _getError(), dlptr() {
@@ -61,13 +62,12 @@ namespace Sierra{
                 return _getConfiguration();
             }
 
-            void* loadResource(ResourceManager::LoadInfo loadInfo) {
-                *(char*)(0x0); // kill yourself
-                return 0;
-            }
-
             Error getError(/*int?*/) {
                 return _getError();
+            }
+
+            ResourceManager::LoadFunc getLoadFunc() {
+                return _loadFunc;
             }
 
         private:
@@ -80,7 +80,7 @@ namespace Sierra{
 
             Error (*_getError)(void);
 
-            void* (*_loadResource)(ResourceManager::LoadInfo);
+            ResourceManager::LoadFunc _loadFunc;
 
             void *dlptr;
 
@@ -95,11 +95,11 @@ namespace Sierra{
                 _setConfiguration = (int(*)(Configuration))dlsym(dlptr, "setConfiguration");
                 _getConfiguration = (Configuration(*)())dlsym(dlptr, "getConfiguration");
                 _getError = (Error(*)())dlsym(dlptr, "getError");
-                _loadResource = (void*(*)(ResourceManager::LoadInfo))dlsym(dlptr, "loadResource");
+                _loadFunc = (ResourceManager::LoadFunc)dlsym(dlptr, "loadResources");
 
 
 
-                if(!_init || !_update || !_cleanup || !_setConfiguration || !_getConfiguration || !_getError) {
+                if(!_init || !_update || !_cleanup || !_setConfiguration || !_getConfiguration || !_getError || !_loadFunc) {
                     throw std::runtime_error("Failed to load all the renderer functions from the shared object file");
                 }
             }
