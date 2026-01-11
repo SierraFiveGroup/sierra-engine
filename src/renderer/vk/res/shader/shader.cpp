@@ -90,7 +90,7 @@ namespace Sierra::vlk {
 
         if(!match) {
             ERROR("Error when reading descriptor type");
-            ERRPRINTF("Offending line: %.*s\n", endlOffset, line);
+            ERRPRINTF("Offending line: %.*s\n", (int)endlOffset, line);
             return endlOffset;
         }
 
@@ -104,7 +104,7 @@ namespace Sierra::vlk {
 
         if (!match) {
             ERROR("Error when parsing descriptor type, unknown type: " << buf);
-            ERRPRINTF("Offending line: %.*s\n", endlOffset, line);
+            ERRPRINTF("Offending line: %.*s\n", (int)endlOffset, line);
             return endlOffset;
         }
         /////
