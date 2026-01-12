@@ -31,7 +31,7 @@ namespace Sierra {
         class iterator { 
             friend class Sierra::Hive<T>;
             public:
-                iterator(): blockIndex(), objectIndex(), blocks(), bCount(), oCount() {
+                iterator(): blockIndex(), bWidth(), objectIndex(), blocks(), bCount(), oCount() {
 
                 }
 
@@ -50,16 +50,15 @@ namespace Sierra {
                 }
 
                 T& operator*() {
-                    return *(T*)&blocks[blockIndex].objects[objectIndex];
+                    return *(T*)&blocks[blockIndex].objects[objectIndex * bWidth];
                 }
 
                 T* operator->() {
-                    return (T*)&blocks[blockIndex].objects[objectIndex];
+                    return (T*)&blocks[blockIndex].objects[objectIndex * bWidth];
                 }                
 
                 iterator& operator++() {
                     if(blockIndex == bCount) return *this;
-                    std::cout << objectIndex << " " << oCount << " " << blockIndex << " " << bCount << "hello\n";
                     for(objectIndex++; objectIndex < oCount && !blocks[blockIndex].skipField[objectIndex]; objectIndex++);
 
                     if(objectIndex >= oCount) {
@@ -171,10 +170,11 @@ namespace Sierra {
                 uint32_t blockIndex, objectIndex;
                 Block* blocks;
                 uint32_t bCount;
+                uint32_t bWidth;
                 uint32_t oCount;
 
                 iterator(Hive& hive, uint32_t blockIndex, uint32_t objectIndex): blocks(hive.blocks.data()), objectIndex(objectIndex), blockIndex(blockIndex),
-                 bCount(hive.blocks.size()), oCount(hive.blockSize) {
+                 bCount(hive.blocks.size()), oCount(hive.blockSize), bWidth(hive.blockWidth) {
                 }
 
                 iterator(Block* blocks, uint32_t bCount, uint32_t oCount): blocks(blocks), bCount(bCount), oCount(oCount) {
@@ -190,6 +190,7 @@ namespace Sierra {
         protected:
 
         uint32_t blockSize;
+        uint32_t blockWidth;
 
         std::vector<uint8_t> bSkipField;
         uint32_t freeBlockCount;
@@ -197,11 +198,11 @@ namespace Sierra {
         std::vector<Block> blocks;
 
         public:
-            Hive(): blockSize(32), freeBlockCount(0), blocks(), bSkipField() {
+            Hive(): blockSize(32), blockWidth(1), freeBlockCount(0), blocks(), bSkipField() {
                 init();
             }
 
-            Hive(uint8_t blockSize): blockSize(blockSize), freeBlockCount(0), blocks(), bSkipField() {
+            Hive(uint32_t blockSize, uint32_t blockWidth): blockSize(blockSize), blockWidth(blockWidth), freeBlockCount(0), blocks(), bSkipField() {
                 init();
             }
 
@@ -237,7 +238,7 @@ namespace Sierra {
             }
 
             iterator end() {
-                return iterator(*this, blocks.size(), 0);
+                return iterator(*this, blocks.size(), -1);
             }
 
             iterator find(T* obj) {
@@ -258,7 +259,7 @@ namespace Sierra {
                 bSkipField.push_back(0);
 
                 blocks.back().skipField.resize(blockSize);
-                blocks.back().objects.resize(blockSize);
+                blocks.back().objects.resize(blockSize * blockWidth);
                 blocks.back().objCount = 0;
             }
 
@@ -281,14 +282,20 @@ namespace Sierra {
                 }
 
                 blocks[blockIndex].objCount++;
-                return new((T*)&blocks[blockIndex].objects[index]) T();
+
+                T* first = (T*)&blocks[blockIndex].objects[index * blockWidth];
+                for(size_t i = 0; i < blockWidth; i++) {
+                    new((T*)&blocks[blockIndex].objects[index * blockWidth + i]) T();
+                }
+                return first;
             }
 
             bool eraseInternal(iterator it) {
                 Block& block = blocks[it.blockIndex];
 
                 if constexpr (std::is_destructible_v<T>) { 
-                    ((T*)&block.objects[it.objectIndex])->~T();
+                    for(size_t i = 0; i < blockWidth; i++)
+                        ((T*)&block.objects[it.objectIndex * blockWidth + i])->~T();
                 }
                 
                 removeSkipEntry(block.skipField, it.objectIndex);
