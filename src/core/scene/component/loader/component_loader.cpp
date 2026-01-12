@@ -1,5 +1,4 @@
 #include "component_loader.hpp"
-#include <filesystem>
 
 namespace Sierra{
 
@@ -35,7 +34,7 @@ namespace Sierra{
         trials.push_back(path);
 
         for (const auto& candidate : trials) {
-            comp.dlptr = dlopen(candidate.c_str(), RTLD_NOW | RTLD_GLOBAL);
+            comp.dlptr = dlopen(candidate.c_str(), RTLD_LAZY | RTLD_GLOBAL);
             if (comp.dlptr) {
                 break;
             }
@@ -66,9 +65,15 @@ namespace Sierra{
     void ComponentLoader::unloadComponent(ComponentTemplate comp) {
         dlclose(comp.dlptr);
     }
+    
+    ComponentLoader::ComponentLoader(ComponentLoader&& other) {
+        templates = std::move(other.templates);
+        blockSize = other.blockSize;
+    }
 
-    void ComponentLoader::operator=(ComponentLoader&&) {
-        templates = std::move(templates);
+    void ComponentLoader::operator=(ComponentLoader&& other) {
+        templates = std::move(other.templates);
+        blockSize = other.blockSize;
     }
 
     ComponentLoader::~ComponentLoader() {
