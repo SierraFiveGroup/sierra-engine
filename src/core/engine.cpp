@@ -8,14 +8,7 @@ namespace Sierra {
         loadComponents();
         loadRenderer();
 
-        resManager = ResourceManager(taskManager, renderer.getLoadFunc());
-
-        ResourceManager::LoadPacket packet{};
-        packet.loadInfos = {
-            ResourceManager::LoadInfo("lepotec.jpg", Res::Type::TEXTURE)
-        };
-
-        resManager.loadResources(packet);
+        Scene scene = Scene({&compLoader, 32});
     }
 
     void Engine::loadComponents() {
@@ -23,7 +16,7 @@ namespace Sierra {
         std::vector<std::string> componentNames;
 
         for(auto const& entry : std::filesystem::directory_iterator(path)) {
-            componentNames.push_back(entry.path().filename());
+            componentNames.push_back(entry.path());
         }
 
         compLoader = ComponentLoader(componentNames);

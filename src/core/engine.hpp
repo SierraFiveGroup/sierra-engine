@@ -8,6 +8,7 @@
 
 #include "renderer.hpp"
 #include "window/window.hpp"
+#include "core/scene/scene.hpp"
 
 namespace Sierra{
     class Engine{

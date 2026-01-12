@@ -7,8 +7,10 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <filesystem>
 
 #include "component_template.hpp"
+#include "common/logging/logger.hpp"
 
 #define SIERRA_COMPONENTS_SO_PATH "components/so"
 
@@ -20,9 +22,9 @@ namespace Sierra {
             ~ComponentLoader();
 
             ComponentLoader(ComponentLoader&) = delete;
-            void operator=(ComponentLoader&) = delete;
 
-            void operator=(ComponentLoader&&);
+            ComponentLoader(ComponentLoader&&);
+            void operator=(ComponentLoader&& other);
 
             std::vector<ComponentTemplate> getTemplates();
             size_t getBlockSize();

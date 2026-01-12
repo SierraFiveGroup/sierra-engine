@@ -20,7 +20,11 @@ namespace Sierra{
                 std::string message;
             };
 
-            //Just stating they exist, no idea what they'll look like
+            struct ObjectBatch {
+                Res::ResID shaderID;
+                Res::ResID modelID;
+            };
+
             struct RenderState {
 
             };
