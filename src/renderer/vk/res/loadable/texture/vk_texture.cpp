@@ -66,6 +66,17 @@ namespace Sierra::vlk {
         return descriptorInfo.get();
     }
 
+    bool VlkTexture::isLoaded(Res::ResourceAny res) {
+        VlkTexture& tex = *(VlkTexture*)res.base.extraDat.get();
+
+        return tex.image.getImage() || tex.asyncDat->imageFuture->valid();
+    }
+
+    void VlkTexture::deleter(void* obj) {
+        VlkTexture* tex = (VlkTexture*)obj;
+        delete tex;
+    }
+
     void VlkTexture::operator=(VlkTexture&& other) {
         asyncDat = std::move(other.asyncDat);
         image = std::move(other.image);

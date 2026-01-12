@@ -10,6 +10,7 @@
 #include "scene/scene.hpp"
 #include "res/mem/mem.hpp"
 #include "res/loadable/model/vk_model.hpp"
+#include "res/loadable/loader.hpp"
 
 namespace Sierra::vlk {
     class Vulkan {
@@ -22,7 +23,7 @@ namespace Sierra::vlk {
 
             ~Vulkan();
 
-            std::vector<Res::ResourceAny> loadResources(ResourceManager::LoadPacket loadInfo);
+            std::vector<Res::ResourceAny> loadResources(ResourceManager::_RendererLoadPacket packet);
 
             void cleanup();
 
@@ -36,9 +37,8 @@ namespace Sierra::vlk {
 
             Swapchain swapchain;
 
+            Loader loader;
             TaskManager taskManager;
-            MemLoader memLoader;
-            MemoryManager memManager;
     };
 }
 

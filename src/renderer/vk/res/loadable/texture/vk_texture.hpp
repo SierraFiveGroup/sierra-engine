@@ -6,9 +6,12 @@
 #include "res/mem/mem_loader.hpp"
 #include "res/texture/texture.hpp"
 #include "res/mem/image/sampler.hpp"
+#include "resource_manager/resources/resources.hpp"
 
 namespace Sierra::vlk {
     class VlkTexture {
+        friend class Loader;
+
         struct AsyncDat {
             std::shared_ptr<std::future<Image>> imageFuture;
 
@@ -36,6 +39,10 @@ namespace Sierra::vlk {
 
             VkImage getImageHandle();
             VkDescriptorImageInfo* getDescriptorInfo();
+
+        protected:
+            static bool isLoaded(Res::ResourceAny res);
+            static void deleter(void* obj);
 
         private:
             void createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info);

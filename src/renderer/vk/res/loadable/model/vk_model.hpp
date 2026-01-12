@@ -8,6 +8,7 @@
 
 namespace Sierra::vlk {
     class VlkModel {
+        friend class Loader;
 
         typedef std::array<std::vector<VlkTexture>, AI_TEXTURE_TYPE_COUNT> Textures_t;
 
@@ -65,7 +66,10 @@ namespace Sierra::vlk {
 
             const std::vector<Mesh>& getMeshes();
 
+        protected:
+
             static bool isLoaded(Res::ResourceAny res);
+            static void deleter(void* obj);
 
         private:
             static void createVertexBuff(AsyncDat& asyncDat); // TODO, make configurable what you wanna load

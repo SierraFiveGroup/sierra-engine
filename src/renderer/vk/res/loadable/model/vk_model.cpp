@@ -169,6 +169,11 @@ namespace Sierra::vlk {
         return model->asyncDat->finished;
     }
 
+    void VlkModel::deleter(void* obj) {
+        VlkModel* model = (VlkModel*)obj;
+        delete (VlkModel*)model;
+    }
+
     VlkModel::VlkModel(VlkModel&& other) {
         if(!other.asyncDat) return;
 

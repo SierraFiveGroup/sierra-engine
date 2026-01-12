@@ -39,7 +39,7 @@ extern "C" Renderer::Error getError(/*int?*/) {
     return oldest;
 }
 
-extern "C" std::vector<Res::ResourceAny> loadResources(ResourceManager::LoadPacket loadInfo) {
-    return instance.loadResources(loadInfo);
+extern "C" std::vector<Res::ResourceAny> loadResources(ResourceManager::_RendererLoadPacket packet) {
+    return instance.loadResources(packet);
 }
 

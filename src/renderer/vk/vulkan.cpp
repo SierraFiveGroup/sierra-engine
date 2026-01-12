@@ -7,7 +7,7 @@ namespace Sierra::vlk {
     }
 
     Vulkan::Vulkan(Window& window): instance(), device(&instance), context(&instance, &device),
-     swapchain(context, window), memLoader(context), memManager(context) {
+     swapchain(context, window), loader(context) {
         Mem::init(context);
     }
 
@@ -18,16 +18,8 @@ namespace Sierra::vlk {
         return Scene(context, info);
     }
 
-    std::vector<Res::ResourceAny> Vulkan::loadResources(ResourceManager::LoadPacket loadInfo) {
-        for(ResourceManager::LoadInfo& info : loadInfo.loadInfos) {
-            if(info.type == ResourceManager::ResourceType::MODEL) {
-                Res::Model modelRes{};
-                modelRes.isLoaded = VlkModel::isLoaded;
-                //modelRes.extraDat = std::make_shared<uint8_t*>(new VlkModel(context, ));
-            }
-        }
-
-        return {};
+    std::vector<Res::ResourceAny> Vulkan::loadResources(ResourceManager::_RendererLoadPacket packet) {
+        return loader.load(packet);
     }
 
     Context& Vulkan::getContext() {

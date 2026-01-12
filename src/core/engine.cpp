@@ -12,7 +12,7 @@ namespace Sierra {
 
         ResourceManager::LoadPacket packet{};
         packet.loadInfos = {
-            ResourceManager::LoadInfo(ResourceManager::ResourceType::IMAGE, "sigma balls")
+            ResourceManager::LoadInfo("lepotec.jpg", Res::Type::TEXTURE)
         };
 
         resManager.loadResources(packet);
@@ -40,6 +40,7 @@ namespace Sierra {
     }
 
     Engine::~Engine() {
+        resManager.cleanup();
         renderer.cleanup();
     }
 }
