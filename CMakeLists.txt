@@ -375,7 +375,7 @@ set(include_dirs
     src/renderer/vk
     src/renderer
     src/resource_manager
-    components/inc
+    .
     renderer
     stb
     drlibs
@@ -391,11 +391,12 @@ file(GLOB_RECURSE RENDERER_SRC src/renderer/*.cpp)
 add_library(renderer SHARED ${RENDERER_SRC} ${COMMON_SRC})
 
 target_include_directories(renderer PRIVATE ${include_dirs})
+target_link_directories(renderer PRIVATE components/so)
 target_link_libraries(renderer PRIVATE
     ${GLFW_TARGET_NAME}
     ${ASSIMP_TARGET}
     Vulkan::Vulkan
-)   
+) # FOR TESTING PURPOSES
 
 # ============================================================
 #                        Resource Manager
@@ -517,6 +518,7 @@ foreach(f ${COMP_SOURCES})
     target_link_libraries(${target_name} PRIVATE ${link_libraries})
     target_include_directories(${target_name} PRIVATE ${include_dirs})
     set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/components/so)
+    target_include_directories(${target_name} PRIVATE components/inc)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_definitions(${target_name} PRIVATE DEBUG)
@@ -545,7 +547,8 @@ endforeach()
 add_executable(a "src/main.cpp")
 target_link_libraries(a PRIVATE engine)
 target_link_libraries(a PRIVATE ${link_libraries})
-target_link_libraries(a PRIVATE resource_manager)
+target_link_libraries(a PRIVATE resource_manager Transform3D) #TODO LINKED FOR TESTING PURPOSES
+
 target_include_directories(a PRIVATE ${include_dirs})
 if(COMPONENT_TARGETS)
     add_dependencies(a ${COMPONENT_TARGETS})
