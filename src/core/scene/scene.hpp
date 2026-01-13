@@ -3,6 +3,7 @@
 #include "common/util/structures/hive.hpp"
 #include "core/scene/component/loader/component_loader.hpp"
 #include "common/logging/logger.hpp"
+#include "object/object.hpp"
 
 namespace Sierra {
     class Scene {
@@ -14,7 +15,12 @@ namespace Sierra {
 
             Scene(); 
             Scene(SceneInfo info); 
+
+            Object createObject();
+            void eraseObject(Object obj);
+        
         private:
+
             void initComponents(SceneInfo& info);
 
             Hive<uint8_t> objects;

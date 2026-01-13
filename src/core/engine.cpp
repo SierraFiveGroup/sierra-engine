@@ -9,6 +9,7 @@ namespace Sierra {
         loadRenderer();
 
         Scene scene = Scene({&compLoader, 32});
+        Object obj = scene.createObject();
     }
 
     void Engine::loadComponents() {

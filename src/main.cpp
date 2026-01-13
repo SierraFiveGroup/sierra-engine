@@ -23,6 +23,8 @@
 #include "io/panic/panic_handler.hpp"
 #include "io/memory/leak_tracker.hpp"
 
+#include "core/scene/scene.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -38,7 +40,6 @@ using namespace Sierra;
 using namespace vlk;
 int main() {
     Engine engine = Engine();
-
 
     /*
     putenv("LD_LIBRARY_PATH=components/so"); // put in engine::init or smthn

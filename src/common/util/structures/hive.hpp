@@ -206,13 +206,13 @@ namespace Sierra {
                 init();
             }
 
-            T* insert(T obj) { 
+            T* insert(T&& obj) { 
                 uint32_t blockIndex = getNextFreeBlock();
-                return blockInsert(blockIndex);
+                return blockInsert(blockIndex, &obj);
             }
 
             void erase(T* obj) {
-                iterator it = find(obj);
+                iterator it = find(obj); // TODO optimize by looking at block addresses to find the right one
                 eraseInternal(it);
             }
 
@@ -272,7 +272,7 @@ namespace Sierra {
                 return bSkipField.front();
             }
 
-            T* blockInsert(uint32_t blockIndex) {
+            T* blockInsert(uint32_t blockIndex, T* obj) {
                 uint32_t index = addNextSkipBlock(blocks[blockIndex].skipField);
 
                 if(blocks[blockIndex].skipField[0] == blockSize) { // block is full
@@ -285,7 +285,10 @@ namespace Sierra {
 
                 T* first = (T*)&blocks[blockIndex].objects[index * blockWidth];
                 for(size_t i = 0; i < blockWidth; i++) {
-                    new((T*)&blocks[blockIndex].objects[index * blockWidth + i]) T();
+                    if(obj)
+                        new((T*)&blocks[blockIndex].objects[index * blockWidth + i]) T(*obj);
+                    else
+                        new((T*)&blocks[blockIndex].objects[index * blockWidth + i]) T(); // TODO is this if necessary / is there any case where we would want to add without explicitly passing in an object
                 }
                 return first;
             }
