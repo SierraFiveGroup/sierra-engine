@@ -18,6 +18,9 @@ extern "C" unsigned int getSize() {\
 extern "C" void setBlockOffset(size_t offset) {\
     x::_INTERNAL_blockOffset = offset;\
 }\
+extern "C" size_t getBlockOffset() {\
+    return x::_INTERNAL_blockOffset;\
+}\
 
 #define SIERRA_COMP(x) \
 using namespace Sierra;\

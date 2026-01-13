@@ -3,23 +3,31 @@
 #include <cstdint>
 
 #include "../component/component.hpp"
+#include "blueprint/object_blueprint.hpp"
 
 namespace Sierra{
     class Object {
         friend class Scene;
+
         public:
             Object();
 
-        protected:
-            Object(uint8_t* row);
+            Object(Object&) = delete;
+            Object(Object&&) = delete;
+
+            ~Object();
 
             template<typename T>
-            T* getComponent(uint32_t compID);
+            T* getComponent();
 
-            Component* getComponentBase(uint32_t compID);
-
+        protected:
+            Object (ObjectBlueprint& blueprint, uint8_t* row);
 
         private:
+            void constructComponents();
+
+            ObjectBlueprint* blueprint;
+
             uint8_t* row;
     };
 

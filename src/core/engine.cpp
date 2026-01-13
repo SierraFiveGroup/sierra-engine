@@ -1,7 +1,6 @@
 #include "engine.hpp"
 
-#include <iostream>
-
+#include "components/inc/Transform3D.hpp"
 
 namespace Sierra {
     Engine::Engine(): window("Sierra ma balls", {800, 600}, API::vulkan), taskManager() {
@@ -9,7 +8,12 @@ namespace Sierra {
         loadRenderer();
 
         Scene scene = Scene({&compLoader, 32});
-        Object obj = scene.createObject();
+        ObjectBlueprint bp = ObjectBlueprint({{SIERRA_COMPONENT_TRANSFORM_3D}});
+        bp.loadOffsets(compLoader);
+        Object obj = scene.createObject(bp);
+
+        Transform3D* transform = obj.getComponent<Transform3D>();
+        transform->setPos({1, 1, 1});
     }
 
     void Engine::loadComponents() {

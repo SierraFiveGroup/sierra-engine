@@ -2,23 +2,50 @@
 
 namespace Sierra {
 
-    ObjectBlueprint::ObjectBlueprint() {
+    ObjectBlueprint::ObjectBlueprint(): componentNames(), componentTemplates() {
 
     }
 
-    ObjectBlueprint::ObjectBlueprint(ComponentLoader& componentLoader) {
-        loadOffsets(componentLoader);
+    ObjectBlueprint::ObjectBlueprint(Info info): componentNames(info.componentNames), componentTemplates() {
+
     }
 
     void ObjectBlueprint::loadOffsets(ComponentLoader& componentLoader) {
         ComponentLoader::ComponentMap& compMap = componentLoader.getTemplates();
+        componentTemplates.reserve(componentNames.size());
 
-        for(std::pair<std::string, uint32_t>& name_offset : componentNames) {
-            auto it = compMap.find(name_offset.first);
+        
 
+        for(std::string& name : componentNames) {
+            auto it = compMap.find(name);
             assert(it != compMap.end());
 
-            name_offset.second = it->second.getSize();
+            componentTemplates.push_back(it->second);
         }
+    }
+
+    uint32_t ObjectBlueprint::getComponentTypeOffset(size_t typeHash, const char* typeName) {
+        auto it = componentOffsetCache.find(typeHash);
+        if(it != componentOffsetCache.end()) {
+            return it->second;
+        }
+
+        for(int i = 0; i < componentNames.size(); i++) {
+            char* realnameDemangled = abi::__cxa_demangle(typeName, NULL, NULL, NULL);
+
+            if (strcmp(realnameDemangled, componentNames[i].c_str())) { // not here
+                free(realnameDemangled);
+                break;
+            }
+
+            free(realnameDemangled);
+            it = componentOffsetCache.insert({typeHash, componentTemplates[i].getBlockOffset()}).first;
+        }
+
+        if(it == componentOffsetCache.end()) {
+            throw std::runtime_error("Component " + (std::string)typeName + " not found in object blueprint"); // TODO maybe demangled name?
+        }
+
+        return it->second;
     }
 }

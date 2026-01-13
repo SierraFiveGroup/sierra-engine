@@ -9,7 +9,7 @@ namespace Sierra{
             temp.setBlockOffset(blockSize);
             blockSize += temp.getSize();
 
-            templates[name] = temp;
+            templates[temp.name] = temp;
         }
     }
 
@@ -45,9 +45,13 @@ namespace Sierra{
         comp.init = (void*(*)(void*))dlsym(comp.dlptr, "init");
         comp.getSize = (size_t(*)())dlsym(comp.dlptr, "getSize"); 
         comp.setBlockOffset = (void(*)(size_t))dlsym(comp.dlptr, "setBlockOffset"); 
+        comp.getBlockOffset = (size_t (*)())dlsym(comp.dlptr, "getBlockOffset"); ;
         comp.destruct = (void(*)(void*))dlsym(comp.dlptr, "destruct");
 
-        if( !comp.init || !comp.getSize || !comp.destruct ) {
+        comp.name = path.substr(path.find_last_of('/') + 1); // strip the path
+        comp.name = comp.name.substr(3, comp.name.find_last_of('.') - 3); // strip the extension and the "lib" part
+
+        if( !comp.init || !comp.getSize || !comp.destruct || !comp.getBlockOffset || !comp.setBlockOffset) {
             throw std::runtime_error("Not all required symbols present in shared object file: " + path);
         }
 

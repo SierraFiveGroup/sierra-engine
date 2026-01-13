@@ -5,11 +5,19 @@ namespace Sierra {
 
     }
 
-    Object::Object(uint8_t* row): row(row) {
-
+    Object::Object(ObjectBlueprint& blueprint, uint8_t* row): row(row), blueprint(&blueprint) {
+        constructComponents();
     }
 
-    Component* Object::getComponentBase(uint32_t compID) {
-        return getComponent<Component>(compID);
+    void Object::constructComponents() {
+        for(ComponentTemplate& temp : blueprint->componentTemplates) {
+            temp.init(row + temp.getBlockOffset());
+        }
+    }
+
+    Object::~Object() {
+        for(ComponentTemplate& temp : blueprint->componentTemplates) {
+            temp.destruct(row + temp.getBlockOffset());
+        }
     }
 }

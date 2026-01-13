@@ -10,5 +10,6 @@ namespace Sierra{
         void (*destruct)(void* obj);
         size_t (*getSize)();
         void (*setBlockOffset)(size_t);
+        size_t (*getBlockOffset)();
     };
 }

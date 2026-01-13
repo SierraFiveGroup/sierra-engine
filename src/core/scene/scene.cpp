@@ -14,8 +14,8 @@ namespace Sierra {
         objects = Hive<uint8_t>(info.objCountPerBlock, info.compLoader->getBlockSize());
     }
 
-    Object Scene::createObject() {
-        return Object(objects.insert((uint8_t)0));
+    Object Scene::createObject(ObjectBlueprint& objBlueprint) {
+        return Object(objBlueprint, objects.insert((uint8_t)0));
     }
 
     void Scene::eraseObject(Object obj) {

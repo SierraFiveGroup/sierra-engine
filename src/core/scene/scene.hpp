@@ -16,7 +16,7 @@ namespace Sierra {
             Scene(); 
             Scene(SceneInfo info); 
 
-            Object createObject();
+            Object createObject(ObjectBlueprint& objBlueprint);
             void eraseObject(Object obj);
         
         private:
