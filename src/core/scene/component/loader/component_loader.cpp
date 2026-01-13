@@ -5,11 +5,11 @@ namespace Sierra{
     ComponentLoader::ComponentLoader(std::vector<std::string> componentNames): blockSize(0), templates() {
         templates.reserve(componentNames.size());
         for(std::string& name : componentNames) {
-            templates.emplace_back(
-                loadComponent(name)
-            );
-            templates.back().setBlockOffset(blockSize);
-            blockSize += templates.back().getSize();
+            ComponentTemplate temp = loadComponent(name);
+            temp.setBlockOffset(blockSize);
+            blockSize += temp.getSize();
+
+            templates[name] = temp;
         }
     }
 
@@ -54,7 +54,7 @@ namespace Sierra{
         return comp;
     }
 
-    std::vector<ComponentTemplate> ComponentLoader::getTemplates() {
+    ComponentLoader::ComponentMap& ComponentLoader::getTemplates() {
         return templates;
     }
 
@@ -77,8 +77,8 @@ namespace Sierra{
     }
 
     ComponentLoader::~ComponentLoader() {
-        for(ComponentTemplate& temp : templates) {
-            unloadComponent(temp);
+        for(auto& temp : templates) {
+            unloadComponent(temp.second);
         }
     }
 

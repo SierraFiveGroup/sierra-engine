@@ -8,6 +8,7 @@
 #include <vector>
 #include <stdexcept>
 #include <filesystem>
+#include <unordered_map>
 
 #include "component_template.hpp"
 #include "common/logging/logger.hpp"
@@ -17,6 +18,8 @@
 namespace Sierra {
     class ComponentLoader {
         public:
+            typedef std::unordered_map<std::string, ComponentTemplate> ComponentMap;
+
             ComponentLoader() = default;
             ComponentLoader(std::vector<std::string> componentNames);
             ~ComponentLoader();
@@ -26,7 +29,7 @@ namespace Sierra {
             ComponentLoader(ComponentLoader&&);
             void operator=(ComponentLoader&& other);
 
-            std::vector<ComponentTemplate> getTemplates();
+            ComponentMap& getTemplates();
             size_t getBlockSize();
         private:
             ComponentTemplate loadComponent(std::string path);
@@ -34,6 +37,6 @@ namespace Sierra {
 
             size_t blockSize;
 
-            std::vector<ComponentTemplate> templates;
+            ComponentMap templates;
     };
 };

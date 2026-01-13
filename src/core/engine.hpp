@@ -5,6 +5,7 @@
 
 #include "scene/component/component.hpp"
 #include "scene/component/loader/component_loader.hpp"
+#include "scene/object/blueprint/object_blueprint.hpp"
 
 #include "renderer.hpp"
 #include "window/window.hpp"
