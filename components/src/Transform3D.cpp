@@ -1,7 +1,10 @@
-#include "transform_3d.hpp"
+#include "Transform3D.hpp"
 
 SIERRA_GEN_COMP(Transform3D);
 
+Transform3D::Transform3D() {
+
+}
 
 void Transform3D::update() {
 
