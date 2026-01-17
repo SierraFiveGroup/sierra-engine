@@ -28,6 +28,12 @@ if(APPLE)
     message(STATUS "Reminder: VK_ICD_FILENAMES and VK_LAYER_PATH must be set at runtime")
 endif()
 
+if(APPLE)
+    #set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)   
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/gcc/15.2.0/bin/g++-15" CACHE PATH "C++ compiler" FORCE)
+    set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/gcc/15.2.0/bin/gcc-15" CACHE PATH "C compiler" FORCE)
+endif()
+
 # ============================================================
 #                 Collect Engine Sources
 # ============================================================
@@ -408,6 +414,7 @@ add_library(resource_manager SHARED ${RES_MANAGER_SRC} ${COMMON_SRC})
 target_include_directories(resource_manager PRIVATE ${include_dirs})
 target_link_libraries(resource_manager PRIVATE
     ${ASSIMP_TARGET}
+    ${GLFW_TARGET_NAME}
     Vulkan::Vulkan
 )
 
@@ -484,7 +491,7 @@ set(link_libraries
 )
 endif()
 
-target_link_libraries(engine PRIVATE ${link_libraries})
+target_link_libraries(engine PRIVATE ${link_libraries} Transform3D)
 
 if(USE_FREETYPE)
     target_link_libraries(engine PRIVATE ${FREETYPE_TARGET})

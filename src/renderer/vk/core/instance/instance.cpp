@@ -33,9 +33,16 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 
 const std::vector<const char*> extensions = {
 #ifdef DEBUG
-    "VK_EXT_debug_utils"
+    "VK_EXT_debug_utils",
+#endif
+#ifdef __APPLE__
+    VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,
 #endif
 };
+
+#ifdef __APPLE__
+#define VK_USE_PLATFORM_MACOS_MVK
+#endif
 
 namespace Sierra::vlk {
     Instance::Instance() {
@@ -57,6 +64,9 @@ namespace Sierra::vlk {
         VkInstanceCreateInfo instanceInfo{};
         instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceInfo.pApplicationInfo = &appInfo;
+        #ifdef __APPLE__
+        instanceInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        #endif
 
 #ifdef DEBUG
         if (checkLayerSupport()) {
