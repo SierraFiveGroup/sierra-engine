@@ -22,6 +22,8 @@ namespace Sierra{
 
             ~Engine();
 
+            void run();
+
         private:
             void loadComponents();
             void loadRenderer();
@@ -29,7 +31,7 @@ namespace Sierra{
             Window window;
             Renderer renderer;
             ResourceManager resManager;
-            ComponentLoader compLoader;
             TaskManager taskManager;
+            ComponentLoader compLoader;
     };
 }

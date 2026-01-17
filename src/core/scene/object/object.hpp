@@ -33,8 +33,6 @@ namespace Sierra{
 
             ObjectBlueprint* blueprint;
 
-            Res::ResID shaderID; // todo figure out how to set normally
-
             uint8_t* row;
     };
 

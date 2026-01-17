@@ -9,9 +9,9 @@ namespace Sierra {
 
         Scene scene = Scene({&compLoader, &resManager, 32});
         ObjectBlueprint bp = ObjectBlueprint({{SIERRA_COMPONENT_TRANSFORM_3D}, {0, 1}, &compLoader.getTemplates()});
-        Object obj = scene.createObject(bp);
+        Object* obj = scene.createObject(bp);
 
-        Component::Transform3D* transform = obj.getComponent<Component::Transform3D>(SIERRA_COMPONENT_TRANSFORM_3D);
+        Component::Transform3D* transform = obj->getComponent<Component::Transform3D>(SIERRA_COMPONENT_TRANSFORM_3D);
         transform->setPos({1, 1, 1});
 
         scene.update();
@@ -31,13 +31,12 @@ namespace Sierra {
         new (&compLoader) ComponentLoader(componentNames);
     }
 
+    void Engine::run() {
+
+    }
+
     void Engine::loadRenderer() {
-        #ifdef __linux__
-        renderer = Renderer("./librenderer.so"); // make it non const at some point in the future 
-        #elif __APPLE__
-        renderer = Renderer("./librenderer.dylib");
-        // TODO: Windows
-        #endif
+        renderer = Renderer("./librenderer." SIERRA_SO_EXT); // make it non const at some point in the future 
 
         Renderer::Configuration conf{};
         conf.window = &window;

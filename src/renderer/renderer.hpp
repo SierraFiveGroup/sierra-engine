@@ -11,6 +11,14 @@
 #include "resource_manager.hpp"
 #include "window/window.hpp"
 
+#ifdef __linux__
+#define SIERRA_SO_EXT "so"
+#elif  __APPLE__
+#define SIERRA_SO_EXT "dylib"
+#else
+#error "Unsupported platform"
+#endif
+
 namespace Sierra{
 
     class Renderer {

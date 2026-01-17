@@ -5,7 +5,7 @@ namespace Sierra {
 
     }
 
-    Object::Object(ObjectBlueprint& blueprint, uint8_t* row): row(row), blueprint(&blueprint), shaderID(0) {
+    Object::Object(ObjectBlueprint& blueprint, uint8_t* row): row(row), blueprint(&blueprint) {
         constructComponents();
         initDrawable();
     }
@@ -36,7 +36,7 @@ namespace Sierra {
     }
 
     Res::ResID Object::getShaderID() {
-        return shaderID;
+        return blueprint->getDrawableData().shaderID;
     }
     
     Object::~Object() {
