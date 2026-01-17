@@ -5,10 +5,12 @@ namespace Sierra {
     ResourceManager::ResourceManager() {
 
     }
-
-    ResourceManager::ResourceManager(TaskManager& taskManager, LoadFunc loadFunc): taskManager(&taskManager), loadFunc(loadFunc), resIDInc(0) {
+    
+    ResourceManager::ResourceManager(Info info): taskManager(info.taskManager), loadFunc(info.loadFunc),
+     renderManager(info.framebufferCount) {
 
     }
+
 
     std::vector<Res::ResID> ResourceManager::loadResources(LoadPacket& packet) {
         std::vector<Res::ResID> ids;
@@ -78,6 +80,10 @@ namespace Sierra {
         rendererInfo.baseRes.texture = &baseBuffers.textures.back();
 
         return rendererInfo;
+    }
+
+    RenderStateManager& ResourceManager::getRenderManager() {
+        return renderManager;
     }
 
     ResourceManager::ResourceManager(ResourceManager&& other) {

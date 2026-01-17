@@ -6,11 +6,15 @@
 #include <unordered_set>
 
 #include "resources/resources.hpp"
-#include <tasks/manager.hpp>
+#include "tasks/manager.hpp"
+#include "components/inc/Transform3D.hpp"
+#include "rendering/render_state_manager.hpp"
 
 namespace Sierra {
     class ResourceManager {
         public:
+
+
             struct LoadInfo{
                 std::string path;
                 Res::Type type;
@@ -37,8 +41,16 @@ namespace Sierra {
 
             typedef std::vector<Res::ResourceAny> (*LoadFunc)(_RendererLoadPacket);
 
+            struct Info{
+                TaskManager* taskManager;
+                LoadFunc loadFunc;
+
+                uint32_t framebufferCount;
+            };
+
+
             ResourceManager();
-            ResourceManager(TaskManager& taskManager, LoadFunc loadfunc);
+            ResourceManager(Info info);
 
             ResourceManager(ResourceManager&) = delete;
 
@@ -48,6 +60,9 @@ namespace Sierra {
             void cleanup();
 
             std::vector<Res::ResID> loadResources(LoadPacket& packet);
+
+            RenderStateManager& getRenderManager();
+
 
             bool isLoaded(Res::ResID res);
             bool unload(Res::ResID res);
@@ -69,5 +84,7 @@ namespace Sierra {
             LoadFunc loadFunc;
 
             uint64_t resIDInc;
+
+            RenderStateManager renderManager;
     };
 }
