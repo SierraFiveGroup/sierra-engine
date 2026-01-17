@@ -2,8 +2,6 @@
 
 namespace Sierra {
 
-    Assimp::Importer Model::importer = {};
-
     Model::Model() {
 
     }
@@ -20,10 +18,11 @@ namespace Sierra {
 
         asyncDat->modelData = {};
         asyncDat->taskManager = &taskManager;
-        asyncDat->importer = &importer;
         asyncDat->modelPath = path;
         asyncDat->modelData = std::make_shared<AIModelData>();
         asyncDat->hasFinishedLoading = hasFinishedLoading;
+
+        new (&asyncDat->modelData->importer) Assimp::Importer();
 
         modelData = asyncDat->modelData;
     }
@@ -32,7 +31,7 @@ namespace Sierra {
     void Model::loadScene(std::shared_ptr<uint8_t> dat) {
         AsyncDat& asyncDat = *(AsyncDat*)dat.get();
 
-        const aiScene* scene = importer.ReadFile(asyncDat.modelPath,
+        const aiScene* scene = asyncDat.modelData->importer.ReadFile(asyncDat.modelPath,
              aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes | aiProcess_OptimizeMeshes);
 
 
@@ -64,7 +63,7 @@ namespace Sierra {
             asyncDat.modelData->textures[aiTextureType_DIFFUSE].push_back(std::move(Texture(*asyncDat.taskManager, asyncDat.modelPath.substr(0, asyncDat.modelPath.find_last_of("/") + 1) + texPath.C_Str())));
         }
     }
-    
+
     std::string Model::getPath() {
         return path;
     }

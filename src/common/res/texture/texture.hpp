@@ -5,6 +5,10 @@
 #include "logging/logger.hpp"
 #include "tasks/manager.hpp"
 
+#ifdef __APPLE__
+typedef unsigned char u_char;
+#endif
+
 #ifdef _WIN32
 using u_char = unsigned char;
 #endif

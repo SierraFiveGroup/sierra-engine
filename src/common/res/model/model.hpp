@@ -25,11 +25,11 @@ namespace Sierra {
         struct AIModelData { //packed into 1 struct cause fragmentation makes me sad
             Textures_t textures;
             std::vector<aiMesh*> meshes;
+            Assimp::Importer importer;
         };
 
         struct AsyncDat {
             TaskManager* taskManager;
-            Assimp::Importer* importer;
             std::string modelPath;
             std::shared_ptr<std::atomic_bool> hasFinishedLoading;
 
@@ -55,7 +55,6 @@ namespace Sierra {
             //no point in creating our own mesh wrapper,
             //this doesn't complicate things
 
-            static Assimp::Importer importer;
             std::string path;
 
         
