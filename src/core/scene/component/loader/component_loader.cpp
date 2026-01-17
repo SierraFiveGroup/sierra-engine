@@ -1,6 +1,6 @@
 #include "component_loader.hpp"
 
-namespace Sierra{
+namespace Sierra {
 
     ComponentLoader::ComponentLoader(std::vector<std::string> componentNames): blockSize(0), templates() {
         templates.reserve(componentNames.size());
@@ -9,7 +9,7 @@ namespace Sierra{
             temp.setBlockOffset(blockSize);
             blockSize += temp.getSize();
 
-            templates[temp.name] = temp;
+            templates[temp.getCode()] = temp;
         }
     }
 
@@ -46,12 +46,13 @@ namespace Sierra{
         comp.getSize = (size_t(*)())dlsym(comp.dlptr, "getSize"); 
         comp.setBlockOffset = (void(*)(size_t))dlsym(comp.dlptr, "setBlockOffset"); 
         comp.getBlockOffset = (size_t (*)())dlsym(comp.dlptr, "getBlockOffset"); ;
+        comp.getCode = (uint32_t (*)())dlsym(comp.dlptr, "getCode"); ;
         comp.destruct = (void(*)(void*))dlsym(comp.dlptr, "destruct");
 
         comp.name = path.substr(path.find_last_of('/') + 1); // strip the path
-        comp.name = comp.name.substr(3, comp.name.find_last_of('.') - 3); // strip the extension and the "lib" part
-
-        if( !comp.init || !comp.getSize || !comp.destruct || !comp.getBlockOffset || !comp.setBlockOffset) {
+        comp.name = comp.name.substr(3, comp.name.find_last_of('.') - SIERRA_COMPONENTS_SO_EXT_LEN); // strip the extension and the "lib" part
+        
+        if( !comp.init || !comp.getSize || !comp.destruct || !comp.getBlockOffset || !comp.setBlockOffset || !comp.getCode) {
             throw std::runtime_error("Not all required symbols present in shared object file: " + path);
         }
 
@@ -69,7 +70,7 @@ namespace Sierra{
     void ComponentLoader::unloadComponent(ComponentTemplate comp) {
         dlclose(comp.dlptr);
     }
-    
+    /*
     ComponentLoader::ComponentLoader(ComponentLoader&& other) {
         templates = std::move(other.templates);
         blockSize = other.blockSize;
@@ -79,7 +80,7 @@ namespace Sierra{
         templates = std::move(other.templates);
         blockSize = other.blockSize;
     }
-
+*/
     ComponentLoader::~ComponentLoader() {
         for(auto& temp : templates) {
             unloadComponent(temp.second);

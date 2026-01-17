@@ -15,10 +15,21 @@
 
 #define SIERRA_COMPONENTS_SO_PATH "components/so"
 
+#ifdef __linux__
+#define SIERRA_COMPONENTS_SO_EXT ".so"
+#define SIERRA_COMPONENTS_SO_EXT_LEN 3
+#elif __APPLE__
+#define SIERRA_COMPONENTS_SO_EXT ".dylib"
+#define SIERRA_COMPONENTS_SO_EXT_LEN 6
+#elif _WIN32
+#define SIERRA_COMPONENTS_SO_EXT ".dll"
+#define SIERRA_COMPONENTS_SO_EXT_LEN 4
+#endif
+
 namespace Sierra {
     class ComponentLoader {
         public:
-            typedef std::unordered_map<std::string, ComponentTemplate> ComponentMap;
+            typedef std::unordered_map<uint32_t, ComponentTemplate> ComponentMap;
 
             ComponentLoader() = default;
             ComponentLoader(std::vector<std::string> componentNames);
@@ -26,8 +37,7 @@ namespace Sierra {
 
             ComponentLoader(ComponentLoader&) = delete;
 
-            ComponentLoader(ComponentLoader&&);
-            void operator=(ComponentLoader&& other);
+            ComponentLoader(ComponentLoader&&) = delete;
 
             ComponentMap& getTemplates();
             size_t getBlockSize();

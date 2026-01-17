@@ -11,5 +11,6 @@ namespace Sierra{
         size_t (*getSize)();
         void (*setBlockOffset)(size_t);
         size_t (*getBlockOffset)();
+        uint32_t (*getCode)();
     };
 }

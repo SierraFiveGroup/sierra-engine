@@ -6,8 +6,14 @@
 
 #include <glm/glm.hpp>
 
-SIERRA_COMP(Transform3D)
+SIERRA_CORE_COMP(Transform3D)
     public:
+        struct Data {
+            glm::mediump_vec3 pos;
+            glm::mediump_vec3 rotation;
+            glm::mediump_vec3 scale;
+        };
+
         Transform3D();
 
         void update() override;
@@ -15,8 +21,8 @@ SIERRA_COMP(Transform3D)
         void setPos(glm::vec3 vec);
         void setRotation(glm::vec3 vec);
         void setScale(glm::vec3 vec);
-    private: //the ONLY 3 members allowed to be here
-        glm::mediump_vec3 pos;
-        glm::mediump_vec3 rotation;
-        glm::mediump_vec3 scale;
-};
+    protected:
+        struct Data data;
+    //private: //the ONLY 3 members allowed to be here
+        
+END_SIERRA_COMP
