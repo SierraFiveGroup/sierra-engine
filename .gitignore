@@ -18,3 +18,5 @@ libgladd.a
 /components/so/*.so
 _deps
 *.so
+*.dylib
+openal_compat/
