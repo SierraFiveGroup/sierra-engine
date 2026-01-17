@@ -2,50 +2,20 @@
 
 namespace Sierra {
 
-    ObjectBlueprint::ObjectBlueprint(): componentNames(), componentTemplates() {
+    ObjectBlueprint::ObjectBlueprint(): componentCodes(), map() {
 
     }
 
-    ObjectBlueprint::ObjectBlueprint(Info info): componentNames(info.componentNames), componentTemplates() {
+    ObjectBlueprint::ObjectBlueprint(Info info): componentCodes(info.componentCodes), 
+     map(info.map), drawableData(info.drawableData) {
 
     }
 
-    void ObjectBlueprint::loadOffsets(ComponentLoader& componentLoader) {
-        ComponentLoader::ComponentMap& compMap = componentLoader.getTemplates();
-        componentTemplates.reserve(componentNames.size());
-
-        
-
-        for(std::string& name : componentNames) {
-            auto it = compMap.find(name);
-            assert(it != compMap.end());
-
-            componentTemplates.push_back(it->second);
-        }
+    uint32_t ObjectBlueprint::getComponentOffset(uint32_t code) {
+        return (*map)[code].getBlockOffset();
     }
 
-    uint32_t ObjectBlueprint::getComponentTypeOffset(size_t typeHash, const char* typeName) {
-        auto it = componentOffsetCache.find(typeHash);
-        if(it != componentOffsetCache.end()) {
-            return it->second;
-        }
-
-        for(int i = 0; i < componentNames.size(); i++) {
-            char* realnameDemangled = abi::__cxa_demangle(typeName, NULL, NULL, NULL);
-
-            if (strcmp(realnameDemangled, componentNames[i].c_str())) { // not here
-                free(realnameDemangled);
-                break;
-            }
-
-            free(realnameDemangled);
-            it = componentOffsetCache.insert({typeHash, componentTemplates[i].getBlockOffset()}).first;
-        }
-
-        if(it == componentOffsetCache.end()) {
-            throw std::runtime_error("Component " + (std::string)typeName + " not found in object blueprint"); // TODO maybe demangled name?
-        }
-
-        return it->second;
+    Component::Drawable::Data& ObjectBlueprint::getDrawableData() {
+        return drawableData;
     }
 }

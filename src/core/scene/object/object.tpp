@@ -1,5 +1,5 @@
 
 template<typename T>
-T* Object::getComponent() {
-    return (T*)(row + blueprint->getComponentTypeOffset(typeid(T).hash_code(), typeid(T).name()));
+T* Object::getComponent(uint32_t code) {
+    return (T*)(row + blueprint->getComponentOffset(code));
 }

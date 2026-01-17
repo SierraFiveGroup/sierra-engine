@@ -13,13 +13,19 @@
 #include "core/scene/component/loader/component_template.hpp"
 #include "core/scene/component/loader/component_loader.hpp"
 
+#include "resource_manager/resources/resources.hpp"
+
+#include "components/inc/Drawable.hpp"
+
 namespace Sierra {
     class ObjectBlueprint {
         friend class Object;
 
         public:
             struct Info {
-                std::vector<std::string> componentNames;
+                std::vector<uint32_t> componentCodes;
+                Component::Drawable::Data drawableData;
+                ComponentLoader::ComponentMap* map;
             };
 
             ObjectBlueprint();
@@ -28,14 +34,14 @@ namespace Sierra {
             ObjectBlueprint(ObjectBlueprint&) = delete;
             ObjectBlueprint(ObjectBlueprint&&) = delete;
 
-            void loadOffsets(ComponentLoader& componentLoader);
         protected:
+            uint32_t getComponentOffset(uint32_t code);
 
-            uint32_t getComponentTypeOffset(size_t typeHash, const char* typeName);
+            Component::Drawable::Data& getDrawableData();
 
-            std::vector<std::string> componentNames;
-            std::vector<ComponentTemplate> componentTemplates; // TODO are all of these arrays eve needed?
-
-            std::unordered_map<size_t, uint32_t> componentOffsetCache;
+        private:
+            Component::Drawable::Data drawableData;
+            ComponentLoader::ComponentMap* map;
+            std::vector<uint32_t> componentCodes;
     };
 }
