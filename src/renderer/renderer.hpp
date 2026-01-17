@@ -3,7 +3,7 @@
 #include <string>
 #include <stdexcept>
 
-#ifdef __linux__
+#ifndef __WIN32
 #include <dlfcn.h>
 #endif
 

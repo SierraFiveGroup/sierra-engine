@@ -8,7 +8,7 @@ namespace Sierra::vlk {
 
     }
 
-    VlkModel::VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model): model(model), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
+    VlkModel::VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model): model(std::move(model)), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
         createTask(context, taskManager, memManager, memLoader, model);
     }
 
