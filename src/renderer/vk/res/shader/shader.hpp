@@ -26,12 +26,19 @@
 //to help in the parsing
 //@descriptor_type binding
 
+#define SIERRA_VLK_SHADER_ENTRY_NAME "main"
+
 
 namespace Sierra::vlk {
     class Shader {
         public:
+            struct Path {
+                std::string bin;
+                std::string src;
+            };
+
             Shader();
-            Shader(Context& ctx, std::string path, std::string sourcePath);
+            Shader(Context& ctx, Path path);
 
             Shader(Shader&&);
             void operator=(Shader&&);

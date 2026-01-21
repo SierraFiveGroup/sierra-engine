@@ -22,9 +22,9 @@ namespace Sierra::vlk {
 
     }
     
-    Shader::Shader(Context& ctx, std::string path, std::string sourcePath): ctx(&ctx), module(VK_NULL_HANDLE) {
-        createShader(path);
-        parseShader(sourcePath);
+    Shader::Shader(Context& ctx, Path path): ctx(&ctx), module(VK_NULL_HANDLE) {
+        createShader(path.bin);
+        parseShader(path.src);
     }
 
     void Shader::readFile(std::string path, std::vector<char>& buff) {
