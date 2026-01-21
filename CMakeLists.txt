@@ -404,6 +404,13 @@ target_link_libraries(renderer PRIVATE
     Vulkan::Vulkan
 ) # FOR TESTING PURPOSES
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(renderer PRIVATE DEBUG)
+    target_compile_options(renderer PRIVATE -O0 -g)
+else()
+    target_compile_options(renderer PRIVATE -O3)
+endif()
+
 # ============================================================
 #                        Resource Manager
 # ============================================================
