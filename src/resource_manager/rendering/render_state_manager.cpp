@@ -11,12 +11,10 @@ namespace Sierra {
     }
 
     std::optional<RenderStateManager::RenderPacket*> RenderStateManager::getEmptyPacket() {
-        std::pair<RenderPacket, std::atomic_bool>& packet = renderPackets[(++nextPacketIndex) % renderPackets.size()];
+        nextPacketIndex = (nextPacketIndex + 1) % renderPackets.size();
+       std::pair<RenderPacket, std::atomic_bool>& packet = renderPackets[nextPacketIndex];
 
         if(packet.second) {
-            if(!nextPacketIndex) nextPacketIndex = renderPackets.size() - 1;
-            else nextPacketIndex--;
-
             return std::nullopt;
         }
 
@@ -25,15 +23,32 @@ namespace Sierra {
     
     std::optional<RenderStateManager::RenderPacket*> RenderStateManager::getFullPacket() {
         int i = (nextPacketIndex + 1) % renderPackets.size();
-        for(; i != nextPacketIndex || renderPackets[i].second; (++i) % renderPackets.size());
+        for(; i != nextPacketIndex && renderPackets[i].second; i = (i + 1) % renderPackets.size());
 
         std::pair<RenderPacket, std::atomic_bool>& packet = renderPackets[i];
 
-        if(packet.second) {
-            packet.second = false;
-            return std::optional<RenderPacket*>(&packet.first);
+        if(!packet.second) {
+            return std::nullopt;
         }
 
-        return std::nullopt;
+        nextPacketIndex = i;
+        return std::optional<RenderPacket*>(&packet.first);
+
+    }
+
+    void RenderStateManager::releaseOwnership(RenderPacket* packet) {
+        
+        auto it = renderPackets.begin();
+        for(; it != renderPackets.end(); it++) {
+            std::pair<RenderPacket, std::atomic_bool>& currPacket = *it;
+            if(&currPacket.first != packet) continue;
+
+            currPacket.second = !currPacket.second;
+            break;
+        }
+
+        if(it == renderPackets.end()) {
+            throw new std::runtime_error("Failed to release the render packet: packet not found");
+        }
     }
 }

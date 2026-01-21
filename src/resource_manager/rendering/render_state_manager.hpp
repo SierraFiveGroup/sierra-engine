@@ -27,11 +27,13 @@ namespace Sierra {
 
             std::optional<RenderPacket*> getEmptyPacket();
             std::optional<RenderPacket*> getFullPacket();
+
+            void releaseOwnership(RenderPacket* packet);
         protected:
             RenderStateManager(uint32_t framebufferCount);
         private:
             //bool indicates whether its used
             std::vector<std::pair<RenderPacket, std::atomic_bool>> renderPackets; 
-            uint32_t nextPacketIndex;
+            std::atomic_uint32_t nextPacketIndex;
     };
 }
