@@ -30,6 +30,7 @@ namespace Sierra {
 
             bool isComplete();
             Stage getStage();
+            uint32_t getID();
             std::shared_ptr<uint8_t> getDat();
         protected:
             std::future<void> execute(std::function<void()> finished);

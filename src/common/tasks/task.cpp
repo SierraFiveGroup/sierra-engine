@@ -42,6 +42,10 @@ namespace Sierra {
         return dat; 
     }
 
+    uint32_t Task::getID() {
+        return id;
+    }
+
     Task::Stage Task::getStage() {
         return stage;
     }
