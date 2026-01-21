@@ -7,8 +7,9 @@ std::list<Renderer::Error> errors;
 
 #define ERR_CATCH(x) try{ x; } catch(std::runtime_error e) {errors.emplace_back(-1, e.what()); return -1;} // TODO custom exception with err code
 
-extern "C" int init(Renderer::Configuration configuration, ResourceManager& resourceManager) {
-    ERR_CATCH(new (&instance) vlk::Vulkan(*configuration.window));
+extern "C" int init(Renderer::Configuration configuration) {
+    //ERR_CATCH(new (&instance) vlk::Vulkan(configuration));
+    new (&instance) vlk::Vulkan(configuration);
 
     return 0;
 }

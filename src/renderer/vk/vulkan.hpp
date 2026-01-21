@@ -11,12 +11,13 @@
 #include "res/mem/mem.hpp"
 #include "res/loadable/model/vk_model.hpp"
 #include "res/loadable/loader.hpp"
+#include "vk/rendering/render_manager.hpp"
 
 namespace Sierra::vlk {
     class Vulkan {
         public:
             Vulkan();
-            Vulkan(Window& window);
+            Vulkan(Renderer::Configuration conf);
 
             Vulkan(Vulkan&) = delete;
             Vulkan(Vulkan&&) = delete;
@@ -31,14 +32,24 @@ namespace Sierra::vlk {
             Context& getContext();
             Swapchain& getSwapchain();
         private:
+
+            void run();
+
+            std::thread runThread;
+
             Instance instance;
             Device device;
             Context context;
 
-            Swapchain swapchain;
 
             Loader loader;
-            TaskManager taskManager;
+            TaskManager* taskManager;
+
+            MemoryManager memManager;
+            ResourceManager* resManager;
+
+            Swapchain swapchain;
+            RenderManager renderManager;
     };
 }
 
