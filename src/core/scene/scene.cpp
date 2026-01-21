@@ -63,6 +63,8 @@ namespace Sierra {
                 transformVectors
             });
         }
+
+        manager.releaseOwnership(packet);
     }
 
     void Scene::eraseObject(Object obj) {

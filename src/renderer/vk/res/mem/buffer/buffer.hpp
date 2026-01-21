@@ -12,8 +12,8 @@ namespace Sierra::vlk {
     class Buffer { 
         public:
             enum class Type {
-                DEVICE_LOCAL,
-                HOST_LOCAL
+                HOST_LOCAL,
+                DEVICE_LOCAL
             };
 
             enum class Usage {

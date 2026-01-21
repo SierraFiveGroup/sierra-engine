@@ -15,8 +15,8 @@ namespace Sierra::vlk {
             Res::ResourceAny loadModel(ResourceManager::_RendererLoadInfo& packet, TaskManager* taskManager);
             Res::ResourceAny loadTexture(ResourceManager::_RendererLoadInfo& packet, TaskManager* taskManager);
 
-            MemLoader memLoader;
-            MemoryManager memManager;
             Context* context;
+            MemoryManager memManager;
+            MemLoader memLoader;
     };
 }

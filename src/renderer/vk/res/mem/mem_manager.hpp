@@ -13,6 +13,9 @@
 
 #include "tasks/task.hpp"
 
+#define SIERRA_TASK_NAME_MEM_UPLOAD "__MEM_UPLOAD"
+#define SIERRA_TASK_NAME_IMG_TRANS "__IMG_TRANS"
+
 namespace Sierra::vlk {
 
     class MemoryManager {
@@ -52,10 +55,7 @@ namespace Sierra::vlk {
             MemoryManager(Context& context);
 
             MemoryManager(MemoryManager&) = delete;
-
-            MemoryManager(MemoryManager&&); 
-            void operator=(MemoryManager&&);
-
+            MemoryManager(MemoryManager&&) = delete;
 
             void addTransferOp(TransferOp op);
             void addTransitionLayoutOp(TransitionLayoutOp op);

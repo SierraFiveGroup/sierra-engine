@@ -8,14 +8,13 @@ namespace Sierra::vlk {
 
     }
 
-    VlkModel::VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model): model(std::move(model)), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
-        createTask(context, taskManager, memManager, memLoader, model);
+    VlkModel::VlkModel(Context& context, TaskManager& taskManager, MemLoader& memLoader, Model& model): model(std::move(model)), vertexCount(), indexCount(), asyncDat(std::make_shared<AsyncDat>()) {
+        createTask(context, taskManager, memLoader, model);
     }
 
-    void VlkModel::createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model) {
+    void VlkModel::createTask(Context& context, TaskManager& taskManager, MemLoader& memLoader, Model& model) {
         asyncDat->parent = this;
         asyncDat->context = &context;
-        asyncDat->memManager = &memManager;
         asyncDat->memLoader = &memLoader;
         asyncDat->taskManager = &taskManager;
         asyncDat->modelData = model.modelData;
@@ -64,7 +63,7 @@ namespace Sierra::vlk {
             vertexOffset = prevSize;
         }
 
-        asyncDat.vertexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, 
+        asyncDat.vertexBuffFuture = asyncDat.memLoader->createBuff(Buffer::Type::DEVICE_LOCAL, 
             Buffer::Usage::VERTEX, (uint8_t*)buff.data(), buff.size() * sizeof(float));
     }
 
@@ -84,7 +83,7 @@ namespace Sierra::vlk {
             }
         }
 
-        asyncDat.indexBuffFuture = asyncDat.memLoader->createBuff(*asyncDat.memManager, Buffer::Type::DEVICE_LOCAL, Buffer::Usage::INDEX,
+        asyncDat.indexBuffFuture = asyncDat.memLoader->createBuff(Buffer::Type::DEVICE_LOCAL, Buffer::Usage::INDEX,
              (uint8_t*)indices.data(), indices.size() * sizeof(uint32_t));
     }
 
@@ -106,7 +105,7 @@ namespace Sierra::vlk {
                 texInfo.texture = &tex;
 
                 asyncDat.textures[i].push_back(
-                    std::move(VlkTexture(*asyncDat.context, *asyncDat.taskManager, *asyncDat.memManager, *asyncDat.memLoader, texInfo))
+                    std::move(VlkTexture(*asyncDat.context, *asyncDat.taskManager, *asyncDat.memLoader, texInfo))
                 );
             }
         

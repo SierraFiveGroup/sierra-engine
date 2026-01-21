@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <thread>
 
 #include "scene/component/component.hpp"
 #include "scene/component/loader/component_loader.hpp"

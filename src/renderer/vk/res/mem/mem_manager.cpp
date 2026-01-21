@@ -9,8 +9,8 @@ namespace Sierra::vlk {
 
     MemoryManager::MemoryManager(Context& context): context(&context),
      transferDat(std::make_shared<AsyncTransferDat>()), transitionDat(std::make_shared<AsyncTransitionDat>()),
-     transferTask(Task::Stage::UPLOAD, 0, &MemoryManager::asyncTransfer, std::reinterpret_pointer_cast<uint8_t>(transferDat)),
-     transitionTask(Task::Stage::INIT, 0, &MemoryManager::asyncTransition, std::reinterpret_pointer_cast<uint8_t>(transitionDat)) {
+     transferTask(SIERRA_TASK_NAME_MEM_UPLOAD, {SIERRA_TASK_NAME_IMG_TRANS}, &MemoryManager::asyncTransfer, std::reinterpret_pointer_cast<uint8_t>(transferDat)),
+     transitionTask(SIERRA_TASK_NAME_IMG_TRANS, {}, &MemoryManager::asyncTransition, std::reinterpret_pointer_cast<uint8_t>(transitionDat)) {
         transferDatMutex = std::make_shared<std::mutex>();
         transitionDatMutex = std::make_shared<std::mutex>();
 
@@ -198,7 +198,7 @@ namespace Sierra::vlk {
         return {transferTask, transitionTask};
     }
 
-
+    /*
     MemoryManager::MemoryManager(MemoryManager&& other) {
         std::lock_guard lock1(*transferDatMutex);
         std::lock_guard lock2(*transitionDatMutex);
@@ -246,4 +246,5 @@ namespace Sierra::vlk {
         other.transitionTask = Task();
         other.transitionDat.reset();
     }
+    */
 }

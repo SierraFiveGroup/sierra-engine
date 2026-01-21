@@ -31,7 +31,6 @@ namespace Sierra::vlk {
 
             Context* context;
             TaskManager* taskManager;
-            MemoryManager* memManager;
             MemLoader* memLoader;
 
             VlkModel* parent;
@@ -48,7 +47,7 @@ namespace Sierra::vlk {
             };
 
             VlkModel();
-            VlkModel(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
+            VlkModel(Context& context, TaskManager& taskManager, MemLoader& memLoader, Model& model);
 
             VlkModel(VlkModel&) = delete;
             void operator=(VlkModel&) = delete;
@@ -76,7 +75,7 @@ namespace Sierra::vlk {
             static void createIndexBuff(AsyncDat& asyncDat); //i.e. tex coords, normals, vertices
             static void createTextures(AsyncDat& asyncDat);
 
-            void createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& memLoader, Model& model);
+            void createTask(Context& context, TaskManager& taskManager, MemLoader& memLoader, Model& model);
             static void createBuffers(std::shared_ptr<uint8_t> dat);
             static void finishedCallback(Task task);
 

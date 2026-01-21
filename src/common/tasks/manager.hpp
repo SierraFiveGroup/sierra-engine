@@ -15,6 +15,9 @@
 namespace Sierra {
     class TaskManager {
         friend class Task;
+
+        typedef std::vector<std::string> TaskDeps;
+        typedef std::unordered_map<std::string, std::pair<Task, TaskDeps>> TaskList;
         public:
 
             TaskManager();
@@ -29,16 +32,20 @@ namespace Sierra {
 
             void start();
             bool isFinished();
+
         protected:
-            void taskFinishedCallback();
+            void taskFinishedCallback(Task& task);
         private:
-            void advanceStage();
             void finish();
 
-            std::array<std::vector<Task>, ENUM_INT(Task::Stage::Stage_MAX)> tasks; //to_underlying gets the enum number thingy
+            TaskList::iterator findTask(std::string name);
 
-            Task::Stage currentStage;
-            std::atomic_uint32_t tasksRemaining;
+             //to_underlying gets the enum number thingy
+
+            TaskList tasks;
+            TaskList startTasks;
+
+            uint32_t tasksCompleted;
 
             std::atomic_bool finished;
     };

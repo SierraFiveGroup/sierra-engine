@@ -13,6 +13,8 @@ typedef unsigned char u_char;
 using u_char = unsigned char;
 #endif
 
+#define SIERRA_TASK_NAME_TEXTURE_LOAD "__TEXTURE_LOAD"
+
 namespace Sierra {
     class Texture {
         struct AsyncDat {

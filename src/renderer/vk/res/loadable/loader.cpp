@@ -5,7 +5,7 @@ namespace Sierra::vlk {
 
     }
 
-    Loader::Loader(Context& context): memLoader(context), memManager(context), context(&context) {
+    Loader::Loader(Context& context): context(&context), memManager(context), memLoader(context, memManager) {
 
     }
 
@@ -33,7 +33,7 @@ namespace Sierra::vlk {
 
     Res::ResourceAny Loader::loadModel(ResourceManager::_RendererLoadInfo& info, TaskManager* taskManager) {
         Res::Model modelRes{};
-        modelRes.extraDat.reset((uint8_t*)new VlkModel(*context, *taskManager, memManager, memLoader, *info.baseRes.model), VlkModel::deleter);
+        modelRes.extraDat.reset((uint8_t*)new VlkModel(*context, *taskManager, memLoader, *info.baseRes.model), VlkModel::deleter);
         modelRes.type = Res::Type::MODEL;
         modelRes.isLoaded = VlkModel::isLoaded;
         //modelRes.textures
@@ -54,7 +54,7 @@ namespace Sierra::vlk {
         texInfo.samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
         Res::Texture texRes{};
-        texRes.extraDat.reset((uint8_t*)new VlkTexture(*context, *taskManager, memManager, memLoader, texInfo), VlkTexture::deleter);
+        texRes.extraDat.reset((uint8_t*)new VlkTexture(*context, *taskManager, memLoader, texInfo), VlkTexture::deleter);
         texRes.type = Res::Type::TEXTURE;
         texRes.isLoaded = VlkTexture::isLoaded;
 

@@ -11,7 +11,7 @@ namespace Sierra {
     }
 
     void Model::createTask(TaskManager& taskManager) {
-        Task task = Task(Task::Stage::PRE_LOAD, 0, Model::loadScene, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        Task task = Task(SIERRA_TASK_NAME_MODEL_LOAD + (std::string)"_" + path, {}, Model::loadScene, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
         task.setOnCompleteCallback(finishedCallback);
 
         taskManager.addTask(task);

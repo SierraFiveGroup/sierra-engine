@@ -17,6 +17,10 @@ namespace Sierra {
                 Res::ResID modelID;
 
                 std::vector<Component::Transform3D> instanceData;
+
+                bool isStatic; // determines whether there is a *possibility* of the data being modified
+                //if ANY changes are made this should be flagged as true
+                //if false instancedata *may* be empty
             };
 
             struct RenderPacket {

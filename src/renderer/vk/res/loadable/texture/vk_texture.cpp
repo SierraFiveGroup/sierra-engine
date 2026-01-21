@@ -7,15 +7,14 @@ namespace Sierra::vlk {
 
     }
 
-    VlkTexture::VlkTexture(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info):
+    VlkTexture::VlkTexture(Context& context, TaskManager& taskManager, MemLoader& memLoader, Info info):
      image(), asyncDat(std::make_shared<AsyncDat>()), sampler(context, info.samplerInfo), descriptorInfo(std::make_shared<VkDescriptorImageInfo>()) {
-        createTask(context, taskManager, memManager, loader, info);
+        createTask(context, taskManager, memLoader, info);
     }
 
-    void VlkTexture::createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info) {
-        asyncDat->imageFuture = std::make_shared<std::future<Image>>();
+    void VlkTexture::createTask(Context& context, TaskManager& taskManager, MemLoader& loader, Info info) {
+        asyncDat->imageFuture = std::make_shared<MemLoader::ImageFuture_t>();
         asyncDat->context = &context;
-        asyncDat->manager = &memManager;
         asyncDat->loader = &loader;
         asyncDat->texture = std::move(info.texture);
 
@@ -44,20 +43,20 @@ namespace Sierra::vlk {
         info.usage = VK_IMAGE_USAGE_SAMPLED_BIT; // color attachment?
 
         *asyncDatRef.imageFuture = asyncDatRef.loader->createImage(
-            *asyncDatRef.manager, info, asyncDatRef.texture->getDat(), info.extent.width * info.extent.height * asyncDatRef.texture->getChannels()
+            info, asyncDatRef.texture->getDat(), info.extent.width * info.extent.height * asyncDatRef.texture->getChannels()
         );
     }
 
     VkImage VlkTexture::getImageHandle() {
         if (!image.getImage())
-            image = asyncDat->imageFuture->get();
+            image = asyncDat->imageFuture->get().first;
 
         return image.getImage();
     }
 
     VkDescriptorImageInfo* VlkTexture::getDescriptorInfo() {
         if(!image.getImage())
-            image = asyncDat->imageFuture->get();
+            image = asyncDat->imageFuture->get().first;
 
         descriptorInfo->sampler = sampler.getSampler();
         descriptorInfo->imageView = image.getView();

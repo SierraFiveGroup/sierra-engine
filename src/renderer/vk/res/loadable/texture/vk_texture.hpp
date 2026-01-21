@@ -13,12 +13,11 @@ namespace Sierra::vlk {
         friend class Loader;
 
         struct AsyncDat {
-            std::shared_ptr<std::future<Image>> imageFuture;
+            std::shared_ptr<MemLoader::ImageFuture_t> imageFuture;
 
             Texture* texture; //TODO handle moving
 
             Context* context;
-            MemoryManager* manager;
             MemLoader* loader;
         };
 
@@ -29,7 +28,7 @@ namespace Sierra::vlk {
             };
 
             VlkTexture();
-            VlkTexture(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info);
+            VlkTexture(Context& context, TaskManager& taskManager, MemLoader& loader, Info info);
 
             VlkTexture(VlkTexture&) = delete;
             void operator=(VlkTexture&) = delete;
@@ -45,7 +44,7 @@ namespace Sierra::vlk {
             static void deleter(void* obj);
 
         private:
-            void createTask(Context& context, TaskManager& taskManager, MemoryManager& memManager, MemLoader& loader, Info info);
+            void createTask(Context& context, TaskManager& taskManager, MemLoader& loader, Info info);
 
             static void uploadToImage(std::shared_ptr<uint8_t> asyncDat);
 

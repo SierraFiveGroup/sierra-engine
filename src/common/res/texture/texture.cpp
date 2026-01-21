@@ -36,7 +36,8 @@ namespace Sierra {
     }
 
     void Texture::addTask(TaskManager& manager) {
-        Task task = Task(Task::Stage::AFTER_LOAD, 0, &Texture::loadTexture, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        Task task = Task(SIERRA_TASK_NAME_TEXTURE_LOAD + (std::string)"_" + asyncDat->path, {}, &Texture::loadTexture,
+             std::reinterpret_pointer_cast<uint8_t>(asyncDat));
         task.setOnCompleteCallback(finishedCallback);
         manager.addTask(task); 
     }

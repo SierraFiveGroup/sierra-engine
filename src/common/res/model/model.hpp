@@ -12,6 +12,8 @@
 
 #define AI_TEXTURE_TYPE_COUNT 28
 
+#define SIERRA_TASK_NAME_MODEL_LOAD "__MODEL_LOAD"
+
 namespace Sierra {
     namespace vlk {
         class VlkModel;
@@ -57,7 +59,6 @@ namespace Sierra {
 
             std::string path;
 
-        
             std::shared_ptr<AsyncDat> asyncDat;
             std::shared_ptr<std::atomic_bool> hasFinishedLoading;
     };

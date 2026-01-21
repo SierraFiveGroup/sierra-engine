@@ -48,10 +48,6 @@ namespace Sierra {
             resIDs[res.base.id] = std::move(res); 
         }
 
-        taskManager->start();
-
-        while(!taskManager->isFinished());
-
         return ids;
     }
 

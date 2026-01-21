@@ -16,6 +16,8 @@
 
 #include "common/util/hash.hpp"
 
+#define SIERRA_TASK_NAME_SCENE_LOAD "__SCENE_LOAD"
+
 namespace Sierra {
     class Scene {
         public:

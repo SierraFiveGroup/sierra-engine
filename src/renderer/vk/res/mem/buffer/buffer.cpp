@@ -55,6 +55,9 @@ namespace Sierra::vlk {
         }
 
         mem = Mem(context, memInfo, buffInfo, buff);
+
+        //0 = host local, 1 = dev local
+        type = (Type)(mem.getAllocInfo().memoryType & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     }
 
     size_t Buffer::getSize() {

@@ -23,6 +23,8 @@ namespace Sierra{
 
     class Renderer {
         public:
+            typedef std::pair<std::string, std::string> ShaderPair;
+
             struct Error {
                 int code;
                 std::string message;
@@ -31,6 +33,8 @@ namespace Sierra{
             struct ObjectBatch {
                 Res::ResID shaderID;
                 Res::ResID modelID;
+
+                std::vector<Component::Transform3D::Data> instanceData;
             };
 
             struct RenderState {
@@ -39,6 +43,9 @@ namespace Sierra{
 
             struct Configuration {
                 Window* window;
+                ResourceManager* resManager;
+                TaskManager* taskManager;
+                std::vector<ShaderPair> shaderPaths; // the rationale here is that compute shaders and such wont be written by user, thus can all be predefined
             };
 
             Renderer(): _init(), _update(), _cleanup(), _setConfiguration(), _getConfiguration(), _getError(), dlptr() {
@@ -49,8 +56,8 @@ namespace Sierra{
                 loadLibrary(objectPath);
             }
 
-            int init(Configuration configuration, ResourceManager& resourceManager) {
-                return _init(configuration, resourceManager);
+            int init(Configuration configuration) {
+                return _init(configuration);
             }
 
             int update() {
@@ -83,7 +90,7 @@ namespace Sierra{
             }
 
         private:
-            int (*_init)(Configuration, ResourceManager&);
+            int (*_init)(Configuration);
             int (*_update)(void);
             int (*_cleanup)(void);
 
@@ -101,7 +108,7 @@ namespace Sierra{
                 if(!dlptr) throw std::runtime_error("Failed to open shared object file with error: "  + (std::string)dlerror());
 
 
-                _init = (int(*)(Configuration, ResourceManager&))dlsym(dlptr, "init");
+                _init = (int(*)(Configuration))dlsym(dlptr, "init");
                 _update = (int(*)())dlsym(dlptr, "update");
                 _cleanup = (int(*)())dlsym(dlptr, "cleanup");
                 _setConfiguration = (int(*)(Configuration))dlsym(dlptr, "setConfiguration");

@@ -20,6 +20,8 @@ extern "C" int update() {
 
 extern "C" int cleanup() {
     ERR_CATCH(instance.cleanup());
+    instance.~Vulkan();
+    throw new std::runtime_error("CHECK ME");
     return 0;
 }
 

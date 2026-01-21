@@ -28,7 +28,7 @@ namespace Sierra::vlk {
          vertPath, fragParth, &tasks, &descriptorPool);
 
         uint32_t id = rand();
-        Task task = Task(Task::Stage::INIT, id, ShaderLoader::loadPackTask, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
+        Task task = Task(SIERRA_TASK_NAME_SHADER_LOAD, {}, ShaderLoader::loadPackTask, std::reinterpret_pointer_cast<uint8_t>(asyncDat));
 
         tasks[id] = asyncDat;
 

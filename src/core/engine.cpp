@@ -7,6 +7,10 @@ namespace Sierra {
         loadComponents();
         loadRenderer();
 
+        taskManager.printTasks();
+        taskManager.start();
+        while(!taskManager.isFinished());
+
         Scene scene = Scene({&compLoader, &resManager, 32});
         ObjectBlueprint bp = ObjectBlueprint({{SIERRA_COMPONENT_TRANSFORM_3D}, {0, 1}, &compLoader.getTemplates()});
         Object* obj = scene.createObject(bp);
@@ -14,10 +18,10 @@ namespace Sierra {
         Component::Transform3D* transform = obj->getComponent<Component::Transform3D>(SIERRA_COMPONENT_TRANSFORM_3D);
         transform->setPos({1, 1, 1});
 
-        scene.update();
-        scene.update();
-        scene.update();
-        
+        while(!window.shouldClose()) {
+            scene.update();
+
+        }
     }
 
     void Engine::loadComponents() {
@@ -32,7 +36,7 @@ namespace Sierra {
     }
 
     void Engine::run() {
-
+            
     }
 
     void Engine::loadRenderer() {
@@ -40,13 +44,17 @@ namespace Sierra {
 
         Renderer::Configuration conf{};
         conf.window = &window;
+        conf.resManager = &resManager;
+        conf.shaderPaths = {
+            {"test_shaders/vk/model.vert.spv", "test_shaders/vk/model.frag.spv"}
+        };
+        conf.taskManager = &taskManager;
 
-        renderer.init(conf, resManager);
+        renderer.init(conf);
 
     }
 
     Engine::~Engine() {
-        resManager.cleanup();
         renderer.cleanup();
     }
 }

@@ -7,6 +7,8 @@
 #include "vk/rendering/graphics_pipeline/graphics_pipeline.hpp"
 #include "vk/res/shader/descriptor/descriptor_set.hpp"
 
+#define SIERRA_TASK_NAME_SHADER_LOAD "__SHADER_LOAD"
+
 namespace Sierra::vlk {
     class ShaderLoader {
         public:
